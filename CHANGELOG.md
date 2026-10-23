@@ -3,6 +3,14 @@
 Changes to the repository itself: layout, tooling, tests, docs. Each app's own changes are in its README or its About box.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [semver](https://semver.org).
 
+## [0.3.1] - 2026-10-23
+
+### Removed
+- Client project files (sample PDFs from a live project, the standard beam DXF) and the client's name, from the repository and its whole history, now that the repository is public. Copies are kept outside git.
+
+### Changed
+- Production address is https://barwin-ch.vercel.app (barwin.vercel.app belongs to another Vercel account).
+
 ## [0.3.0] - 2026-10-23
 
 ### Changed
@@ -13,7 +21,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follo
 ## [0.2.0] - 2026-10-23
 
 ### Added
-- Website at https://barwin.vercel.app: a homepage with one card per tool (name, status, version, summary), each tool at its own address (`/beam-sections/`, `/bbs-studio/`, ...), a branded 404, favicon.
+- Website (now https://barwin-ch.vercel.app): a homepage with one card per tool (name, status, version, summary), each tool at its own address (`/beam-sections/`, `/bbs-studio/`, ...), a branded 404, favicon.
 - `apps/<app>/app.json` and `icon.svg` for every app; the homepage is generated from them and reads each version from the app's source.
 - `scripts/build-site.js`: builds `site/`, minifying every page (about 30% smaller, comments removed). Data blocks such as the BBS Studio DXF template are passed through untouched.
 - CI/CD (`.github/workflows/ci-cd.yml`): tests, then a protected preview deploy for pull requests and a production deploy for `main`, followed by a smoke test of every page. Only the built site is uploaded to Vercel.
@@ -36,7 +44,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follo
 - `scripts/build-beams.js`: one build for both beam apps, writing to each app's `dist/` (was two copies writing to a fixed outside folder).
 - Tests: 12 logic tests for Beam Sections (`node:test`, includes the freeze probe) and 5 Playwright smoke tests across the apps, replacing the scratch screenshot scripts.
 - CI on GitHub Actions: logic and browser tests on every push and pull request.
-- Docs: `docs/BACKLOG.md`, `docs/beam-rules.md`, and the reference files (sample PDFs, standard beam DXF, shape-figure spec).
+- Docs: `docs/BACKLOG.md`, `docs/beam-rules.md`, `docs/reference/shape-figure-spec.md`.
 
 ### Removed
 - 37 hand-kept backups (`beams_v0*.js`, `page_v0*.html`); history now lives in git.

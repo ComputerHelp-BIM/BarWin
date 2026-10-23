@@ -2,7 +2,7 @@
 
 Reinforcement detailing apps by Computer Help: beam drawings, bar bending schedules, BS 8666 shape codes, and the BarWin brand they share.
 
-**Live: https://barwin.vercel.app**, one homepage with a card for each tool. Every push to `main` goes live automatically through Vercel's GitHub app; see [docs/DEPLOY.md](docs/DEPLOY.md).
+**Live: https://barwin-ch.vercel.app**, one homepage with a card for each tool. Every push to `main` goes live automatically through Vercel's GitHub app; see [docs/DEPLOY.md](docs/DEPLOY.md).
 
 Every app is also a single HTML page that opens straight from disk in any modern browser. Node is only needed to build and test.
 
@@ -49,7 +49,7 @@ docs/
   DEPLOY.md             CI/CD, Vercel setup, adding an app
   BACKLOG.md            what is left: visual, engineering, outputs, housekeeping
   beam-rules.md         every agreed rule for the beam apps
-  reference/            sample PDFs, the standard beam DXF, the shape-figure spec
+  reference/            the shape-figure spec (project files are kept outside the public repo)
 scripts/build-beams.js  builds a beam app into its dist/
 scripts/build-site.js   builds the website into site/
 tests/e2e/              Playwright tests, run on the built site

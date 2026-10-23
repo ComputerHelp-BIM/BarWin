@@ -1,11 +1,11 @@
 # Deploying BarWin
 
-Live site: **https://barwin.vercel.app** (Vercel project `barwin`, team Computer Help, linked to this repo).
+Live site: **https://barwin-ch.vercel.app** (Vercel project `barwin`, team Computer Help, linked to this repo).
 
 ## How it works
 
 ```
-push to main ──► Vercel: npm test ──► build site/ ──► production (https://barwin.vercel.app)
+push to main ──► Vercel: npm test ──► build site/ ──► production (https://barwin-ch.vercel.app)
              └─► GitHub Actions CI: logic tests + browser tests on the built site
 
 pull request ──► Vercel: preview deploy (needs a Vercel login; Vercel posts the link on the PR)

@@ -30,7 +30,7 @@ Suggested order: A (cleaning and visual), then the rest of D, then C (outputs), 
 
 | # | Item | Detail |
 |---|---|---|
-| C1 | True-scale drawing sheets | DXF (model space 1:1, paper-space layout with viewports), PDF and SVG; separate scales for the L-section and the sections (1:100 to 1:10); A4 to A0; full title block; break line or a "pick a smaller scale" alert when a view does not fit; text about 2.5 mm on paper. Test in AutoCAD 2021 / 2025+, ZWCAD 2026 and the cad2bim viewer. Reference: [standard beam DXF](reference/dxf/standard-beam.dxf). |
+| C1 | True-scale drawing sheets | DXF (model space 1:1, paper-space layout with viewports), PDF and SVG; separate scales for the L-section and the sections (1:100 to 1:10); A4 to A0; full title block; break line or a "pick a smaller scale" alert when a view does not fit; text about 2.5 mm on paper. Test in AutoCAD 2021 / 2025+, ZWCAD 2026 and the cad2bim viewer. Reference: the standard beam DXF, kept outside the repo (see [reference](reference/README.md)). |
 | C2 | Bar schedule | Bar marks, BS 8666 / IS shape codes, cutting lengths with bend deductions, weights, linked to BBS Studio (one data model with the drawing). |
 
 ## D. Housekeeping
@@ -44,4 +44,4 @@ Suggested order: A (cleaning and visual), then the rest of D, then C (outputs), 
 | D5 | BBS Studio source | Open | The modular source was lost; `apps/bbs-studio/index.html` (6,600 lines) is now the source. Split it into modules like Beam Sections before large changes. |
 | D6 | Apps on the brand | Open | No app uses `packages/brand` yet; each has its own colours and fonts. Move them onto `tokens.css`, keeping the drawing colour groups. |
 | D7 | BBS Studio tests | Partly done (repo 0.2.0) | End-to-end smoke tests with a DXF download check are in. Still to add: workbook import totals against the workbook's own, schedule lengths against the CADS RC sample. |
-| D8 | Custom domain | Open | e.g. barwin.buildingsoftware.in in place of barwin.vercel.app; needs a DNS record at the domain's registrar. |
+| D8 | Custom domain | Open | e.g. barwin.buildingsoftware.in in place of barwin-ch.vercel.app; needs a DNS record at the domain's registrar. |

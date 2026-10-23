@@ -1,7 +1,7 @@
 # BarWin CI: logic tests, then the site is built and every page is tested in Chromium.
 #
 # Deploys are done by Vercel's GitHub app, not here (see docs/DEPLOY.md):
-#   push to main  -> production, https://barwin.vercel.app
+#   push to main  -> production, https://barwin-ch.vercel.app
 #   pull request  -> preview, link posted on the PR by Vercel
 # Vercel runs the logic tests (npm test) before every build, so a failing rule check never goes live.
 # The browser tests run here; check this workflow is green before merging a pull request.
