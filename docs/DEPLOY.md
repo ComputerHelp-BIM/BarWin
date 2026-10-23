@@ -1,20 +1,21 @@
 # Deploying BarWin
 
-Live site: **https://barwin.vercel.app** (Vercel project `barwin`, team Computer Help).
+Live site: **https://barwin.vercel.app** (Vercel project `barwin`, team Computer Help, linked to this repo).
 
 ## How it works
 
 ```
-pull request ──► Test ──► Deploy preview      (protected: needs a Vercel login; link in the run summary)
-push to main ──► Test ──► Deploy production   (https://barwin.vercel.app) ──► smoke test every page
+push to main ──► Vercel: npm test ──► build site/ ──► production (https://barwin.vercel.app)
+             └─► GitHub Actions CI: logic tests + browser tests on the built site
+
+pull request ──► Vercel: preview deploy (needs a Vercel login; Vercel posts the link on the PR)
+             └─► GitHub Actions CI: the same tests
 ```
 
-Defined in [`.github/workflows/ci-cd.yml`](../.github/workflows/ci-cd.yml).
-
-- **Test**: logic tests, then the site is built and every page is opened in Chromium. Includes a real BBS Studio run that downloads the DXF and checks it is well-formed.
-- **Deploy**: the Vercel CLI builds the site on the GitHub runner and uploads only the result (`vercel deploy --prebuilt`). The repository, docs and reference files never reach Vercel.
-- Vercel's own Git deploys are switched off (`"git": {"deploymentEnabled": false}` in `vercel.json`), so nothing goes live without passing the tests. This also avoids the Hobby plan's block on deploying commits from collaborators on a private repo.
-- A failed test stops the deploy; production keeps the last good version.
+- **Vercel deploys from Git.** The repository is public, so Vercel's GitHub app builds and deploys every push with no token stored in GitHub. (On the Hobby plan this only works for public repositories; see "If the repo goes private".)
+- **Vercel runs the logic tests first** (`npm test && npm run build:site`), so a broken rule check fails the build and production keeps the last good version.
+- **GitHub Actions runs the browser tests** ([`.github/workflows/ci.yml`](../.github/workflows/ci.yml)), including a real BBS Studio run that downloads the DXF and checks it is well-formed. These run alongside the deploy, not before it: merge pull requests only when CI is green.
+- Pull requests from forks are not deployed until someone on the team approves them in Vercel.
 
 ## What is published
 
@@ -23,21 +24,17 @@ Defined in [`.github/workflows/ci-cd.yml`](../.github/workflows/ci-cd.yml).
 | Path | What |
 |---|---|
 | `/` | Homepage: one card per app, from each `apps/<app>/app.json` |
-| `/<app>/` | The app, minified (comments removed, code compressed) |
+| `/<app>/` | The app, minified (about 30% smaller, comments removed) |
 | `/brand/` | Mark and icons |
 | `404.html` | Branded not-found page |
 
-The apps run in the browser, so visitors receive their code; minifying makes it hard to read but cannot hide it. Data blocks such as the DXF template are passed through the minifier untouched (tested).
+Data blocks such as the BBS Studio DXF template pass through the minifier untouched (tested).
 
 Every response carries `X-Robots-Tag: noindex, nofollow`, so search engines leave the site out. To let it be found, remove that header from `vercel.json` and the robots meta tags from `site-src/`.
 
-## One-time setup
+## Rolling back
 
-1. **Token.** At vercel.com → Account Settings → Tokens, create a token with scope **Computer Help** and an expiry you are happy to renew.
-2. **Secret.** In GitHub: ComputerHelp-BIM/BarWin → Settings → Secrets and variables → Actions → New repository secret: name `VERCEL_TOKEN`, value the token.
-3. **First deploy.** Actions → CI/CD → Run workflow (branch `main`), or push to `main`.
-
-The team and project IDs are in the workflow file; they are identifiers, not secrets.
+Vercel → project `barwin` → Deployments → pick the last good one → Promote to Production. Then fix forward on `main`.
 
 ## Adding an app
 
@@ -57,21 +54,25 @@ The team and project IDs are in the workflow file; they are identifiers, not sec
    `status`: `active` or `reference` go under Tools, `frozen` under Archive. The version is read from the source, so the card never shows a stale number.
 3. Optionally add `apps/<slug>/icon.svg` (64 × 64 grid, `currentColor` lines, `class="dot"` for the accent dot).
 4. If the app needs a build step, add it to `npm run build` and point `entry` at the built file.
-5. `npm run check`, commit, push. The card, the page and the production smoke test pick it up automatically.
+5. `npm run check`, commit, push. The card and the page appear on the next deploy.
 
 ## Local preview
 
 ```bash
-npm run build:site                    # site/, minified as on Vercel
+npm run build:site                      # site/, minified as on Vercel
 node scripts/build-site.js --no-minify  # same, unminified, to rule out the minifier
-npx serve site                        # any static server; open http://localhost:3000
+npx serve site                          # any static server; open http://localhost:3000
 ```
+
+## If the repo goes private
+
+Vercel's Hobby plan will not build commits by collaborators on a private repository, so Git deploys would stop. Switch to deploying from GitHub Actions with the Vercel CLI instead: the deploy job is in git history (commit `0d0fb52`, `.github/workflows/ci-cd.yml`). Restore it, add the repository secret `VERCEL_TOKEN` (a token scoped to the Computer Help team), and set `"git": { "deploymentEnabled": false }` in `vercel.json` so the two paths do not both deploy.
 
 ## Troubleshooting
 
 | Symptom | Fix |
 |---|---|
-| Deploy fails with "VERCEL_TOKEN missing" | Add the secret (setup step 2) and re-run the workflow. |
-| Deploy fails with 401 / 403 from Vercel | The token expired or lacks the Computer Help scope; create a new one and update the secret. |
-| Smoke test fails after deploy | The page did not return 200; open the deployment link in the run summary. Production still serves it, so roll back in Vercel (Deployments → previous → Promote) while you fix it. |
+| Vercel build fails at `npm test` | A logic test failed; the log in Vercel names it. Run `npm test` locally. |
+| CI is red but the site deployed | A browser test failed after the deploy. Roll back if the live site is affected, then fix. |
 | A page works in the repo but not on the site | Build with `node scripts/build-site.js --no-minify`; if that works, it is a minifier problem. |
+| No deploy after a push | Check the Vercel GitHub app still has access to this repo (GitHub → Settings → Applications). |

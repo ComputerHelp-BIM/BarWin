@@ -3,6 +3,13 @@
 Changes to the repository itself: layout, tooling, tests, docs. Each app's own changes are in its README or its About box.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [semver](https://semver.org).
 
+## [0.3.0] - 2026-10-23
+
+### Changed
+- Deploys now come from Vercel's GitHub app (the repository is public), so no token is stored in GitHub. Push to `main` deploys production; pull requests get preview links from Vercel.
+- Vercel runs `npm test` before every build, so a failing logic test stops the deploy.
+- `ci-cd.yml` is now `ci.yml`: tests only. The CLI deploy job is kept in history for a private repo (see `docs/DEPLOY.md`).
+
 ## [0.2.0] - 2026-10-23
 
 ### Added

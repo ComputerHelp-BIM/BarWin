@@ -2,7 +2,7 @@
 
 Reinforcement detailing apps by Computer Help: beam drawings, bar bending schedules, BS 8666 shape codes, and the BarWin brand they share.
 
-**Live: https://barwin.vercel.app**, one homepage with a card for each tool. Every merge to `main` that passes the tests goes live automatically; see [docs/DEPLOY.md](docs/DEPLOY.md).
+**Live: https://barwin.vercel.app**, one homepage with a card for each tool. Every push to `main` goes live automatically through Vercel's GitHub app; see [docs/DEPLOY.md](docs/DEPLOY.md).
 
 Every app is also a single HTML page that opens straight from disk in any modern browser. Node is only needed to build and test.
 
@@ -53,8 +53,8 @@ docs/
 scripts/build-beams.js  builds a beam app into its dist/
 scripts/build-site.js   builds the website into site/
 tests/e2e/              Playwright tests, run on the built site
-vercel.json             site settings: headers, noindex, no Git auto-deploys
-.github/workflows/      CI/CD: test, then deploy (preview on PRs, production on main)
+vercel.json             site settings: build, headers, noindex
+.github/workflows/      CI: logic and browser tests on every push and pull request
 ```
 
 ## Versioning
@@ -77,4 +77,4 @@ Releases are tagged per app: `beam-sections@v0.15.1`, `bbs-studio@v0.14.2`, and 
 - Branch from `main`, one change per branch, then a pull request.
 - Commits are signed (SSH) so GitHub shows them as Verified.
 - Bump the app's version in the same commit as the change: patch for fixes, minor for new features, major for anything that changes saved values or outputs people rely on.
-- `npm run check` before pushing; CI runs the same on every push and pull request, and a pull request gets its own preview link.
+- `npm run check` before pushing; CI runs the same on every push and pull request, and Vercel posts a preview link on each pull request. Merge only when CI is green.
