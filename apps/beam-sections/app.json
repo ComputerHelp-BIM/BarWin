@@ -1,0 +1,9 @@
+{
+  "name": "Beam Sections",
+  "status": "active",
+  "order": 10,
+  "summary": "Simply supported beam: L-section and sections A-A, B-B, C-C with the full reinforcement.",
+  "features": ["Links to scale", "Laps and extras", "Ld and bent legs", "Copy SVG"],
+  "entry": "dist/beam-sections.html",
+  "version": { "file": "src/beams.js", "pattern": "VERSION = '(\\d+\\.\\d+\\.\\d+)'" }
+}

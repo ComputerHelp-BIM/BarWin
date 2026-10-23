@@ -1,4 +1,4 @@
-<title>Beam Sections</title>
+<title>Simply Supported Beam Geometry</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -125,7 +125,7 @@ footer { color: var(--muted); font-size: 13px; }
 <div class="wrap">
   <header>
     <p class="eyebrow">BBS Studio · beam detailing</p>
-    <h1>Beam sections</h1>
+    <h1>Simply supported beam: geometry</h1>
     <p class="lede">L-section and section A-A of one beam span. Choose what each end rests on, then click any <b>red number</b> to type a real size or a <b class="g">green number</b> to set a cover. Tick the box under a section mark to show that section. The drawing keeps its shape; only the numbers change, except that a support beam is drawn deeper or shallower to match the depths.</p>
   </header>
 
@@ -172,7 +172,7 @@ footer { color: var(--muted); font-size: 13px; }
 <script>
 (function () {
   'use strict';
-  var BS = window.BeamSections, KEY = 'bbs-beam-sections-v2', OLD_KEY = 'bbs-beam-sections-v1';
+  var BS = window.BeamSections, KEY = 'bbs-ss-beam-geometry-v040', OLD_KEY = 'bbs-beam-sections-v1';
   var $ = function (s) { return document.querySelector(s); };
   var vals = load();
   $('#ver').textContent = BS.VERSION;

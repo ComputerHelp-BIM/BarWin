@@ -1,0 +1,9 @@
+{
+  "name": "BS 8666 Shape Codes",
+  "status": "reference",
+  "order": 30,
+  "summary": "Every BS 8666:2020 shape code plus 51A, in side and plan view, in four presentations.",
+  "features": ["35 codes + 51A", "Length formulas", "Outline to line views"],
+  "entry": "index.html",
+  "version": { "file": "index.html", "pattern": "figure engine v(\\d+\\.\\d+\\.\\d+)", "label": "engine" }
+}

@@ -1,8 +1,12 @@
 # dependencies
 node_modules/
 
-# build output (npm run build)
+# build output (npm run build, npm run build:site)
 apps/*/dist/
+site/
+
+# Vercel CLI (vercel pull / vercel build)
+.vercel/
 
 # test output
 test-results/

@@ -43,4 +43,5 @@ Suggested order: A (cleaning and visual), then the rest of D, then C (outputs), 
 | D4 | Repo | Done (repo 0.1.0) | Every BarWin app in this repo as its own app. |
 | D5 | BBS Studio source | Open | The modular source was lost; `apps/bbs-studio/index.html` (6,600 lines) is now the source. Split it into modules like Beam Sections before large changes. |
 | D6 | Apps on the brand | Open | No app uses `packages/brand` yet; each has its own colours and fonts. Move them onto `tokens.css`, keeping the drawing colour groups. |
-| D7 | BBS Studio tests | Open | Smoke and logic tests for BBS Studio (workbook import totals against the workbook's own, schedule lengths against the CADS RC sample). |
+| D7 | BBS Studio tests | Partly done (repo 0.2.0) | End-to-end smoke tests with a DXF download check are in. Still to add: workbook import totals against the workbook's own, schedule lengths against the CADS RC sample. |
+| D8 | Custom domain | Open | e.g. barwin.buildingsoftware.in in place of barwin.vercel.app; needs a DNS record at the domain's registrar. |

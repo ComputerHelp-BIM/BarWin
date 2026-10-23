@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="BarWin by Computer Help: reinforcement detailing tools for beam drawings, bar bending schedules and BS 8666 shape codes.">
+<title>BarWin · Detailing tools</title>
+<link rel="icon" href="/brand/app-icon-small.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/*__TOKENS__*/
+:root {
+  color-scheme: light;
+  --ground: var(--bw-galvanised); --card: var(--bw-white); --ink: var(--bw-steel); --soft: var(--bw-ink-soft);
+  --muted: var(--bw-mill); --line: var(--bw-rule); --accent: var(--bw-oxide); --dot: var(--bw-oxide); --tile: var(--bw-galvanised);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --ground: #11181F; --card: #1B2530; --ink: #F3F6F8; --soft: #D5DCE2; --muted: #B9C3CB; --line: #2E3B47;
+    --accent: var(--bw-oxide-light); --dot: var(--bw-oxide-light); --tile: #24303C;
+  }
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--ground); color: var(--ink); font: 400 16px/1.5 var(--bw-font-body); }
+a { color: inherit; }
+.wrap { max-width: 1160px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
+
+/* header: the reversed lockup on Steel */
+header.top { background: var(--bw-steel); color: var(--bw-white); padding: calc(36px + env(safe-area-inset-top)) 0 40px; }
+.lockup { display: flex; align-items: center; gap: 18px; }
+.lockup svg { width: 64px; height: 64px; flex: none; }
+.word { font: 700 64px/0.9 var(--bw-font-display); letter-spacing: -0.01em; margin: 0; }
+.word span { color: var(--bw-oxide-light); }
+.by { margin: 6px 0 0; font: 500 13px/1 var(--bw-font-body); letter-spacing: 0.14em; text-transform: uppercase; color: var(--bw-on-steel-muted); }
+.lede { margin: 24px 0 0; max-width: 60ch; font-size: 19px; line-height: 1.45; color: #D5DCE2; }
+.meta { margin: 14px 0 0; font: 400 13px/1.4 var(--bw-font-mono); color: var(--bw-on-steel-muted); }
+
+/* sections and cards */
+main { padding: 36px 0 24px; }
+section + section { margin-top: 40px; }
+.sec-h { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; margin: 0 0 16px; }
+.sec-h h2 { margin: 0; font: 700 30px/1 var(--bw-font-display); }
+.sec-h p { margin: 0; color: var(--muted); font-size: 15px; }
+.grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 16px; }
+.card { position: relative; height: 100%; display: flex; flex-direction: column; gap: 12px; padding: 20px; background: var(--card); border: 1px solid var(--line); border-radius: var(--bw-radius-card); transition: border-color .15s, transform .15s; }
+.card:hover { border-color: var(--accent); transform: translateY(-1px); }
+.card:focus-within { outline: 3px solid var(--bw-marker); outline-offset: 2px; }
+.head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.glyph { width: 56px; height: 56px; flex: none; display: grid; place-items: center; border-radius: 8px; background: var(--tile); color: var(--ink); }
+.glyph svg { width: 40px; height: 40px; }
+.glyph .dot { fill: var(--dot); }
+.chips { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+.chip { font: 500 12.5px/1 var(--bw-font-mono); padding: 5px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+.chip.active { color: var(--accent); border-color: var(--accent); }
+.chip.reference { color: var(--ink); border-color: var(--ink); }
+.chip.frozen { border-style: dashed; }
+.card h3 { margin: 0; font: 600 27px/1.05 var(--bw-font-display); }
+.card h3 a { text-decoration: none; }
+.card h3 a::after { content: ""; position: absolute; inset: 0; border-radius: inherit; }   /* the whole card is the link */
+.card h3 a:focus { outline: none; }
+.sum { margin: 0; color: var(--soft); font-size: 15.5px; }
+.feat { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.feat li { font-size: 13px; color: var(--muted); background: var(--tile); border-radius: 6px; padding: 3px 8px; }
+.go { margin-top: auto; padding-top: 4px; font-weight: 600; color: var(--accent); }
+.go::after { content: " \2192"; }
+.archive .card { background: transparent; }
+.archive .glyph, .archive .feat li { background: var(--card); }   /* tiles stay visible on the bare ground */
+
+footer { padding: 28px 0 calc(36px + env(safe-area-inset-bottom)); color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); }
+footer p { margin: 0 0 6px; max-width: 70ch; }
+
+@media (max-width: 560px) {
+  .word { font-size: 48px; }
+  .lockup svg { width: 48px; height: 48px; }
+  .lede { font-size: 17px; }
+}
+@media (prefers-reduced-motion: reduce) { .card { transition: none; } .card:hover { transform: none; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="lockup">
+      <svg viewBox="0 0 64 64" role="img" aria-label="BarWin mark">
+        <path d="M8 36 H36 A12 12 0 0 0 48 24 V6" fill="none" stroke="#FFFFFF" stroke-width="9"/>
+        <path d="M8 54 H42" fill="none" stroke="#FFFFFF" stroke-width="4"/>
+        <circle cx="48" cy="54" r="5.5" fill="#F08A5D"/>
+      </svg>
+      <div>
+        <h1 class="word">Bar<span>Win</span></h1>
+        <p class="by">by Computer Help</p>
+      </div>
+    </div>
+    <p class="lede">Reinforcement detailing tools: beam drawings, bar bending schedules and BS 8666 shapes. Pick a tool to open it.</p>
+    <p class="meta">{{META}}</p>
+  </div>
+</header>
+<main class="wrap">
+  <section aria-labelledby="h-tools">
+    <div class="sec-h"><h2 id="h-tools">Tools</h2><p>In development; numbers to check before issue.</p></div>
+    <ul class="grid">
+{{CARDS}}
+    </ul>
+  </section>
+  <section class="archive" aria-labelledby="h-archive">
+    <div class="sec-h"><h2 id="h-archive">Archive</h2><p>Kept as approved, for reference. Not developed further.</p></div>
+    <ul class="grid">
+{{ARCHIVE}}
+    </ul>
+  </section>
+</main>
+<footer>
+  <div class="wrap">
+    <p>Everything runs in your browser. Files you open in a tool stay on your device; nothing is uploaded.</p>
+    <p>BarWin by Computer Help · <a href="https://buildingsoftware.in">buildingsoftware.in</a></p>
+  </div>
+</footer>
+</body>
+</html>

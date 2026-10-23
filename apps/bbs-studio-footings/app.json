@@ -1,0 +1,9 @@
+{
+  "name": "BBS Studio: Footings",
+  "status": "frozen",
+  "order": 40,
+  "summary": "The footing-only BBS Studio: pad footings, cutting plan with offcuts, 3D and DXF.",
+  "features": ["Rect, polygon, circle", "Cutting plan", "BVBS, DXF, GLB"],
+  "entry": "index.html",
+  "version": { "file": "index.html", "pattern": "VERSION = '(\\d+\\.\\d+\\.\\d+)'" }
+}

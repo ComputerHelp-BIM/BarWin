@@ -1,6 +1,6 @@
 # BS 8666 shape codes
 
-**Figure engine 1.2.0 · Reference**
+**Figure engine 1.3.0 · Reference**
 
 Every BS 8666:2020 shape code (35) plus 51A, the hooked link used on site and under IS codes. Each is drawn as a bar of real thickness in side view and plan view (bars bent in more than one plane get one pictorial view), in four presentations: Outline, Solid, Solid + centre-line, Line with a dot at each bend.
 
