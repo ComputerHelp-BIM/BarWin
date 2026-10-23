@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="BarWin">
+  <!-- App icon, 64 px and up. Corner radius 56/256 of the size. -->
+  <rect width="256" height="256" rx="56" fill="#1B2530"/>
+  <g transform="translate(40 40) scale(2.75)">
+    <path d="M8 36 H36 A12 12 0 0 0 48 24 V6" fill="none" stroke="#FFFFFF" stroke-width="9"/>
+    <path d="M8 54 H42" fill="none" stroke="#FFFFFF" stroke-width="4"/>
+    <circle cx="48" cy="54" r="5.5" fill="#F08A5D"/>
+  </g>
+</svg>

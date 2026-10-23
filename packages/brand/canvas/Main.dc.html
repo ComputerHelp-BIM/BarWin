@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>BarWin logo</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 1200px; height: 640px; box-sizing: border-box; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); font-family: 'Barlow', 'Segoe UI', sans-serif; color: #1B2530">
+<div style="background: #E9EDF0; padding: 56px; display: flex; flex-direction: column; justify-content: space-between">
+<div style="font-size: 14px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #46525C">Primary</div>
+<div style="display: flex; align-items: center; gap: 28px">
+<svg width="150" height="150" viewBox="0 0 64 64" role="img" aria-label="BarWin mark: a bar with one bend, and its plan view with a dot at the bend">
+<path d="M8 36 H36 A12 12 0 0 0 48 24 V6" fill="none" stroke="#1B2530" stroke-width="9"></path>
+<path d="M8 54 H42" fill="none" stroke="#1B2530" stroke-width="4"></path>
+<circle cx="48" cy="54" r="5.5" fill="{{accent}}"></circle>
+</svg>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<div style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 700; font-size: 118px; line-height: 0.9; letter-spacing: -0.01em">Bar<span style="color: {{accent}}">Win</span></div>
+<div style="font-size: 17px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: #46525C">by Computer Help</div>
+</div>
+</div>
+<div style="font-size: 20px; font-weight: 500; color: #2B3742">Bar schedules, shop drawings and IFC from one model.</div>
+</div>
+<div style="background: #1B2530; padding: 56px; display: flex; flex-direction: column; justify-content: space-between; color: #FFFFFF">
+<div style="font-size: 14px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #B9C3CB">Reversed</div>
+<div style="display: flex; align-items: center; gap: 28px">
+<svg width="150" height="150" viewBox="0 0 64 64" role="img" aria-label="BarWin mark, reversed">
+<path d="M8 36 H36 A12 12 0 0 0 48 24 V6" fill="none" stroke="#FFFFFF" stroke-width="9"></path>
+<path d="M8 54 H42" fill="none" stroke="#FFFFFF" stroke-width="4"></path>
+<circle cx="48" cy="54" r="5.5" fill="{{accentOnDark}}"></circle>
+</svg>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<div style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 700; font-size: 118px; line-height: 0.9; letter-spacing: -0.01em">Bar<span style="color: {{accentOnDark}}">Win</span></div>
+<div style="font-size: 17px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: #B9C3CB">by Computer Help</div>
+</div>
+</div>
+<div style="display: flex; align-items: center; gap: 40px">
+<div style="display: flex; align-items: center; gap: 12px">
+<svg width="40" height="40" viewBox="0 0 64 64" aria-hidden="true">
+<path d="M8 36 H36 A12 12 0 0 0 48 24 V6" fill="none" stroke="#FFFFFF" stroke-width="9"></path>
+<path d="M8 54 H42" fill="none" stroke="#FFFFFF" stroke-width="4"></path>
+<circle cx="48" cy="54" r="5.5" fill="{{accentOnDark}}"></circle>
+</svg>
+<div style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 700; font-size: 34px; line-height: 1">Bar<span style="color: {{accentOnDark}}">Win</span></div>
+</div>
+<div style="font-size: 15px; color: #B9C3CB">Small lockup, for toolbars and title blocks</div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#B23A21","options":["#B23A21","#C2410C","#9A3412","#0B5CAB"]},"accentOnDark":{"editor":"color","default":"#F08A5D","options":["#F08A5D","#F2B705","#FF9F6E"]},"$preview":{"width":1200,"height":640}}'>
+class Component extends DCLogic {
+renderVals() {
+return { accent: this.props.accent ?? '#B23A21', accentOnDark: this.props.accentOnDark ?? '#F08A5D' };
+}
+}
+</script>
+</body>
+</html>

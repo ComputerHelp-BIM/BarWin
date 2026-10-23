@@ -1,0 +1,31 @@
+/*
+ * BarWin design tokens, v1.0.0
+ * Source of truth: packages/brand/tokens.json (keep both in step). Taken from the BarWin brand canvas.
+ *
+ * Use: <link rel="stylesheet" href="tokens.css">, then var(--bw-steel) and so on.
+ * Fonts load separately (Google Fonts):
+ *   https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap
+ */
+:root {
+  /* colour */
+  --bw-steel: #1B2530;        /* text, bars, the dark ground */
+  --bw-oxide: #B23A21;        /* the accent: "Win", the dot, primary buttons */
+  --bw-oxide-light: #F08A5D;  /* the accent on Steel */
+  --bw-marker: #F2B705;       /* the picked bar, and nothing else */
+  --bw-mill: #46525C;         /* secondary text, dimension lines */
+  --bw-galvanised: #E9EDF0;   /* the light ground; cards sit on it in white */
+  --bw-white: #FFFFFF;
+  --bw-rule: #C9D1D8;         /* borders, table rules */
+  --bw-ink-soft: #2B3742;     /* body text on Galvanised */
+  --bw-on-steel-muted: #B9C3CB;
+
+  /* type */
+  --bw-font-display: "Barlow Condensed", "Arial Narrow", sans-serif;   /* the name, headings, tab labels: 700, 600 */
+  --bw-font-body: "Barlow", "Segoe UI", sans-serif;                    /* everything people read: 400, 500, 600 */
+  --bw-font-mono: "IBM Plex Mono", Consolas, monospace;                /* dimensions, bar marks, lengths, weights: 400, 500 */
+
+  /* shape */
+  --bw-radius-card: 10px;
+  --bw-radius-control: 8px;
+  --bw-touch-min: 44px;
+}

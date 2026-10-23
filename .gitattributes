@@ -1,0 +1,9 @@
+# Text files are stored with LF; Windows checkouts follow core.autocrlf.
+* text=auto eol=lf
+*.ps1 text eol=crlf
+
+# Keep drawings and documents byte-for-byte.
+*.dxf binary
+*.pdf binary
+*.png binary
+*.woff2 binary

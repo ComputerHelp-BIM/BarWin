@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="BarWin">
+  <!-- A bar with one bend (side view) and its plan view, with a dot where the bar leaves the plan. -->
+  <path d="M8 36 H36 A12 12 0 0 0 48 24 V6" fill="none" stroke="#1B2530" stroke-width="9"/>
+  <path d="M8 54 H42" fill="none" stroke="#1B2530" stroke-width="4"/>
+  <circle cx="48" cy="54" r="5.5" fill="#B23A21"/>
+</svg>

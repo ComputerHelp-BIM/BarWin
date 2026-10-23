@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>BarWin colour palette</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 1200px; height: 520px; box-sizing: border-box; padding: 56px; background: #FFFFFF; display: flex; flex-direction: column; gap: 28px; font-family: 'Barlow', 'Segoe UI', sans-serif; color: #1B2530">
+<div style="font-size: 14px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #46525C">Colour</div>
+<div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 16px; flex-grow: 1">
+<div style="background: #1B2530; color: #FFFFFF; border-radius: 10px; padding: 20px; display: flex; flex-direction: column; justify-content: flex-end; gap: 4px">
+<div style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 600; font-size: 28px; line-height: 1">Steel</div>
+<div style="font-family: 'IBM Plex Mono', Consolas, monospace; font-size: 14px">#1B2530</div>
+<div style="font-size: 14px; color: #D5DCE2">Text, bars, the dark ground</div>
+</div>
+<div style="background: #B23A21; color: #FFFFFF; border-radius: 10px; padding: 20px; display: flex; flex-direction: column; justify-content: flex-end; gap: 4px">
+<div style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 600; font-size: 28px; line-height: 1">Oxide</div>
+<div style="font-family: 'IBM Plex Mono', Consolas, monospace; font-size: 14px">#B23A21</div>
+<div style="font-size: 14px; color: #FFE3DA">The accent: "Win", the dot, primary buttons</div>
+</div>
+<div style="background: #F08A5D; color: #1B2530; border-radius: 10px; padding: 20px; display: flex; flex-direction: column; justify-content: flex-end; gap: 4px">
+<div style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 600; font-size: 28px; line-height: 1">Oxide light</div>
+<div style="font-family: 'IBM Plex Mono', Consolas, monospace; font-size: 14px">#F08A5D</div>
+<div style="font-size: 14px; color: #1B2530">The accent on Steel</div>
+</div>
+<div style="background: #F2B705; color: #1B2530; border-radius: 10px; padding: 20px; display: flex; flex-direction: column; justify-content: flex-end; gap: 4px">
+<div style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 600; font-size: 28px; line-height: 1">Marker</div>
+<div style="font-family: 'IBM Plex Mono', Consolas, monospace; font-size: 14px">#F2B705</div>
+<div style="font-size: 14px; color: #1B2530">The picked bar, and nothing else</div>
+</div>
+<div style="background: #46525C; color: #FFFFFF; border-radius: 10px; padding: 20px; display: flex; flex-direction: column; justify-content: flex-end; gap: 4px">
+<div style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 600; font-size: 28px; line-height: 1">Mill</div>
+<div style="font-family: 'IBM Plex Mono', Consolas, monospace; font-size: 14px">#46525C</div>
+<div style="font-size: 14px; color: #E3E8EC">Secondary text, dimension lines</div>
+</div>
+<div style="background: #E9EDF0; color: #1B2530; border-radius: 10px; padding: 20px; display: flex; flex-direction: column; justify-content: flex-end; gap: 4px; border: 1px solid #C9D1D8">
+<div style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 600; font-size: 28px; line-height: 1">Galvanised</div>
+<div style="font-family: 'IBM Plex Mono', Consolas, monospace; font-size: 14px">#E9EDF0</div>
+<div style="font-size: 14px; color: #2B3742">The light ground; cards sit on it in white</div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1200,"height":520}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

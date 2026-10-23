@@ -1,0 +1,325 @@
+<title>Beam Sections</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a drawing-office sheet. The two views sit side by side on a pale steel ground, values panel below. */
+:root {
+  --bg: #EDF0F3;        /* galvanised ground */
+  --paper: #FBFCFD;     /* drawing sheet */
+  --ink: #1B2530;       /* steel: headings, ticks */
+  --outline: #8A949D;   /* concrete outline: a faded grey, not a hard line */
+  --cover: #2E8B57;     /* cover line and cover values */
+  --muted: #5B6772;     /* mill: dimension lines, names */
+  --rule: #CFD6DD;
+  --edit: #B23A21;      /* oxide: anything the user can change */
+  --edit-soft: #F6E3DD;
+  --cond: "Barlow Condensed", "Arial Narrow", Arial, sans-serif;
+  --body: "Barlow", "Segoe UI", Arial, sans-serif;
+  --mono: "IBM Plex Mono", Consolas, "Courier New", monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #10161C; --paper: #172029; --ink: #DDE4EA; --muted: #93A0AB; --rule: #2B3743; --edit: #F08A5D; --edit-soft: #3A251D; --outline: #5E6B77; --cover: #4FB37E; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #10161C; --paper: #172029; --ink: #DDE4EA; --muted: #93A0AB; --rule: #2B3743; --edit: #F08A5D; --edit-soft: #3A251D; --outline: #5E6B77; --cover: #4FB37E; color-scheme: dark }
+
+body { background: var(--bg); color: var(--ink); font: 400 15px/1.55 var(--body); }
+.wrap { max-width: 1240px; margin: 0 auto; padding-block: 28px 40px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 20px; }
+header { display: grid; gap: 4px; }
+.eyebrow { margin: 0; font: 600 13px/1 var(--cond); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+h1 { margin: 0; font: 700 34px/1.1 var(--cond); letter-spacing: .01em; text-wrap: balance; }
+h2 { margin: 0; font: 700 20px/1.2 var(--cond); letter-spacing: .02em; }
+.lede { margin: 4px 0 0; max-width: 64ch; color: var(--muted); }
+.lede b { color: var(--edit); font-weight: 600; }
+.lede b.g { color: var(--cover); }
+.under { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 4px; font-size: 13px; color: var(--muted); }
+.under input { width: auto; margin: 0; accent-color: var(--ink); }
+.under label { display: inline-flex; gap: 5px; align-items: center; cursor: pointer; }
+.group { display: grid; gap: 8px; }
+.ends { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: end; }
+.seg { margin: 0; padding: 0; border: 0; display: inline-flex; flex-wrap: wrap; gap: 0; }
+.seg legend { padding: 0; margin-bottom: 4px; font: 600 13px/1.2 var(--cond); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.seg input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.seg label { padding: 8px 14px; font: 600 14px var(--body); color: var(--muted); background: var(--bg); border: 1px solid var(--rule); cursor: pointer; }
+.seg label:first-of-type { border-radius: 4px 0 0 4px; }
+.seg label:last-of-type { border-radius: 0 4px 4px 0; border-left: 0; }
+.seg input:checked + label { color: var(--paper); background: var(--ink); border-color: var(--ink); }
+.seg input:focus-visible + label { outline: 2px solid var(--edit); outline-offset: 2px; }
+.kind { margin: 0; padding: 6px 10px; border: 1px solid var(--rule); border-radius: 4px; font-size: 14px; }
+.kind b { font: 700 15px var(--cond); letter-spacing: .04em; text-transform: uppercase; }
+.group h3 { margin: 0; font: 600 14px/1.2 var(--cond); letter-spacing: .08em; text-transform: uppercase; color: var(--ink); }
+
+.views { display: grid; gap: 16px; }
+.secs { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; }
+.secs .none { margin: 0; padding: 14px; color: var(--muted); border: 1px dashed var(--rule); border-radius: 6px; }
+.view figcaption .mini { margin-left: auto; }
+button.mini { padding: 4px 10px; font-size: 13px; }
+.view { margin: 0; background: var(--paper); border: 1px solid var(--rule); border-radius: 6px; padding: 14px 14px 10px; display: grid; gap: 8px; min-width: 0; }
+.view figcaption { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; }
+.view figcaption small { color: var(--muted); font-size: 13px; }
+.scroll { overflow-x: auto; }
+.sheet { position: relative; }
+.view.l .sheet { min-width: 680px; max-width: 1100px; margin: 0 auto; }
+.view.x .sheet { max-width: 250px; margin: 0 auto; }
+.sheet svg { display: block; width: 100%; height: auto; }
+
+/* drawing */
+.dw .ob { fill: none; stroke: var(--outline); stroke-width: 1.6px; vector-effect: non-scaling-stroke; }
+.dw .cl { fill: none; stroke: var(--cover); stroke-width: .9px; stroke-dasharray: 7 4; vector-effect: non-scaling-stroke; }
+.dw .th, .dw .ex, .dw .dm { fill: none; stroke: var(--muted); stroke-width: .8px; vector-effect: non-scaling-stroke; }
+.dw .tk { fill: none; stroke: var(--ink); stroke-width: 1.4px; vector-effect: non-scaling-stroke; }
+.dw .sm { fill: none; stroke: var(--ink); stroke-width: 2.2px; vector-effect: non-scaling-stroke; }
+.dw .ah { fill: var(--ink); }
+.dw .jn { fill: none; stroke: var(--outline); stroke-width: 1.2px; stroke-dasharray: 10 6; vector-effect: non-scaling-stroke; }
+.dw .tx { font-family: var(--mono); fill: var(--ink); }
+.dw .ov { fill: var(--muted); }
+.dw .nm, .dw .tt, .dw .sk { font-family: var(--cond); letter-spacing: .06em; fill: var(--muted); }
+.dw .tt, .dw .sk { font-weight: 700; fill: var(--ink); }
+.dw .ed { cursor: pointer; outline: none; }
+.dw .ed .tx { fill: var(--edit); font-weight: 500; }
+.dw .ed .hit { fill: transparent; }
+.dw .ed:hover .hit { fill: var(--edit-soft); }
+.dw .ed:focus-visible .hit { fill: var(--edit-soft); stroke: var(--edit); stroke-width: 1.5px; vector-effect: non-scaling-stroke; }
+.dw .ed.cvr .tx { fill: var(--cover); }
+.dw .ed.cvr .ul { stroke: var(--cover); }
+.dw .sec.off { opacity: .3; }
+.dw .sx { cursor: pointer; outline: none; }
+.dw .sx .hit { fill: transparent; }
+.dw .sx .box { fill: var(--paper); stroke: var(--muted); stroke-width: 1.4px; vector-effect: non-scaling-stroke; }
+.dw .sx[aria-checked="true"] .box { fill: var(--ink); stroke: var(--ink); }
+.dw .sx .tick { fill: none; stroke: var(--paper); stroke-width: 2.2px; vector-effect: non-scaling-stroke; }
+.dw .sx:hover .box, .dw .sx:focus-visible .box { stroke: var(--edit); stroke-width: 2px; }
+.dw .sx:focus-visible .hit { fill: var(--edit-soft); }
+.dw .ul { stroke: var(--edit); stroke-width: 1px; stroke-dasharray: 3 3; vector-effect: non-scaling-stroke; }
+
+.dim-ed { position: absolute; height: 34px; padding: 0 6px; font: 500 16px var(--mono); text-align: center; color: var(--ink); background: var(--paper); border: 2px solid var(--edit); border-radius: 4px; box-shadow: 0 2px 10px rgba(0,0,0,.18); z-index: 2; }
+.dim-ed[aria-invalid="true"] { border-style: dashed; }
+.dim-ed.cvr { border-color: var(--cover); }
+
+/* values panel */
+.panel { background: var(--paper); border: 1px solid var(--rule); border-radius: 6px; padding: 16px; display: grid; gap: 14px; }
+.fields { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px 16px; }
+.field { display: grid; gap: 4px; min-width: 0; align-content: start; }
+.field label, .field .lab { font: 600 13px/1.2 var(--cond); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.field .in { display: flex; align-items: center; border: 1px solid var(--rule); border-radius: 4px; background: var(--bg); }
+.field.cvr .in input { color: var(--cover); }
+.field .in input { flex: 1 1 0; width: 0; min-width: 0; height: 36px; border: 0; background: transparent; padding: 0 8px; font: 500 16px var(--mono); color: var(--edit); font-variant-numeric: tabular-nums; }
+.field .in input:focus { outline: none; }
+.field .in:focus-within { border-color: var(--edit); box-shadow: 0 0 0 2px var(--edit-soft); }
+.field input[aria-invalid="true"] { text-decoration: underline wavy var(--edit); }
+.field .u { padding: 0 8px; color: var(--muted); font: 400 13px var(--mono); }
+.field .out { height: 38px; display: flex; align-items: center; padding: 0 9px; font: 500 16px var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+.field small { color: var(--muted); font-size: 12.5px; }
+.acts { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+button { font: 600 14px var(--body); color: var(--ink); background: var(--bg); border: 1px solid var(--rule); border-radius: 4px; padding: 8px 12px; cursor: pointer; }
+button:hover { border-color: var(--muted); }
+button:focus-visible, .field input:focus-visible { outline: 2px solid var(--edit); outline-offset: 2px; }
+#msg { margin: 0; min-height: 1.5em; color: var(--muted); }
+#msg.err { color: var(--edit); }
+#svgOut { width: 100%; min-height: 120px; font: 12px var(--mono); color: var(--ink); background: var(--bg); border: 1px solid var(--rule); border-radius: 4px; padding: 8px; }
+footer { color: var(--muted); font-size: 13px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">BBS Studio · beam detailing</p>
+    <h1>Beam sections</h1>
+    <p class="lede">L-section and section A-A of one beam span. Choose what each end rests on, then click any <b>red number</b> to type a real size or a <b class="g">green number</b> to set a cover. Tick the box under a section mark to show that section. The drawing keeps its shape; only the numbers change, except that a support beam is drawn deeper or shallower to match the depths.</p>
+  </header>
+
+  <div class="views">
+    <figure class="view l">
+      <figcaption><h2>L-section</h2><small id="lcap"></small><button type="button" class="mini" data-act="copyL">Copy SVG</button></figcaption>
+      <div class="scroll"><div class="sheet"><div class="svgbox" id="sheetL"></div></div></div>
+    </figure>
+    <div class="secs" id="secs"></div>
+  </div>
+
+  <section class="panel" aria-labelledby="valsH">
+    <h2 id="valsH">Dimensions</h2>
+    <form id="vals" class="group" novalidate>
+      <div class="group"><h3>Supports</h3>
+        <div class="ends">
+          <fieldset class="seg"><legend>Left end rests on</legend>
+            <input type="radio" id="tL-col" name="typeL" value="col"><label for="tL-col">Column / wall</label>
+            <input type="radio" id="tL-beam" name="typeL" value="beam"><label for="tL-beam">Beam</label>
+          </fieldset>
+          <fieldset class="seg"><legend>Right end rests on</legend>
+            <input type="radio" id="tR-col" name="typeR" value="col"><label for="tR-col">Column / wall</label>
+            <input type="radio" id="tR-beam" name="typeR" value="beam"><label for="tR-beam">Beam</label>
+          </fieldset>
+          <p class="kind" id="kind" aria-live="polite"></p>
+        </div>
+      </div>
+      <div class="group"><h3>Sizes</h3><div class="fields" id="sizes"></div></div>
+      <div class="group"><h3>Clear cover</h3><div class="fields" id="covers"></div></div>
+    </form>
+    <div class="acts">
+      <button type="button" data-act="reset">Reset to the example</button>
+    </div>
+    <p id="msg" role="status" aria-live="polite"></p>
+    <textarea id="svgOut" aria-label="SVG code" readonly hidden></textarea>
+  </section>
+
+  <footer>Beam sections v<span id="ver"></span> · Not to scale. Sizes accept mm, cm or m (450, 45 cm, 0.45 m); values are kept in this browser.</footer>
+</div>
+
+<script>
+/*__BEAMS__*/
+</script>
+<script>
+(function () {
+  'use strict';
+  var BS = window.BeamSections, KEY = 'bbs-beam-sections-v2', OLD_KEY = 'bbs-beam-sections-v1';
+  var $ = function (s) { return document.querySelector(s); };
+  var vals = load();
+  $('#ver').textContent = BS.VERSION;
+
+  function copyDefaults() { var o = {}, k; for (k in BS.DEFAULTS) o[k] = BS.DEFAULTS[k]; return o; }
+  /** Reads this browser's saved values; a save from 0.2 (column left, beam right) is carried over. Anything unusable keeps its example value. */
+  function load() {
+    var o = copyDefaults();
+    try {
+      var s = JSON.parse(localStorage.getItem(KEY) || 'null');
+      if (!s) { var old = JSON.parse(localStorage.getItem(OLD_KEY) || 'null'); if (old) s = { LcolW: old.colW, span: old.span, RbeamW: old.supW, RbeamD: old.supD, D: old.D, B: old.B, ctop: old.ctop, cbot: old.cbot, cside: old.cside, ccol: old.ccol }; }
+      if (s) for (var k in o) {
+        if (k === 'typeL' || k === 'typeR') { if (s[k] === 'col' || s[k] === 'beam') o[k] = s[k]; }
+        else if (k === 'Lunder' || k === 'Runder') { if (s[k] === 'stop' || s[k] === 'under') o[k] = s[k]; }
+        else if (typeof o[k] === 'boolean') { if (typeof s[k] === 'boolean') o[k] = s[k]; }
+        else if (s[k] > 0 && s[k] <= 100000) o[k] = Math.round(s[k]);
+      }
+    } catch (e) { /* storage unavailable: use the example */ }
+    return o;
+  }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(vals)); } catch (e) { /* storage unavailable */ } }
+
+  /** Reads "450", "450 mm", "45 cm", "0.45 m" or "1,200" as whole millimetres. Returns null when it is not a usable size. */
+  function parseMM(t) {
+    var m = /^(\d+(?:\.\d+)?)\s*(mm|cm|m)?$/i.exec(String(t).trim().replace(/,/g, ''));
+    if (!m) return null;
+    var u = (m[2] || 'mm').toLowerCase(), v = Math.round(parseFloat(m[1]) * (u === 'm' ? 1000 : u === 'cm' ? 10 : 1));
+    return v > 0 && v <= 100000 ? v : null;
+  }
+  var HELP = 'Type a size greater than zero, in mm unless you add cm or m, for example 450, 45 cm or 0.45 m.';
+  function msg(t, err) { var m = $('#msg'); m.textContent = t || ''; m.className = err ? 'err' : ''; }
+  function cap(t) { return t.charAt(0).toUpperCase() + t.slice(1); }
+
+  var KIND = { primary: ['Primary beam', 'column or wall at both ends'], secondary: ['Secondary beam', 'column or wall at one end, beam at the other'], tertiary: ['Tertiary beam', 'beams at both ends'] };
+  var ENDS = { col: 'column / wall', beam: 'beam' };
+  /** The form fields for the current supports: an end shows a width when it is a column or wall, a width and a depth when it is a beam. */
+  function fieldList() {
+    function end(k, side) { return vals['type' + k] === 'col' ? [[k + 'colW', side + ' column / wall width']] : [[k + 'beamW', side + ' support beam width'], [k + 'beamD', side + ' support beam depth', 'note' + k]]; }
+    var sizes = end('L', 'Left').concat([['span', 'Clear span'], ['D', 'Beam depth', 'Shown in both views'], ['B', 'Beam width']]).concat(end('R', 'Right'));
+    var covers = [['ctop', 'Beam top'], ['cbot', 'Beam bottom'], ['cside', 'Beam sides']];
+    if (vals.typeL === 'col' || vals.typeR === 'col') covers.push(['ccol', 'Column / wall']);
+    return { sizes: sizes, covers: covers };
+  }
+  function fieldHTML(f, cover) {
+    var note = f[2] ? '<small' + (/^note/.test(f[2]) ? ' id="' + f[2] + '">' : '>' + f[2]) + '</small>' : '';
+    if (/^note/.test(f[2] || '')) {
+      var k = f[2].slice(4);
+      note += '<div class="under" id="und' + k + '" role="radiogroup" aria-label="Where the beam ends against the ' + (k === 'L' ? 'left' : 'right') + ' support beam">' +
+        '<label><input type="radio" name="' + k + 'under" value="stop"> Beam stops at its face</label>' +
+        '<label><input type="radio" name="' + k + 'under" value="under"> Beam runs under it</label></div>';
+    }
+    return '<div class="field' + (cover ? ' cvr' : '') + '"><label for="f-' + f[0] + '">' + f[1] + '</label><div class="in"><input id="f-' + f[0] + '" data-k="' + f[0] + '" inputmode="decimal" autocomplete="off"><span class="u">mm</span></div>' + note + '</div>';
+  }
+  function buildForm() {
+    var F = fieldList();
+    $('#sizes').innerHTML = F.sizes.map(function (f) { return fieldHTML(f); }).join('') + '<div class="field"><span class="lab">Overall length</span><output class="out" id="overall"></output><small>Left end + span + right end</small></div>';
+    $('#covers').innerHTML = F.covers.map(function (f) { return fieldHTML(f, true); }).join('');
+    ['L', 'R'].forEach(function (k) { $('#t' + k + '-' + vals['type' + k]).checked = true; var r = document.querySelector('input[name="' + k + 'under"][value="' + vals[k + 'under'] + '"]'); if (r) r.checked = true; });
+  }
+
+  function render() {
+    $('#sheetL').innerHTML = BS.lSection(vals, { ia: true });
+    var shown = ['B', 'A', 'C'].filter(function (k) { return vals['show' + k]; });
+    $('#secs').innerHTML = shown.length ? shown.map(function (k) {
+      return '<figure class="view x"><figcaption><h2>Section ' + k + '-' + k + '</h2><small>' + { A: 'Cut at mid-span', B: 'Near the left end', C: 'Near the right end' }[k] + '</small><button type="button" class="mini" data-act="copyX" data-s="' + k + '">Copy SVG</button></figcaption>' +
+        '<div class="sheet"><div class="svgbox">' + BS.xSection(vals, { ia: true, letter: k }) + '</div></div></figure>';
+    }).join('') : '<p class="none">No cross-sections shown. Tick the box under a section mark on the L-section to show one.</p>';
+    [].forEach.call(document.querySelectorAll('#vals input[data-k]'), function (i) { if (document.activeElement !== i) { i.value = vals[i.dataset.k]; i.removeAttribute('aria-invalid'); } });
+    var w = function (k) { return vals[k + (vals['type' + k] === 'col' ? 'colW' : 'beamW')]; };
+    $('#overall').textContent = (w('L') + vals.span + w('R')) + ' mm';
+    ['L', 'R'].forEach(function (k) {
+      var el = $('#note' + k); if (!el) return;
+      var kase = BS.supportCase(vals, k); el.textContent = kase === 'flush' ? 'Same as the beam: drawn flush' : kase === 'deeper' ? 'Deeper than the beam: drawn 200 deeper' : 'Shallower than the beam: drawn 200 shallower';
+      $('#und' + k).hidden = kase !== 'shallower';
+    });
+    var K = KIND[BS.beamClass(vals)];
+    $('#kind').innerHTML = '<b>' + K[0] + '</b> &middot; ' + K[1];
+    $('#lcap').textContent = cap(ENDS[vals.typeL]) + ' left, ' + ENDS[vals.typeR] + ' right';
+  }
+  /** Rebuilds the form (its fields depend on the supports) without losing the field the user was on. */
+  function refresh() { var id = document.activeElement && document.activeElement.id; buildForm(); render(); if (id && document.getElementById(id)) document.getElementById(id).focus({ preventScroll: true }); }
+
+  /* ---- editing a number on the drawing: an input laid over the label ---- */
+  var ed = document.createElement('input'), cur = null;
+  ed.className = 'dim-ed'; ed.id = 'dimEditor'; ed.hidden = true; ed.setAttribute('inputmode', 'decimal'); ed.setAttribute('autocomplete', 'off');
+  function openEd(g) {
+    var sheet = g.closest('.sheet'), r = g.querySelector('text').getBoundingClientRect(), b = sheet.getBoundingClientRect(), w = Math.max(88, r.width + 32);
+    sheet.appendChild(ed);
+    ed.style.width = w + 'px';
+    ed.style.left = Math.max(0, r.left - b.left + r.width / 2 - w / 2) + 'px';
+    ed.style.top = (r.top - b.top + r.height / 2 - 17) + 'px';
+    cur = { k: g.dataset.k }; ed.classList.toggle('cvr', !!BS.COVER[cur.k]);
+    ed.value = vals[cur.k]; ed.setAttribute('aria-label', 'New ' + BS.NAMES[cur.k] + ' in mm'); ed.removeAttribute('aria-invalid');
+    ed.hidden = false; ed.focus(); ed.select();
+  }
+  function closeEd(commit, fromBlur) {
+    if (!cur) return;
+    var k = cur.k;
+    if (commit) {
+      var v = parseMM(ed.value);
+      if (v === null) {
+        if (!fromBlur) { ed.setAttribute('aria-invalid', 'true'); msg(HELP, true); return; }
+        msg('"' + ed.value + '" is not a size, so the ' + BS.NAMES[k] + ' stays ' + vals[k] + ' mm.', true); commit = false;
+      }
+      if (commit) { vals[k] = v; save(); msg(cap(BS.NAMES[k]) + ' set to ' + v + ' mm.'); }
+    }
+    cur = null; ed.hidden = true; render();
+    if (!fromBlur) { var g = document.querySelector('.ed[data-k="' + k + '"]'); if (g) g.focus({ preventScroll: true }); }
+  }
+  ed.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); closeEd(true); } else if (e.key === 'Escape') { e.preventDefault(); closeEd(false); } });
+  ed.addEventListener('blur', function () { closeEd(true, true); });
+  document.addEventListener('click', function (e) { var g = e.target.closest && e.target.closest('.dw .ed'); if (g) openEd(g); });
+  function toggleSec(x) { var k = x.dataset.s; vals['show' + k] = !vals['show' + k]; save(); render(); msg('Section ' + k + '-' + k + (vals['show' + k] ? ' shown.' : ' hidden.')); var n = document.querySelector('.sx[data-s="' + k + '"]'); if (n) n.focus({ preventScroll: true }); }
+  document.addEventListener('click', function (e) { var x = e.target.closest && e.target.closest('.dw .sx'); if (x) toggleSec(x); });
+  document.addEventListener('keydown', function (e) { var x = e.target.closest && e.target.closest('.dw .sx'); if (x && (e.key === ' ' || e.key === 'Enter')) { e.preventDefault(); toggleSec(x); } });
+  document.addEventListener('keydown', function (e) { var g = e.target.closest && e.target.closest('.dw .ed'); if (g && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openEd(g); } });
+
+  /* ---- the form: what each end rests on, then the sizes ---- */
+  $('#vals').addEventListener('change', function (e) {
+    var i = e.target;
+    if (i.name === 'typeL' || i.name === 'typeR') {
+      vals[i.name] = i.value; save(); refresh();
+      var K = KIND[BS.beamClass(vals)]; msg((i.name === 'typeL' ? 'Left' : 'Right') + ' end now rests on a ' + ENDS[i.value] + '. This is a ' + K[0].toLowerCase() + '.');
+      return;
+    }
+    if (i.name === 'Lunder' || i.name === 'Runder') { vals[i.name] = i.value; save(); render(); msg((i.name === 'Lunder' ? 'Left' : 'Right') + ' end: the beam ' + (i.value === 'under' ? 'runs under the support beam to its far face.' : 'stops at the support beam\u2019s face.')); return; }
+    var k = i.dataset && i.dataset.k; if (!k) return;
+    var v = parseMM(i.value);
+    if (v === null) { i.setAttribute('aria-invalid', 'true'); msg(HELP, true); return; }
+    i.removeAttribute('aria-invalid'); msg(''); vals[k] = v; save(); render(); i.value = v;
+  });
+  $('#vals').addEventListener('submit', function (e) { e.preventDefault(); });
+
+  /* ---- copy as a standalone SVG ---- */
+  function copy(svg, name) {
+    var out = $('#svgOut');
+    function fallback() { out.hidden = false; out.value = svg; out.focus(); out.select(); msg('Copying is blocked here. The ' + name + ' SVG is selected in the box below; copy it from there.'); }
+    try { navigator.clipboard.writeText(svg).then(function () { out.hidden = true; msg(name + ' SVG copied, with the current numbers.'); }, fallback); } catch (e) { fallback(); }
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('button[data-act]'); if (!b) return;
+    var a = b.dataset.act;
+    if (a === 'copyL') copy(BS.lSection(vals, { style: BS.EXPORT_CSS }), 'L-section');
+    else if (a === 'copyX') copy(BS.xSection(vals, { style: BS.EXPORT_CSS, letter: b.dataset.s }), 'Section ' + b.dataset.s + '-' + b.dataset.s);
+    else if (a === 'reset') { vals = copyDefaults(); save(); refresh(); msg('Back to the example: a secondary beam, 900 column or wall on the left, 300 x 900 beam on the right, 5000 span, 300 x 900 beam, covers 25 top, 40 bottom, 25 sides, 40 column, all three sections shown.'); }
+  });
+
+  refresh();
+})();
+</script>

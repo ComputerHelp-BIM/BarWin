@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>BarWin app header</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+body{margin:0}
+a{color:#1B2530}a:hover{color:#B23A21}
+</style>
+</helmet>
+<div style="background: #E9EDF0; font-family: 'Barlow', 'Segoe UI', sans-serif; color: #1B2530; min-height: 520px">
+<header style="background: #1B2530; color: #FFFFFF; padding: 14px 24px; display: flex; flex-wrap: wrap; align-items: center; gap: 16px 28px">
+<div style="display: flex; align-items: center; gap: 10px">
+<svg width="34" height="34" viewBox="0 0 64 64" role="img" aria-label="BarWin">
+<path d="M8 36 H36 A12 12 0 0 0 48 24 V6" fill="none" stroke="#FFFFFF" stroke-width="9"></path>
+<path d="M8 54 H42" fill="none" stroke="#FFFFFF" stroke-width="4"></path>
+<circle cx="48" cy="54" r="5.5" fill="{{accentOnDark}}"></circle>
+</svg>
+<div style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 700; font-size: 30px; line-height: 1">Bar<span style="color: {{accentOnDark}}">Win</span></div>
+<div style="font-family: 'IBM Plex Mono', Consolas, monospace; font-size: 13px; color: #B9C3CB">v0.9.0</div>
+</div>
+<div style="flex: 999 1 240px; min-width: 0; font-size: 16px; font-weight: 500; color: #D5DCE2">Sample residential, 12F to 13F walls</div>
+<div style="display: flex; flex-wrap: wrap; gap: 6px 22px; font-family: 'IBM Plex Mono', Consolas, monospace; font-size: 14px; color: #FFFFFF">
+<div>12.306 t steel</div>
+<div>70.92 m³ concrete</div>
+<div>730 m² formwork</div>
+</div>
+</header>
+<nav aria-label="Sections" style="background: #FFFFFF; border-bottom: 1px solid #C9D1D8; padding: 0 16px; display: flex; flex-wrap: wrap; gap: 0 4px">
+<a href="#review" style="padding: 14px 12px; min-height: 44px; box-sizing: border-box; text-decoration: none; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 600; font-size: 20px; color: #46525C">Review</a>
+<a href="#members" style="padding: 14px 12px; min-height: 44px; box-sizing: border-box; text-decoration: none; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 600; font-size: 20px; color: #46525C">Members</a>
+<a href="#schedule" style="padding: 14px 12px; min-height: 44px; box-sizing: border-box; text-decoration: none; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 600; font-size: 20px; color: #46525C">Schedule</a>
+<a href="#shapes" aria-current="page" style="padding: 14px 12px; min-height: 44px; box-sizing: border-box; text-decoration: none; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 600; font-size: 20px; color: #1B2530; border-bottom: 3px solid {{accent}}">Shape codes</a>
+<a href="#cost" style="padding: 14px 12px; min-height: 44px; box-sizing: border-box; text-decoration: none; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 600; font-size: 20px; color: #46525C">BOQ and cost</a>
+<a href="#rules" style="padding: 14px 12px; min-height: 44px; box-sizing: border-box; text-decoration: none; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 600; font-size: 20px; color: #46525C">Rules</a>
+<a href="#downloads" style="padding: 14px 12px; min-height: 44px; box-sizing: border-box; text-decoration: none; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 600; font-size: 20px; color: #46525C">Downloads</a>
+</nav>
+<main id="shapes" style="max-width: 1180px; margin: 0 auto; padding: 24px; display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px">
+<h1 style="margin: 0; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 700; font-size: 34px; line-height: 1">Shape codes</h1>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<button type="button" aria-pressed="true" style="min-height: 44px; padding: 0 16px; border-radius: 8px; border: 1px solid {{accent}}; background: {{accent}}; color: #FFFFFF; font: 600 16px 'Barlow', 'Segoe UI', sans-serif">Outline</button>
+<button type="button" aria-pressed="false" style="min-height: 44px; padding: 0 16px; border-radius: 8px; border: 1px solid #C9D1D8; background: #FFFFFF; color: #1B2530; font: 500 16px 'Barlow', 'Segoe UI', sans-serif">Solid</button>
+<button type="button" aria-pressed="false" style="min-height: 44px; padding: 0 16px; border-radius: 8px; border: 1px solid #C9D1D8; background: #FFFFFF; color: #1B2530; font: 500 16px 'Barlow', 'Segoe UI', sans-serif">Solid + centre-line</button>
+<button type="button" aria-pressed="false" style="min-height: 44px; padding: 0 16px; border-radius: 8px; border: 1px solid #C9D1D8; background: #FFFFFF; color: #1B2530; font: 500 16px 'Barlow', 'Segoe UI', sans-serif">Line, dot at bend</button>
+</div>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 16px">
+<article style="flex: 1 1 320px; min-width: 0; background: #FFFFFF; border: 1px solid #C9D1D8; border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 8px">
+<h2 style="margin: 0; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 600; font-size: 24px; line-height: 1">Shape code 11</h2>
+<div style="font-size: 15px; color: #46525C">One bend</div>
+<svg viewBox="0 0 320 150" role="img" aria-label="Shape code 11 in side view" style="width: 100%; max-width: 360px; height: auto">
+<path d="M20 110 L208 110 A42 42 0 0 0 250 68 L250 14 L236 14 L236 68 A28 28 0 0 1 208 96 L20 96 Z" fill="none" stroke="#1B2530" stroke-width="1.4"></path>
+<path d="M20 116 V138 M250 116 V138 M22 134 H248" fill="none" stroke="#46525C" stroke-width="0.8"></path>
+<text x="135" y="130" text-anchor="middle" style="font: 500 12px 'IBM Plex Mono', Consolas, monospace; fill: #46525C">(B)=1350</text>
+<path d="M256 14 H284 M256 110 H284 M280 16 V108" fill="none" stroke="#46525C" stroke-width="0.8"></path>
+<text x="288" y="66" style="font: 500 12px 'IBM Plex Mono', Consolas, monospace; fill: #46525C">A=900</text>
+</svg>
+<div style="font-family: 'IBM Plex Mono', Consolas, monospace; font-size: 14px">L = A + (B) - 0.5r - d = <span style="font-weight: 500; color: {{accent}}">2200 mm</span></div>
+</article>
+<article style="flex: 1 1 320px; min-width: 0; background: #FFFFFF; border: 1px solid {{accent}}; border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; align-items: center; gap: 10px">
+<h2 style="margin: 0; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 600; font-size: 24px; line-height: 1">Shape code 26</h2>
+<div style="font-size: 13px; font-weight: 600; color: {{accent}}; border: 1px solid {{accent}}; border-radius: 12px; padding: 2px 9px">in use</div>
+</div>
+<div style="font-size: 15px; color: #46525C">Crank</div>
+<svg viewBox="0 0 320 150" role="img" aria-label="Shape code 26 in side view" style="width: 100%; max-width: 360px; height: auto">
+<path d="M20 110 H100 L160 50 H300" fill="none" stroke="#1B2530" stroke-width="14" stroke-linejoin="round"></path>
+<path d="M20 110 H100 L160 50 H300" fill="none" stroke="#FFFFFF" stroke-width="11.2" stroke-linejoin="round"></path>
+<path d="M20 103 V117 M300 43 V57" fill="none" stroke="#1B2530" stroke-width="1.4"></path>
+<text x="56" y="138" text-anchor="middle" style="font: 500 12px 'IBM Plex Mono', Consolas, monospace; fill: #46525C">A=2475</text>
+<text x="230" y="34" text-anchor="middle" style="font: 500 12px 'IBM Plex Mono', Consolas, monospace; fill: #46525C">(C)=800</text>
+<text x="112" y="70" text-anchor="end" style="font: 500 12px 'IBM Plex Mono', Consolas, monospace; fill: #46525C">B=225</text>
+</svg>
+<div style="font-family: 'IBM Plex Mono', Consolas, monospace; font-size: 14px">L = A + B + (C) = <span style="font-weight: 500; color: {{accent}}">3500 mm</span></div>
+</article>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#B23A21","options":["#B23A21","#C2410C","#9A3412","#0B5CAB"]},"accentOnDark":{"editor":"color","default":"#F08A5D","options":["#F08A5D","#F2B705","#FF9F6E"]},"$preview":{"width":1280,"height":520}}'>
+class Component extends DCLogic {
+renderVals() {
+return { accent: this.props.accent ?? '#B23A21', accentOnDark: this.props.accentOnDark ?? '#F08A5D' };
+}
+}
+</script>
+</body>
+</html>

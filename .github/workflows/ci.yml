@@ -1,0 +1,31 @@
+# Logic and browser tests on every push and pull request.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run check
+      - name: Keep the built pages
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: built-pages
+          path: apps/*/dist/
+          retention-days: 14

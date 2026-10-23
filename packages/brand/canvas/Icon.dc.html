@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>BarWin app icon</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 880px; height: 640px; box-sizing: border-box; padding: 56px; background: #FFFFFF; display: flex; flex-direction: column; gap: 40px; font-family: 'Barlow', 'Segoe UI', sans-serif; color: #1B2530">
+<div style="font-size: 14px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #46525C">App icon</div>
+<div style="display: flex; align-items: flex-end; gap: 48px">
+<div style="display: flex; flex-direction: column; gap: 12px; align-items: flex-start">
+<div style="width: 256px; height: 256px; border-radius: 56px; background: #1B2530; display: flex; align-items: center; justify-content: center">
+<svg width="176" height="176" viewBox="0 0 64 64" role="img" aria-label="BarWin icon">
+<path d="M8 36 H36 A12 12 0 0 0 48 24 V6" fill="none" stroke="#FFFFFF" stroke-width="9"></path>
+<path d="M8 54 H42" fill="none" stroke="#FFFFFF" stroke-width="4"></path>
+<circle cx="48" cy="54" r="5.5" fill="{{accentOnDark}}"></circle>
+</svg>
+</div>
+<div style="font-size: 15px; color: #46525C">256 px</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px; align-items: flex-start">
+<div style="width: 128px; height: 128px; border-radius: 28px; background: #1B2530; display: flex; align-items: center; justify-content: center">
+<svg width="88" height="88" viewBox="0 0 64 64" aria-hidden="true">
+<path d="M8 36 H36 A12 12 0 0 0 48 24 V6" fill="none" stroke="#FFFFFF" stroke-width="9"></path>
+<path d="M8 54 H42" fill="none" stroke="#FFFFFF" stroke-width="4"></path>
+<circle cx="48" cy="54" r="5.5" fill="{{accentOnDark}}"></circle>
+</svg>
+</div>
+<div style="font-size: 15px; color: #46525C">128 px</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px; align-items: flex-start">
+<div style="width: 64px; height: 64px; border-radius: 14px; background: #1B2530; display: flex; align-items: center; justify-content: center">
+<svg width="44" height="44" viewBox="0 0 64 64" aria-hidden="true">
+<path d="M8 36 H36 A12 12 0 0 0 48 24 V6" fill="none" stroke="#FFFFFF" stroke-width="9"></path>
+<path d="M8 54 H42" fill="none" stroke="#FFFFFF" stroke-width="4"></path>
+<circle cx="48" cy="54" r="5.5" fill="{{accentOnDark}}"></circle>
+</svg>
+</div>
+<div style="font-size: 15px; color: #46525C">64 px</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px; align-items: flex-start">
+<div style="width: 32px; height: 32px; border-radius: 7px; background: #1B2530; display: flex; align-items: center; justify-content: center">
+<svg width="24" height="24" viewBox="0 0 64 64" aria-hidden="true">
+<path d="M8 38 H34 A14 14 0 0 0 48 24 V6" fill="none" stroke="#FFFFFF" stroke-width="11"></path>
+<circle cx="48" cy="54" r="7" fill="{{accentOnDark}}"></circle>
+</svg>
+</div>
+<div style="font-size: 15px; color: #46525C">32 px</div>
+</div>
+</div>
+<div style="display: flex; align-items: center; gap: 32px">
+<div style="width: 96px; height: 96px; border-radius: 21px; background: {{accent}}; display: flex; align-items: center; justify-content: center">
+<svg width="66" height="66" viewBox="0 0 64 64" role="img" aria-label="BarWin icon on the accent colour">
+<path d="M8 36 H36 A12 12 0 0 0 48 24 V6" fill="none" stroke="#FFFFFF" stroke-width="9"></path>
+<path d="M8 54 H42" fill="none" stroke="#FFFFFF" stroke-width="4"></path>
+<circle cx="48" cy="54" r="5.5" fill="#FFFFFF"></circle>
+</svg>
+</div>
+<div style="width: 96px; height: 96px; border-radius: 21px; background: #E9EDF0; display: flex; align-items: center; justify-content: center">
+<svg width="66" height="66" viewBox="0 0 64 64" role="img" aria-label="BarWin icon on the light ground">
+<path d="M8 36 H36 A12 12 0 0 0 48 24 V6" fill="none" stroke="#1B2530" stroke-width="9"></path>
+<path d="M8 54 H42" fill="none" stroke="#1B2530" stroke-width="4"></path>
+<circle cx="48" cy="54" r="5.5" fill="{{accent}}"></circle>
+</svg>
+</div>
+<div style="font-size: 17px; color: #2B3742; max-width: 420px">Alternates on the accent and on the light ground. At 32 px the plan line is dropped and the dot is enlarged.</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#B23A21","options":["#B23A21","#C2410C","#9A3412","#0B5CAB"]},"accentOnDark":{"editor":"color","default":"#F08A5D","options":["#F08A5D","#F2B705","#FF9F6E"]},"$preview":{"width":880,"height":640}}'>
+class Component extends DCLogic {
+renderVals() {
+return { accent: this.props.accent ?? '#B23A21', accentOnDark: this.props.accentOnDark ?? '#F08A5D' };
+}
+}
+</script>
+</body>
+</html>

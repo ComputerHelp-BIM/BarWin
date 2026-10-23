@@ -1,0 +1,40 @@
+# Beam Sections
+
+**Version 0.15.1 · Active**
+
+Simply supported beam: an L-section plus cross-sections A-A (mid-span), B-B (left end) and C-C (right end), with the reinforcement drawn to the rules in [docs/beam-rules.md](../../docs/beam-rules.md).
+
+- Supports: column / wall or beam at each end (primary, secondary, tertiary beams).
+- Links in six distributions, counted and spaced to scale along the span.
+- Top and bottom bars by zone (left / mid / right), laps of 50 x the smaller bar in three styles (inline, offset, cranked 1:6).
+- Extra top bars per end and extra bottom bars with curtailment; Auto or manual layers; spacer bars.
+- Anchorage per support (straight, bent, to cover), Ld and leg dimensions; values edited on the drawing.
+- Colour groups with pickers, a Labels switch and text size; Copy SVG with colours baked in.
+
+The drawing is a fixed not-to-scale template: the numbers are real, the geometry is not. True-scale sheets (DXF, PDF, SVG) are the next output milestone, see [BACKLOG C1](../../docs/BACKLOG.md).
+
+## Files
+
+| File | Role |
+|---|---|
+| `src/beams.js` | The drawing module: rules, layout and SVG. UMD, so the page and Node use the same code. Holds `VERSION`. |
+| `src/page.html` | The page: form, alerts, on-drawing editors, legend. `/*__BEAMS__*/` is replaced by `beams.js` at build. |
+| `test/logic.test.js` | Rule tests and the freeze probe. |
+| `dist/` | Built page and SVGs. Not committed; `npm run build` makes it. |
+
+## Develop
+
+```bash
+npm run build        # from the repo root: writes dist/beam-sections.html and the SVGs
+npm test             # logic tests
+npm run test:e2e     # browser smoke tests
+```
+
+Open `dist/beam-sections.html` to try a change. Values are kept in the browser under the key `bbs-beam-sections-v2`; a change that alters the shape of saved values needs a new key or a migration in `load()`.
+
+## Release
+
+1. Bump `VERSION` in `src/beams.js` (patch: fix, minor: feature, major: breaks saved values or outputs).
+2. `npm run check`.
+3. Commit, then tag `beam-sections@vX.Y.Z`.
+4. Republish the page from `dist/beam-sections.html` if it is shared as an artifact.

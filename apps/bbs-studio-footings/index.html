@@ -1,0 +1,5895 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BBS Studio - bar bending schedules</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Semi+Condensed:wght@500;600&display=swap">
+<style>
+:root{
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  --paper:#dfe5e1;--sheet:#f7f9f7;--ink:#18283a;--muted:#55656f;--rule:#aab6b3;--accent:#1d4f91;--accent-ink:#ffffff;
+  --rebar:#c0392b;--rebar-top:#7d3c98;--starter:#c8650a;--dim:#2c7a4b;--tag:#7a5600;--hi:#e0a800;--concrete:#8a959c;--row:#e6ecf5;--warn:#9a5b00;--err:#a8281c;
+  --ui:"Barlow","Segoe UI",system-ui,sans-serif;--cond:"Barlow Semi Condensed","Barlow","Arial Narrow",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#0b1d33;--sheet:#102a4a;--ink:#e3ecf7;--muted:#9db4cf;--rule:#31517c;--accent:#8ec1ff;--accent-ink:#0b1d33;
+  --rebar:#ff8f78;--rebar-top:#d6a4f5;--starter:#ffb561;--dim:#7fe0a6;--tag:#ffd257;--hi:#ffd257;--concrete:#b9c8dc;--row:#1a3a63;--warn:#ffc46b;--err:#ff9d8f;}}
+:root[data-theme="dark"]{
+  --paper:#0b1d33;--sheet:#102a4a;--ink:#e3ecf7;--muted:#9db4cf;--rule:#31517c;--accent:#8ec1ff;--accent-ink:#0b1d33;
+  --rebar:#ff8f78;--rebar-top:#d6a4f5;--starter:#ffb561;--dim:#7fe0a6;--tag:#ffd257;--hi:#ffd257;--concrete:#b9c8dc;--row:#1a3a63;--warn:#ffc46b;--err:#ff9d8f;}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 70px)}
+body{margin:0;background:var(--paper);color:var(--ink);font:15.5px/1.45 var(--ui);font-variant-numeric:tabular-nums}
+h1,h2,h3{font-family:var(--cond);font-weight:600;margin:0}
+h2{font-size:20px}h3{font-size:16px}
+button,input,select,textarea{font:inherit;color:inherit}
+button{background:var(--sheet);border:1px solid var(--rule);padding:8px 14px;cursor:pointer;border-radius:3px}
+button:hover{border-color:var(--ink)}
+button.primary,button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+:focus-visible{outline:2px solid var(--hi);outline-offset:1px}
+input,select,textarea{background:var(--sheet);border:1px solid var(--rule);padding:8px 9px;border-radius:3px;min-width:0;width:100%}
+/* header drawn as a drawing title block */
+.tb{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;border-bottom:2px solid var(--ink);background:var(--sheet)}
+.tb>div{padding:8px 16px;border-right:1px solid var(--ink);display:flex;flex-direction:column;justify-content:center;gap:2px;min-width:0}
+.tb>div:last-child{border-right:0;flex-direction:row;align-items:center;gap:6px}
+.tb small{font-size:12px;color:var(--muted)}
+.tb h1{font-size:22px}
+#ptitle{font:600 18px var(--cond);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.steps{display:flex;align-items:stretch}
+.steps button{border:0;border-radius:0;background:transparent;padding:6px 16px;display:flex;align-items:center;gap:8px;font-weight:500;border-bottom:3px solid transparent}
+.steps button b{display:inline-grid;place-items:center;width:24px;height:24px;border:1.5px solid currentColor;border-radius:50%;font:600 14px var(--cond)}
+.steps button[aria-current="step"]{border-bottom-color:var(--rebar);color:var(--accent)}
+.steps button[aria-current="step"] b{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+main{max-width:1240px;margin:0 auto;padding:18px 16px 8px}
+.page{display:flex;flex-direction:column;gap:14px}
+.page[hidden]{display:none}
+.page>header h2{font-size:26px}.page>header p{margin:2px 0 0;color:var(--muted);max-width:70ch}
+#rvTop,#rvBottom,#inBody,#outBody{display:flex;flex-direction:column;gap:14px}
+#nav{max-width:1240px;margin:0 auto;padding:10px 16px 28px;display:flex;justify-content:space-between;gap:10px}
+#nav button{padding:11px 22px;font-weight:600}
+.card{background:var(--sheet);border:1px solid var(--rule);padding:16px 18px;min-width:0}
+.card>h2,.card-h{margin-bottom:10px}
+.card-h{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+details.card>summary{font:600 20px var(--cond);cursor:pointer}
+details.card[open]>summary{margin-bottom:10px}
+.hint{color:var(--muted);font-size:14px;margin:4px 0 10px;max-width:76ch}
+.empty{color:var(--muted);margin:8px 0}
+.fields{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px 16px}
+.f{display:flex;flex-direction:column;gap:4px;font-size:14px;font-weight:500}
+.f input,.f select,.f textarea{font-weight:400;font-size:15.5px}
+.f.inline{flex-direction:row;align-items:center;gap:8px}.f.inline select{width:auto}
+.f.wide,.laps{grid-column:1/-1}.f.wide2{grid-column:span 2}
+.f small{color:var(--muted);font-size:12.5px;font-weight:400}
+.laps{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px}
+fieldset{border:0;border-top:1px solid var(--rule);margin:0;padding:12px 0 16px;min-width:0}
+legend{font:600 17px var(--cond);padding:0 10px 0 0}
+fieldset .hint{margin-top:0}
+.row-btns{display:flex;flex-wrap:wrap;gap:8px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.chip{display:flex;flex-direction:column;align-items:flex-start;gap:0;text-align:left;padding:7px 14px;font-size:13px;border-left:4px solid var(--rule)}
+.chip strong{font:600 19px var(--cond)}
+.chip[aria-pressed="true"]{border-left-color:var(--rebar)}
+.el-edit{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:22px;align-items:start}
+.el-sketch{position:sticky;top:84px;border:1px solid var(--rule);padding:12px}
+.el-sketch .dwg{width:100%;height:auto;display:block}
+.scroll{overflow-x:auto;max-width:100%}
+table{border-collapse:collapse;font-size:14px}
+table.grid th,table.data th{font:500 13px var(--cond);text-align:center;padding:6px 8px;border:1px solid var(--rule);background:var(--paper);white-space:nowrap}
+table.grid td{border:1px solid var(--rule);padding:0}
+table.grid td input,table.grid td select{border:0;background:transparent;width:100%;min-width:84px;padding:8px;border-radius:0}
+table.grid td select{min-width:120px}
+table.grid .x{border:0;background:transparent;padding:2px 8px;color:var(--err);font-size:18px}
+table.data{width:100%}
+table.data td{border:1px solid var(--rule);padding:5px 9px;text-align:center;white-space:nowrap}
+table.data tr.on td{background:var(--row)}
+td.sk{padding:1px 4px}td.sk svg{width:62px;height:31px;display:block}
+.warns{list-style:none;margin:0;padding:0}.warns li{padding:6px 0 6px 12px;border-left:4px solid var(--muted);margin-bottom:6px;max-width:84ch}
+.warns .error{border-color:var(--err)}.warns .warn{border-color:var(--warn)}.warns strong{margin-right:6px}
+.ok{margin:0;color:var(--dim);font-weight:600}.errtxt{color:var(--err)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:0;margin:0 0 16px;border:1px solid var(--rule)}
+.stats div{padding:10px 14px;border-right:1px solid var(--rule)}.stats div:last-child{border-right:0}
+.stats dt{font-size:13px;color:var(--muted)}.stats dd{margin:0;font:600 24px var(--cond)}
+.charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px 28px}
+.chart h3{margin-bottom:8px}
+.cr{display:grid;grid-template-columns:72px minmax(0,1fr) 92px;gap:10px;align-items:center;padding:3px 0;font-size:14px}
+.cb{height:16px;background:var(--paper);border:1px solid var(--rule)}.cb i{display:block;height:100%;background:var(--rebar)}
+.cv{text-align:right}
+#rvEls h2{margin-bottom:8px}#rvEls .chips{margin-bottom:0}
+.views{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:start}
+#detail .dwg{width:100%;height:auto;display:block}
+.bar3{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin-bottom:10px}
+.seg{display:flex}.seg button{border-radius:0;margin-left:-1px;padding:6px 12px}
+#stage3d{position:relative;height:min(64vh,560px);border:1px solid var(--rule)}
+#c3d{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+#msg3d{margin:8px 0 0;font-size:13.5px;color:var(--muted)}
+.cut{border-top:1px solid var(--rule);padding:10px 0}
+.cut-s{display:flex;flex-wrap:wrap;gap:4px 18px;margin:4px 0 8px;font-size:14px}
+.cut ul{list-style:none;margin:0;padding:0}.cut li{display:grid;grid-template-columns:44px 220px minmax(0,1fr);gap:10px;align-items:center;padding:3px 0;font-size:13.5px}
+.cut .cnt{text-align:right;font-weight:600}
+.bar{display:flex;height:14px;border:1px solid var(--ink);background:repeating-linear-gradient(135deg,transparent 0 3px,var(--rule) 3px 4px)}
+.bar i{background:var(--rebar);display:block}.bar b{background:var(--hi);display:block}
+.outs{list-style:none;margin:0;padding:0}
+.outs li{display:grid;grid-template-columns:minmax(0,1fr) 210px;gap:16px;align-items:center;padding:14px 0;border-top:1px solid var(--rule)}
+.outs p{margin:2px 0 0;color:var(--muted);font-size:14px;max-width:70ch}
+.outs button{width:100%}
+.sheet-bar{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;justify-content:space-between;margin-bottom:10px}
+table.sheet{border-collapse:collapse;font-size:14.5px}
+table.sheet th{font:500 13px var(--cond);background:var(--paper);border:1px solid var(--rule);padding:4px 8px;white-space:nowrap;text-align:center;color:var(--muted)}
+table.sheet tr.names th{color:var(--ink);font-size:14px;font-weight:600;padding:7px 9px}
+table.sheet tr.names th small{font:400 12px var(--ui);color:var(--muted)}
+table.sheet tr.names th.gm{border-bottom:3px solid var(--accent)}table.sheet tr.names th.gb{border-bottom:3px solid var(--rebar)}
+table.sheet tbody th{min-width:44px;position:relative}
+table.sheet tr.sel th{background:var(--row);color:var(--ink);box-shadow:inset 4px 0 0 var(--rebar)}
+table.sheet td{border:1px solid var(--rule);padding:0;height:34px}
+table.sheet tr.first td{border-top:2px solid var(--ink)}
+table.sheet td input,table.sheet td select{border:0;background:transparent;width:100%;min-width:84px;padding:7px 8px;border-radius:0;font-size:14.5px}
+table.sheet td select{min-width:104px}
+table.sheet td input:focus,table.sheet td select:focus{outline:2px solid var(--accent);outline-offset:-2px;background:var(--row)}
+table.sheet td input[aria-invalid="true"],.f input[aria-invalid="true"]{outline:2px solid var(--err);outline-offset:-2px}
+table.sheet td.ro{background:var(--paper);color:var(--muted);padding:0 8px;text-align:right;font-style:italic;white-space:nowrap}
+table.sheet td.lab{padding:0 9px;font-weight:600;white-space:nowrap}
+table.sheet td.na{background:repeating-linear-gradient(135deg,transparent 0 5px,var(--paper) 5px 6px)}
+table.sheet tr.blank td{height:16px;background:var(--paper);color:var(--muted);padding:0 8px}
+table.sheet .x{border:0;background:transparent;padding:0 4px;color:var(--err);font-size:17px;line-height:1}
+.tabs2{display:flex;gap:0;border-top:1px solid var(--rule)}
+.tabs2 button{border-radius:0 0 3px 3px;border-top:0;margin-right:-1px;padding:6px 14px;font-size:14px}
+.tabs2 button[aria-selected="true"]{background:var(--sheet);border-bottom:3px solid var(--rebar);font-weight:600}
+.tabs2 button:disabled{color:var(--muted);cursor:default;background:var(--paper)}
+.sheet-foot{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:20px;margin-top:14px;align-items:start}
+.sheet-foot .el-sketch{position:static}
+code{font-family:inherit;background:var(--paper);padding:1px 5px;border:1px solid var(--rule);border-radius:2px;white-space:nowrap}
+table.sheet tr.names th.gc{border-bottom:3px solid var(--muted)}
+table.sheet td.ovr input{font-weight:600;color:var(--accent)}
+table.sheet td input::placeholder{color:var(--muted);font-style:italic;opacity:1}
+h3.sh{font-size:17px;margin:18px 0 8px}h3.sh small{font:400 13.5px var(--ui);color:var(--muted);margin-left:8px}
+.sh-row{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}.sh-row button{margin-bottom:8px}
+.chk{display:flex;gap:8px;align-items:flex-start;margin:0 0 10px;font-size:14px;max-width:80ch}.chk input{width:auto;margin-top:3px}
+#sheets{margin-bottom:10px}
+/* drawing colours */
+.dwg line,.dwg polyline,.dwg polygon,.dwg circle{fill:none;stroke:var(--ink);stroke-width:1.3;vector-effect:non-scaling-stroke}
+.dwg .ly-RB,.dwg .ly-SH{stroke:var(--rebar);stroke-width:2.2}.dwg .ly-RT{stroke:var(--rebar-top);stroke-width:2.2}.dwg .ly-RS{stroke:var(--starter);stroke-width:2.2}
+.dwg .ly-DIM{stroke:var(--dim);stroke-width:.9}.dwg .ly-TAG{stroke:var(--tag);stroke-width:.9}.dwg .ly-COL{stroke:var(--accent)}.dwg .ly-TBL{stroke:var(--rule);stroke-width:.9}
+.dwg .dash{stroke-dasharray:6 4}
+.dwg circle.fill.ly-RB{fill:var(--rebar)}.dwg circle.fill.ly-RT{fill:var(--rebar-top)}.dwg circle.fill.ly-RS{fill:var(--starter)}.dwg circle.fill.ly-DIM{fill:var(--dim)}
+.dwg text{font-family:var(--ui);fill:var(--ink);stroke:none}.dwg .tx-DIM{fill:var(--dim)}.dwg .tx-TAG{fill:var(--tag)}
+#toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:9px 16px;border-radius:3px;max-width:90vw;opacity:0;pointer-events:none;transition:opacity .15s;z-index:9}
+#toast.on{opacity:1}
+dialog{background:var(--sheet);color:var(--ink);border:2px solid var(--ink);padding:18px 20px;max-width:min(560px,92vw)}
+dialog::backdrop{background:rgba(10,20,35,.55)}
+.dlg-body{margin:10px 0 16px;max-height:60vh;overflow:auto}.dlg-body p{max-width:64ch}.dlg-btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+@media (max-width:900px){
+  .tb{grid-template-columns:minmax(0,1fr) auto}.tb>div:nth-child(2){border-right:0}
+  .tb>div:nth-child(3){grid-column:1/-1;grid-row:2;border-right:0;border-top:1px solid var(--rule);padding:0}
+  .tb>div:nth-child(4){grid-column:2;grid-row:1}.tb>div:nth-child(1){display:none}
+  .steps button{flex:1;justify-content:center;padding:9px 6px}
+  .el-edit,.views,.sheet-foot{grid-template-columns:minmax(0,1fr)}.el-sketch{position:static;max-width:420px}
+  .f.wide2{grid-column:1/-1}.fields{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+  .outs li{grid-template-columns:minmax(0,1fr)}.cut li{grid-template-columns:36px 90px minmax(0,1fr)}
+  .stats div{border-right:0;border-bottom:1px solid var(--rule)}
+  #stage3d{height:56vh}
+}
+@media (prefers-reduced-motion:reduce){#toast{transition:none}}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/exporters/GLTFExporter.js"></script>
+</head>
+<body>
+<header class="tb">
+  <div><h1>BBS Studio</h1><small>Bar bending schedules <span id="ver"></span></small></div>
+  <div><small>Project</small><span id="ptitle"></span></div>
+  <div><nav class="steps" aria-label="Steps"><button data-step="input"><b>1</b> Input</button><button data-step="review"><b>2</b> Review</button><button data-step="outputs"><b>3</b> Outputs</button></nav></div>
+  <div><button data-act="theme">Light / dark</button><button data-act="about">About</button></div>
+</header>
+<main>
+  <section class="page" id="page-input">
+    <header><h2>Input</h2><p>Project settings sit in the folding panels. Concrete goes in the geometry table, steel in the rebar table.</p></header>
+    <div id="inBody"></div>
+  </section>
+  <section class="page" id="page-review" hidden>
+    <header><h2>Review</h2><p>Check the numbers and the drawings before you download anything.</p></header>
+    <div id="rvTop"></div>
+    <div id="rvEls"></div>
+    <div class="views">
+      <section class="card"><h2>2D: plan, sections and bar shapes</h2><div id="detail"></div></section>
+      <section class="card" id="view3d"><h2>3D</h2>
+        <div class="bar3">
+          <div class="seg"><button data-m3="sel">Selected element</button><button data-m3="all">Whole project</button></div>
+          <div class="seg"><button data-solid="1">Solid bars</button><button data-solid="0">Centre-lines</button></div>
+        </div>
+        <div id="stage3d"><canvas id="c3d"></canvas></div>
+        <p id="msg3d"></p>
+      </section>
+    </div>
+    <div id="rvBottom"></div>
+  </section>
+  <section class="page" id="page-outputs" hidden>
+    <header><h2>Outputs</h2><p>Download the schedule, the drawing and the model.</p></header>
+    <div id="outBody"></div>
+  </section>
+</main>
+<div id="nav"></div>
+<div id="toast" role="status" aria-live="polite"></div>
+<dialog id="dlg"></dialog>
+<input id="file" type="file" hidden>
+<div id="about" hidden>
+  <p>BBS Studio turns footing sizes and bar arrangements into a bar bending schedule, a reinforcement detail drawing, a cutting plan and a 3D model. All dimensions are in millimetres.</p>
+  <p><strong>In this version.</strong> Pad footings (rectangular, polygonal, circular; flat, sloped or stepped); manual entry and Excel import; IS 2502 / SP 34 and BS 8666:2020; two cutting lengths side by side; stock-length splitting with laps; a cutting plan that reuses yard offcuts; Excel, CSV, BVBS, HTML, DXF, GLB and PNG downloads.</p>
+  <p><strong>Not yet.</strong> Columns and beams, DXF import, IFC import and export, direct PDF export, sharing a project by link.</p>
+  <p><strong>Check before issue.</strong> The cutting plan is a best-fit heuristic, not a proven minimum. Anchorage is checked from the column face only. Verify lengths against your office practice before steel is ordered.</p>
+  <p><strong>Changelog.</strong></p>
+  <p>0.4.0: concrete and steel are now separate tables. Geometry holds the outline (rectangle, polygon by corner points, or circle), depth, sloped or stepped top, rotation, and per-footing overrides for covers and concrete grade. Footing cover can be one value, sides plus bottom, or sides, bottom and top. A Positions table places each footing by a named corner at its top face and sets the quantity. The Rebar table has a Shape code column (Auto, 00, 11, 21) with automatic A to C that you can override, plus calculated bar mark, cutting lengths, totals and weight. In polygon and circular footings every bar is clipped and scheduled under sub-marks (04a, 04b); Review can collapse a set to one line. The 3D view draws real shapes at their positions. Breaking: Excel files from 0.3.0 no longer import (project files still open); the old "Ends" setting became the shape code; overrides need an explicit shape code.</p>
+  <p>0.3.0: element input is now an Excel-style sheet, one block of rows per footing with a row per bar set and a blank row between footings; extra bars sit inside their footing's block. Lengths can be typed in mm, cm, m, inches or feet and fractional inches, the display unit is switchable, and a bare number is read in the display unit. Bottom X and Bottom Y bars now have separate end settings (older files apply their single setting to both). The Excel file uses the same sheet layout, with one sheet per element type; the older flat template still imports.</p>
+  <p>0.2.0: the three-pane workspace was confusing, so the app is now three full pages. Input is a grouped form per footing with a live plan sketch, and holds every input including stock and yard offcuts. Review shows checks, summary charts, 2D and 3D side by side, the schedule and the cutting plan. Outputs lists each download with what it contains, and adds a separate 3D model download. Calculations are unchanged.</p>
+  <p>0.1.0: first release, footings end to end.</p>
+</div>
+<script type="text/plain" id="dxf-template" data-msp="17">
+  0
+SECTION
+  2
+HEADER
+  9
+$ACADVER
+  1
+AC1024
+  9
+$ACADMAINTVER
+ 70
+6
+  9
+$DWGCODEPAGE
+  3
+ANSI_1252
+  9
+$LASTSAVEDBY
+  1
+ezdxf
+  9
+$INSBASE
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$EXTMIN
+ 10
+1e+20
+ 20
+1e+20
+ 30
+1e+20
+  9
+$EXTMAX
+ 10
+-1e+20
+ 20
+-1e+20
+ 30
+-1e+20
+  9
+$LIMMIN
+ 10
+0.0
+ 20
+0.0
+  9
+$LIMMAX
+ 10
+420.0
+ 20
+297.0
+  9
+$ORTHOMODE
+ 70
+0
+  9
+$REGENMODE
+ 70
+1
+  9
+$FILLMODE
+ 70
+1
+  9
+$QTEXTMODE
+ 70
+0
+  9
+$MIRRTEXT
+ 70
+1
+  9
+$LTSCALE
+ 40
+1.0
+  9
+$ATTMODE
+ 70
+1
+  9
+$TEXTSIZE
+ 40
+2.5
+  9
+$TRACEWID
+ 40
+1.0
+  9
+$TEXTSTYLE
+  7
+Standard
+  9
+$CLAYER
+  8
+0
+  9
+$CELTYPE
+  6
+ByLayer
+  9
+$CECOLOR
+ 62
+256
+  9
+$CELTSCALE
+ 40
+1.0
+  9
+$DISPSILH
+ 70
+0
+  9
+$DIMSCALE
+ 40
+1.0
+  9
+$DIMASZ
+ 40
+2.5
+  9
+$DIMEXO
+ 40
+0.625
+  9
+$DIMDLI
+ 40
+3.75
+  9
+$DIMRND
+ 40
+0.0
+  9
+$DIMDLE
+ 40
+0.0
+  9
+$DIMEXE
+ 40
+1.25
+  9
+$DIMTP
+ 40
+0.0
+  9
+$DIMTM
+ 40
+0.0
+  9
+$DIMTXT
+ 40
+2.5
+  9
+$DIMCEN
+ 40
+2.5
+  9
+$DIMTSZ
+ 40
+0.0
+  9
+$DIMTOL
+ 70
+0
+  9
+$DIMLIM
+ 70
+0
+  9
+$DIMTIH
+ 70
+0
+  9
+$DIMTOH
+ 70
+0
+  9
+$DIMSE1
+ 70
+0
+  9
+$DIMSE2
+ 70
+0
+  9
+$DIMTAD
+ 70
+1
+  9
+$DIMZIN
+ 70
+8
+  9
+$DIMBLK
+  1
+
+  9
+$DIMASO
+ 70
+1
+  9
+$DIMSHO
+ 70
+1
+  9
+$DIMPOST
+  1
+
+  9
+$DIMAPOST
+  1
+
+  9
+$DIMALT
+ 70
+0
+  9
+$DIMALTD
+ 70
+3
+  9
+$DIMALTF
+ 40
+0.03937007874
+  9
+$DIMLFAC
+ 40
+1.0
+  9
+$DIMTOFL
+ 70
+1
+  9
+$DIMTVP
+ 40
+0.0
+  9
+$DIMTIX
+ 70
+0
+  9
+$DIMSOXD
+ 70
+0
+  9
+$DIMSAH
+ 70
+0
+  9
+$DIMBLK1
+  1
+
+  9
+$DIMBLK2
+  1
+
+  9
+$DIMSTYLE
+  2
+ISO-25
+  9
+$DIMCLRD
+ 70
+0
+  9
+$DIMCLRE
+ 70
+0
+  9
+$DIMCLRT
+ 70
+0
+  9
+$DIMTFAC
+ 40
+1.0
+  9
+$DIMGAP
+ 40
+0.625
+  9
+$DIMJUST
+ 70
+0
+  9
+$DIMSD1
+ 70
+0
+  9
+$DIMSD2
+ 70
+0
+  9
+$DIMTOLJ
+ 70
+0
+  9
+$DIMTZIN
+ 70
+8
+  9
+$DIMALTZ
+ 70
+0
+  9
+$DIMALTTZ
+ 70
+0
+  9
+$DIMUPT
+ 70
+0
+  9
+$DIMDEC
+ 70
+2
+  9
+$DIMTDEC
+ 70
+2
+  9
+$DIMALTU
+ 70
+2
+  9
+$DIMALTTD
+ 70
+3
+  9
+$DIMTXSTY
+  7
+Standard
+  9
+$DIMAUNIT
+ 70
+0
+  9
+$DIMADEC
+ 70
+0
+  9
+$DIMALTRND
+ 40
+0.0
+  9
+$DIMAZIN
+ 70
+0
+  9
+$DIMDSEP
+ 70
+44
+  9
+$DIMATFIT
+ 70
+3
+  9
+$DIMFRAC
+ 70
+0
+  9
+$DIMLDRBLK
+  1
+
+  9
+$DIMLUNIT
+ 70
+2
+  9
+$DIMLWD
+ 70
+-2
+  9
+$DIMLWE
+ 70
+-2
+  9
+$DIMTMOVE
+ 70
+0
+  9
+$DIMFXL
+ 40
+1.0
+  9
+$DIMFXLON
+ 70
+0
+  9
+$DIMJOGANG
+ 40
+0.785398163397
+  9
+$DIMTFILL
+ 70
+0
+  9
+$DIMTFILLCLR
+ 70
+0
+  9
+$DIMARCSYM
+ 70
+0
+  9
+$DIMLTYPE
+  6
+
+  9
+$DIMLTEX1
+  6
+
+  9
+$DIMLTEX2
+  6
+
+  9
+$DIMTXTDIRECTION
+ 70
+0
+  9
+$LUNITS
+ 70
+2
+  9
+$LUPREC
+ 70
+4
+  9
+$SKETCHINC
+ 40
+1.0
+  9
+$FILLETRAD
+ 40
+10.0
+  9
+$AUNITS
+ 70
+0
+  9
+$AUPREC
+ 70
+2
+  9
+$MENU
+  1
+.
+  9
+$ELEVATION
+ 40
+0.0
+  9
+$PELEVATION
+ 40
+0.0
+  9
+$THICKNESS
+ 40
+0.0
+  9
+$LIMCHECK
+ 70
+0
+  9
+$CHAMFERA
+ 40
+0.0
+  9
+$CHAMFERB
+ 40
+0.0
+  9
+$CHAMFERC
+ 40
+0.0
+  9
+$CHAMFERD
+ 40
+0.0
+  9
+$SKPOLY
+ 70
+0
+  9
+$TDCREATE
+ 40
+2461317.440902778
+  9
+$TDUCREATE
+ 40
+2458532.153996898
+  9
+$TDUPDATE
+ 40
+2461317.440902778
+  9
+$TDUUPDATE
+ 40
+2458532.1544311
+  9
+$TDINDWG
+ 40
+0.0
+  9
+$TDUSRTIMER
+ 40
+0.0
+  9
+$USRTIMER
+ 70
+1
+  9
+$ANGBASE
+ 50
+0.0
+  9
+$ANGDIR
+ 70
+0
+  9
+$PDMODE
+ 70
+0
+  9
+$PDSIZE
+ 40
+0.0
+  9
+$PLINEWID
+ 40
+0.0
+  9
+$SPLFRAME
+ 70
+0
+  9
+$SPLINETYPE
+ 70
+6
+  9
+$SPLINESEGS
+ 70
+8
+  9
+$HANDSEED
+  5
+__HANDSEED__
+  9
+$SURFTAB1
+ 70
+6
+  9
+$SURFTAB2
+ 70
+6
+  9
+$SURFTYPE
+ 70
+6
+  9
+$SURFU
+ 70
+6
+  9
+$SURFV
+ 70
+6
+  9
+$UCSBASE
+  2
+
+  9
+$UCSNAME
+  2
+
+  9
+$UCSORG
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$UCSXDIR
+ 10
+1.0
+ 20
+0.0
+ 30
+0.0
+  9
+$UCSYDIR
+ 10
+0.0
+ 20
+1.0
+ 30
+0.0
+  9
+$UCSORTHOREF
+  2
+
+  9
+$UCSORTHOVIEW
+ 70
+0
+  9
+$UCSORGTOP
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$UCSORGBOTTOM
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$UCSORGLEFT
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$UCSORGRIGHT
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$UCSORGFRONT
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$UCSORGBACK
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$PUCSBASE
+  2
+
+  9
+$PUCSNAME
+  2
+
+  9
+$PUCSORG
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$PUCSXDIR
+ 10
+1.0
+ 20
+0.0
+ 30
+0.0
+  9
+$PUCSYDIR
+ 10
+0.0
+ 20
+1.0
+ 30
+0.0
+  9
+$PUCSORTHOREF
+  2
+
+  9
+$PUCSORTHOVIEW
+ 70
+0
+  9
+$PUCSORGTOP
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$PUCSORGBOTTOM
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$PUCSORGLEFT
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$PUCSORGRIGHT
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$PUCSORGFRONT
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$PUCSORGBACK
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$USERI1
+ 70
+0
+  9
+$USERI2
+ 70
+0
+  9
+$USERI3
+ 70
+0
+  9
+$USERI4
+ 70
+0
+  9
+$USERI5
+ 70
+0
+  9
+$USERR1
+ 40
+0.0
+  9
+$USERR2
+ 40
+0.0
+  9
+$USERR3
+ 40
+0.0
+  9
+$USERR4
+ 40
+0.0
+  9
+$USERR5
+ 40
+0.0
+  9
+$WORLDVIEW
+ 70
+1
+  9
+$SHADEDGE
+ 70
+3
+  9
+$SHADEDIF
+ 70
+70
+  9
+$TILEMODE
+ 70
+1
+  9
+$MAXACTVP
+ 70
+64
+  9
+$PINSBASE
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$PLIMCHECK
+ 70
+0
+  9
+$PEXTMIN
+ 10
+1e+20
+ 20
+1e+20
+ 30
+1e+20
+  9
+$PEXTMAX
+ 10
+-1e+20
+ 20
+-1e+20
+ 30
+-1e+20
+  9
+$PLIMMIN
+ 10
+-0.0
+ 20
+-0.0
+  9
+$PLIMMAX
+ 10
+841.0
+ 20
+594.0
+  9
+$UNITMODE
+ 70
+0
+  9
+$VISRETAIN
+ 70
+1
+  9
+$PLINEGEN
+ 70
+0
+  9
+$PSLTSCALE
+ 70
+1
+  9
+$TREEDEPTH
+ 70
+3020
+  9
+$CMLSTYLE
+  2
+Standard
+  9
+$CMLJUST
+ 70
+0
+  9
+$CMLSCALE
+ 40
+20.0
+  9
+$PROXYGRAPHICS
+ 70
+1
+  9
+$MEASUREMENT
+ 70
+1
+  9
+$CELWEIGHT
+370
+-1
+  9
+$ENDCAPS
+280
+0
+  9
+$JOINSTYLE
+280
+0
+  9
+$LWDISPLAY
+290
+0
+  9
+$INSUNITS
+ 70
+4
+  9
+$HYPERLINKBASE
+  1
+
+  9
+$STYLESHEET
+  1
+
+  9
+$XEDIT
+290
+1
+  9
+$CEPSNTYPE
+380
+0
+  9
+$PSTYLEMODE
+290
+1
+  9
+$FINGERPRINTGUID
+  2
+{C26BFF81-4B62-4E18-87B7-AEB6554B4EB5}
+  9
+$VERSIONGUID
+  2
+{63B0ABBD-B8EE-4CEF-B6D0-8803D1D6EE66}
+  9
+$EXTNAMES
+290
+1
+  9
+$PSVPSCALE
+ 40
+0.0
+  9
+$OLESTARTUP
+290
+0
+  9
+$SORTENTS
+280
+127
+  9
+$INDEXCTL
+280
+0
+  9
+$HIDETEXT
+280
+1
+  9
+$XCLIPFRAME
+280
+1
+  9
+$HALOGAP
+280
+0
+  9
+$OBSCOLOR
+ 70
+257
+  9
+$OBSLTYPE
+280
+0
+  9
+$INTERSECTIONDISPLAY
+280
+0
+  9
+$INTERSECTIONCOLOR
+ 70
+257
+  9
+$DIMASSOC
+280
+2
+  9
+$PROJECTNAME
+  1
+
+  9
+$CAMERADISPLAY
+290
+0
+  9
+$LENSLENGTH
+ 40
+50.0
+  9
+$CAMERAHEIGHT
+ 40
+0.0
+  9
+$STEPSPERSEC
+ 40
+24.0
+  9
+$STEPSIZE
+ 40
+100.0
+  9
+$3DDWFPREC
+ 40
+2.0
+  9
+$PSOLWIDTH
+ 40
+0.005
+  9
+$PSOLHEIGHT
+ 40
+0.08
+  9
+$LOFTANG1
+ 40
+1.570796326795
+  9
+$LOFTANG2
+ 40
+1.570796326795
+  9
+$LOFTMAG1
+ 40
+0.0
+  9
+$LOFTMAG2
+ 40
+0.0
+  9
+$LOFTPARAM
+ 70
+7
+  9
+$LOFTNORMALS
+280
+1
+  9
+$LATITUDE
+ 40
+37.795
+  9
+$LONGITUDE
+ 40
+-122.394
+  9
+$NORTHDIRECTION
+ 40
+0.0
+  9
+$TIMEZONE
+ 70
+-8000
+  9
+$LIGHTGLYPHDISPLAY
+280
+1
+  9
+$TILEMODELIGHTSYNCH
+280
+1
+  9
+$CMATERIAL
+347
+20
+  9
+$SOLIDHIST
+280
+0
+  9
+$SHOWHIST
+280
+1
+  9
+$DWFFRAME
+280
+2
+  9
+$DGNFRAME
+280
+2
+  9
+$REALWORLDSCALE
+290
+1
+  9
+$INTERFERECOLOR
+ 62
+256
+  9
+$CSHADOW
+280
+0
+  9
+$SHADOWPLANELOCATION
+ 40
+0.0
+  0
+ENDSEC
+  0
+SECTION
+  2
+CLASSES
+  0
+CLASS
+  1
+ACDBDICTIONARYWDFLT
+  2
+AcDbDictionaryWithDefault
+  3
+ObjectDBX Classes
+ 90
+0
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+SUN
+  2
+AcDbSun
+  3
+SCENEOE
+ 90
+1153
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+VISUALSTYLE
+  2
+AcDbVisualStyle
+  3
+ObjectDBX Classes
+ 90
+4095
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+MATERIAL
+  2
+AcDbMaterial
+  3
+ObjectDBX Classes
+ 90
+1153
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+SCALE
+  2
+AcDbScale
+  3
+ObjectDBX Classes
+ 90
+1153
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+TABLESTYLE
+  2
+AcDbTableStyle
+  3
+ObjectDBX Classes
+ 90
+4095
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+MLEADERSTYLE
+  2
+AcDbMLeaderStyle
+  3
+ACDB_MLEADERSTYLE_CLASS
+ 90
+4095
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+DICTIONARYVAR
+  2
+AcDbDictionaryVar
+  3
+ObjectDBX Classes
+ 90
+0
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+CELLSTYLEMAP
+  2
+AcDbCellStyleMap
+  3
+ObjectDBX Classes
+ 90
+1152
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+MENTALRAYRENDERSETTINGS
+  2
+AcDbMentalRayRenderSettings
+  3
+SCENEOE
+ 90
+1024
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+ACDBDETAILVIEWSTYLE
+  2
+AcDbDetailViewStyle
+  3
+ObjectDBX Classes
+ 90
+1025
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+ACDBSECTIONVIEWSTYLE
+  2
+AcDbSectionViewStyle
+  3
+ObjectDBX Classes
+ 90
+1025
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+RASTERVARIABLES
+  2
+AcDbRasterVariables
+  3
+ISM
+ 90
+0
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+LAYOUT
+  2
+AcDbLayout
+  3
+ObjectDBX Classes
+ 90
+0
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+ACDBPLACEHOLDER
+  2
+AcDbPlaceHolder
+  3
+ObjectDBX Classes
+ 90
+0
+ 91
+0
+280
+0
+281
+0
+  0
+ENDSEC
+  0
+SECTION
+  2
+TABLES
+  0
+TABLE
+  2
+VPORT
+  5
+8
+330
+0
+100
+AcDbSymbolTable
+ 70
+1
+  0
+VPORT
+  5
+23
+330
+8
+100
+AcDbSymbolTableRecord
+100
+AcDbViewportTableRecord
+  2
+*Active
+ 70
+0
+ 10
+0.0
+ 20
+0.0
+ 11
+1.0
+ 21
+1.0
+ 12
+0.0
+ 22
+0.0
+ 13
+0.0
+ 23
+0.0
+ 14
+0.5
+ 24
+0.5
+ 15
+0.5
+ 25
+0.5
+ 16
+0.0
+ 26
+0.0
+ 36
+1.0
+ 17
+0.0
+ 27
+0.0
+ 37
+0.0
+ 40
+1000.0
+ 41
+1.34
+ 42
+50.0
+ 43
+0.0
+ 44
+0.0
+ 50
+0.0
+ 51
+0.0
+ 71
+0
+ 72
+1000
+ 73
+1
+ 74
+3
+ 75
+0
+ 76
+0
+ 77
+0
+ 78
+0
+281
+0
+ 65
+0
+146
+0.0
+  0
+ENDTAB
+  0
+TABLE
+  2
+LTYPE
+  5
+2
+330
+0
+100
+AcDbSymbolTable
+ 70
+4
+  0
+LTYPE
+  5
+24
+330
+2
+100
+AcDbSymbolTableRecord
+100
+AcDbLinetypeTableRecord
+  2
+ByBlock
+ 70
+0
+  3
+
+ 72
+65
+ 73
+0
+ 40
+0.0
+  0
+LTYPE
+  5
+25
+330
+2
+100
+AcDbSymbolTableRecord
+100
+AcDbLinetypeTableRecord
+  2
+ByLayer
+ 70
+0
+  3
+
+ 72
+65
+ 73
+0
+ 40
+0.0
+  0
+LTYPE
+  5
+26
+330
+2
+100
+AcDbSymbolTableRecord
+100
+AcDbLinetypeTableRecord
+  2
+Continuous
+ 70
+0
+  3
+
+ 72
+65
+ 73
+0
+ 40
+0.0
+  0
+LTYPE
+  5
+30
+330
+2
+100
+AcDbSymbolTableRecord
+100
+AcDbLinetypeTableRecord
+  2
+DASHED
+ 70
+0
+  3
+Dashed __ __ __
+ 72
+65
+ 73
+2
+ 40
+100.0
+ 49
+60.0
+ 74
+0
+ 49
+-40.0
+ 74
+0
+  0
+ENDTAB
+  0
+TABLE
+  2
+LAYER
+  5
+1
+330
+0
+100
+AcDbSymbolTable
+ 70
+15
+  0
+LAYER
+  5
+27
+330
+1
+100
+AcDbSymbolTableRecord
+100
+AcDbLayerTableRecord
+  2
+0
+ 70
+0
+ 62
+7
+  6
+Continuous
+370
+-3
+390
+13
+347
+21
+  0
+LAYER
+  5
+28
+330
+1
+100
+AcDbSymbolTableRecord
+100
+AcDbLayerTableRecord
+  2
+Defpoints
+ 70
+0
+ 62
+7
+  6
+Continuous
+290
+0
+370
+-3
+390
+13
+347
+21
+  0
+LAYER
+  5
+31
+330
+1
+100
+AcDbSymbolTableRecord
+100
+AcDbLayerTableRecord
+  2
+S-FTG-OUTLINE
+ 70
+0
+ 62
+7
+  6
+Continuous
+370
+50
+390
+13
+347
+21
+  0
+LAYER
+  5
+32
+330
+1
+100
+AcDbSymbolTableRecord
+100
+AcDbLayerTableRecord
+  2
+S-COL-OUTLINE
+ 70
+0
+ 62
+4
+  6
+Continuous
+370
+35
+390
+13
+347
+21
+  0
+LAYER
+  5
+33
+330
+1
+100
+AcDbSymbolTableRecord
+100
+AcDbLayerTableRecord
+  2
+S-REBAR-BOT
+ 70
+0
+ 62
+1
+  6
+Continuous
+370
+50
+390
+13
+347
+21
+  0
+LAYER
+  5
+34
+330
+1
+100
+AcDbSymbolTableRecord
+100
+AcDbLayerTableRecord
+  2
+S-REBAR-TOP
+ 70
+0
+ 62
+6
+  6
+Continuous
+370
+50
+390
+13
+347
+21
+  0
+LAYER
+  5
+35
+330
+1
+100
+AcDbSymbolTableRecord
+100
+AcDbLayerTableRecord
+  2
+S-REBAR-STARTER
+ 70
+0
+ 62
+30
+  6
+Continuous
+370
+50
+390
+13
+347
+21
+  0
+LAYER
+  5
+36
+330
+1
+100
+AcDbSymbolTableRecord
+100
+AcDbLayerTableRecord
+  2
+S-REBAR-SHAPE
+ 70
+0
+ 62
+1
+  6
+Continuous
+370
+35
+390
+13
+347
+21
+  0
+LAYER
+  5
+37
+330
+1
+100
+AcDbSymbolTableRecord
+100
+AcDbLayerTableRecord
+  2
+S-DIM
+ 70
+0
+ 62
+3
+  6
+Continuous
+370
+18
+390
+13
+347
+21
+  0
+LAYER
+  5
+38
+330
+1
+100
+AcDbSymbolTableRecord
+100
+AcDbLayerTableRecord
+  2
+S-TAG
+ 70
+0
+ 62
+2
+  6
+Continuous
+370
+25
+390
+13
+347
+21
+  0
+LAYER
+  5
+39
+330
+1
+100
+AcDbSymbolTableRecord
+100
+AcDbLayerTableRecord
+  2
+S-TEXT
+ 70
+0
+ 62
+7
+  6
+Continuous
+370
+25
+390
+13
+347
+21
+  0
+LAYER
+  5
+3A
+330
+1
+100
+AcDbSymbolTableRecord
+100
+AcDbLayerTableRecord
+  2
+S-TABLE
+ 70
+0
+ 62
+8
+  6
+Continuous
+370
+18
+390
+13
+347
+21
+  0
+LAYER
+  5
+3B
+330
+1
+100
+AcDbSymbolTableRecord
+100
+AcDbLayerTableRecord
+  2
+S-TABLE-TEXT
+ 70
+0
+ 62
+7
+  6
+Continuous
+370
+25
+390
+13
+347
+21
+  0
+LAYER
+  5
+3C
+330
+1
+100
+AcDbSymbolTableRecord
+100
+AcDbLayerTableRecord
+  2
+S-FRAME
+ 70
+0
+ 62
+7
+  6
+Continuous
+370
+70
+390
+13
+347
+21
+  0
+LAYER
+  5
+3D
+330
+1
+100
+AcDbSymbolTableRecord
+100
+AcDbLayerTableRecord
+  2
+S-VPORT
+ 70
+0
+ 62
+8
+  6
+Continuous
+290
+0
+370
+0
+390
+13
+347
+21
+  0
+ENDTAB
+  0
+TABLE
+  2
+STYLE
+  5
+5
+330
+0
+100
+AcDbSymbolTable
+ 70
+2
+  0
+STYLE
+  5
+29
+330
+5
+100
+AcDbSymbolTableRecord
+100
+AcDbTextStyleTableRecord
+  2
+Standard
+ 70
+0
+ 40
+0.0
+ 41
+1.0
+ 50
+0.0
+ 71
+0
+ 42
+2.5
+  3
+txt
+  4
+
+  0
+STYLE
+  5
+2F
+330
+5
+100
+AcDbSymbolTableRecord
+100
+AcDbTextStyleTableRecord
+  2
+BBS
+ 70
+0
+ 40
+0.0
+ 41
+1.0
+ 50
+0.0
+ 71
+0
+ 42
+2.5
+  3
+arial.ttf
+  4
+
+  0
+ENDTAB
+  0
+TABLE
+  2
+VIEW
+  5
+7
+330
+0
+100
+AcDbSymbolTable
+ 70
+0
+  0
+ENDTAB
+  0
+TABLE
+  2
+UCS
+  5
+6
+330
+0
+100
+AcDbSymbolTable
+ 70
+0
+  0
+ENDTAB
+  0
+TABLE
+  2
+APPID
+  5
+3
+330
+0
+100
+AcDbSymbolTable
+ 70
+3
+  0
+APPID
+  5
+2A
+330
+3
+100
+AcDbSymbolTableRecord
+100
+AcDbRegAppTableRecord
+  2
+ACAD
+ 70
+0
+  0
+APPID
+  5
+4D
+330
+3
+100
+AcDbSymbolTableRecord
+100
+AcDbRegAppTableRecord
+  2
+HATCHBACKGROUNDCOLOR
+ 70
+0
+  0
+APPID
+  5
+4E
+330
+3
+100
+AcDbSymbolTableRecord
+100
+AcDbRegAppTableRecord
+  2
+EZDXF
+ 70
+0
+  0
+ENDTAB
+  0
+TABLE
+  2
+DIMSTYLE
+  5
+4
+330
+0
+100
+AcDbSymbolTable
+ 70
+1
+100
+AcDbDimStyleTable
+  0
+DIMSTYLE
+105
+2B
+330
+4
+100
+AcDbSymbolTableRecord
+100
+AcDbDimStyleTableRecord
+  2
+Standard
+ 70
+0
+ 40
+1.0
+ 41
+2.5
+ 42
+0.625
+ 43
+3.75
+ 44
+1.25
+ 45
+0.0
+ 46
+0.0
+ 47
+0.0
+ 48
+0.0
+ 49
+2.5
+140
+2.5
+141
+2.5
+142
+0.0
+143
+0.03937007874
+144
+1.0
+145
+0.0
+146
+1.0
+147
+0.625
+148
+0.0
+ 69
+0
+ 70
+0
+ 71
+0
+ 72
+0
+ 73
+0
+ 74
+0
+ 75
+0
+ 76
+0
+ 77
+1
+ 78
+8
+ 79
+3
+170
+0
+171
+3
+172
+1
+173
+0
+174
+0
+175
+0
+176
+0
+177
+0
+178
+0
+179
+2
+271
+2
+272
+2
+273
+2
+274
+3
+275
+0
+276
+0
+277
+2
+278
+44
+279
+0
+280
+0
+281
+0
+282
+0
+283
+0
+284
+8
+285
+0
+286
+0
+288
+0
+289
+3
+290
+0
+371
+-2
+372
+-2
+  0
+ENDTAB
+  0
+TABLE
+  2
+BLOCK_RECORD
+  5
+9
+330
+0
+100
+AcDbSymbolTable
+ 70
+2
+  0
+BLOCK_RECORD
+  5
+17
+330
+9
+100
+AcDbSymbolTableRecord
+100
+AcDbBlockTableRecord
+  2
+*Model_Space
+340
+1A
+ 70
+0
+280
+1
+281
+0
+  0
+BLOCK_RECORD
+  5
+1B
+330
+9
+100
+AcDbSymbolTableRecord
+100
+AcDbBlockTableRecord
+  2
+*Paper_Space
+340
+1E
+ 70
+0
+280
+1
+281
+0
+  0
+ENDTAB
+  0
+ENDSEC
+  0
+SECTION
+  2
+BLOCKS
+  0
+BLOCK
+  5
+18
+330
+17
+100
+AcDbEntity
+  8
+0
+100
+AcDbBlockBegin
+  2
+*Model_Space
+ 70
+0
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  3
+*Model_Space
+  1
+
+  0
+ENDBLK
+  5
+19
+330
+17
+100
+AcDbEntity
+  8
+0
+100
+AcDbBlockEnd
+  0
+BLOCK
+  5
+1C
+330
+1B
+100
+AcDbEntity
+  8
+0
+100
+AcDbBlockBegin
+  2
+*Paper_Space
+ 70
+0
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  3
+*Paper_Space
+  1
+
+  0
+ENDBLK
+  5
+1D
+330
+1B
+100
+AcDbEntity
+  8
+0
+100
+AcDbBlockEnd
+  0
+ENDSEC
+  0
+SECTION
+  2
+ENTITIES
+  0
+VIEWPORT
+  5
+3E
+330
+1B
+100
+AcDbEntity
+ 67
+1
+  8
+VIEWPORTS
+100
+AcDbViewport
+ 10
+420.5
+ 20
+297.0
+ 30
+0.0
+ 40
+925.1
+ 41
+653.4000000000001
+ 68
+1
+ 69
+1
+ 12
+420.5
+ 22
+297.0
+ 13
+0.0
+ 23
+0.0
+ 14
+10.0
+ 24
+10.0
+ 15
+10.0
+ 25
+10.0
+ 16
+0.0
+ 26
+0.0
+ 36
+1.0
+ 17
+0.0
+ 27
+0.0
+ 37
+0.0
+ 42
+50.0
+ 43
+0.0
+ 44
+0.0
+ 45
+653.4000000000001
+ 50
+0.0
+ 51
+0.0
+ 72
+100
+ 90
+557088
+  1
+
+281
+0
+ 71
+0
+ 74
+0
+110
+0.0
+120
+0.0
+130
+0.0
+111
+1.0
+121
+0.0
+131
+0.0
+112
+0.0
+122
+1.0
+132
+0.0
+ 79
+0
+146
+0.0
+282
+0
+  0
+LWPOLYLINE
+  5
+3F
+330
+1B
+100
+AcDbEntity
+ 67
+1
+  8
+S-FRAME
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+20.0
+ 20
+20.0
+ 10
+821.0
+ 20
+20.0
+ 10
+821.0
+ 20
+574.0
+ 10
+20.0
+ 20
+574.0
+  0
+LINE
+  5
+40
+330
+1B
+100
+AcDbEntity
+ 67
+1
+  8
+S-FRAME
+100
+AcDbLine
+ 10
+20.0
+ 20
+60.0
+ 30
+0.0
+ 11
+821.0
+ 21
+60.0
+ 31
+0.0
+  0
+LINE
+  5
+41
+330
+1B
+100
+AcDbEntity
+ 67
+1
+  8
+S-FRAME
+100
+AcDbLine
+ 10
+350.0
+ 20
+20.0
+ 30
+0.0
+ 11
+350.0
+ 21
+60.0
+ 31
+0.0
+  0
+LINE
+  5
+42
+330
+1B
+100
+AcDbEntity
+ 67
+1
+  8
+S-FRAME
+100
+AcDbLine
+ 10
+580.0
+ 20
+20.0
+ 30
+0.0
+ 11
+580.0
+ 21
+60.0
+ 31
+0.0
+  0
+LINE
+  5
+43
+330
+1B
+100
+AcDbEntity
+ 67
+1
+  8
+S-FRAME
+100
+AcDbLine
+ 10
+700.0
+ 20
+20.0
+ 30
+0.0
+ 11
+700.0
+ 21
+60.0
+ 31
+0.0
+  0
+TEXT
+  5
+44
+330
+1B
+100
+AcDbEntity
+ 67
+1
+  8
+S-TEXT
+100
+AcDbText
+ 10
+26.0
+ 20
+42.0
+ 30
+0.0
+ 40
+7.0
+  1
+__PROJECT__
+  7
+BBS
+100
+AcDbText
+  0
+TEXT
+  5
+45
+330
+1B
+100
+AcDbEntity
+ 67
+1
+  8
+S-TEXT
+100
+AcDbText
+ 10
+26.0
+ 20
+28.0
+ 30
+0.0
+ 40
+4.0
+  1
+BAR BENDING SCHEDULE AND REINFORCEMENT DETAILS
+  7
+BBS
+100
+AcDbText
+  0
+TEXT
+  5
+46
+330
+1B
+100
+AcDbEntity
+ 67
+1
+  8
+S-TEXT
+100
+AcDbText
+ 10
+356.0
+ 20
+42.0
+ 30
+0.0
+ 40
+5.0
+  1
+__STD__
+  7
+BBS
+100
+AcDbText
+  0
+TEXT
+  5
+47
+330
+1B
+100
+AcDbEntity
+ 67
+1
+  8
+S-TEXT
+100
+AcDbText
+ 10
+356.0
+ 20
+28.0
+ 30
+0.0
+ 40
+4.0
+  1
+All dimensions in mm
+  7
+BBS
+100
+AcDbText
+  0
+TEXT
+  5
+48
+330
+1B
+100
+AcDbEntity
+ 67
+1
+  8
+S-TEXT
+100
+AcDbText
+ 10
+586.0
+ 20
+42.0
+ 30
+0.0
+ 40
+5.0
+  1
+SCALE __SCALE__
+  7
+BBS
+100
+AcDbText
+  0
+TEXT
+  5
+49
+330
+1B
+100
+AcDbEntity
+ 67
+1
+  8
+S-TEXT
+100
+AcDbText
+ 10
+586.0
+ 20
+28.0
+ 30
+0.0
+ 40
+4.0
+  1
+A1
+  7
+BBS
+100
+AcDbText
+  0
+TEXT
+  5
+4A
+330
+1B
+100
+AcDbEntity
+ 67
+1
+  8
+S-TEXT
+100
+AcDbText
+ 10
+706.0
+ 20
+42.0
+ 30
+0.0
+ 40
+5.0
+  1
+__DATE__
+  7
+BBS
+100
+AcDbText
+  0
+TEXT
+  5
+4B
+330
+1B
+100
+AcDbEntity
+ 67
+1
+  8
+S-TEXT
+100
+AcDbText
+ 10
+706.0
+ 20
+28.0
+ 30
+0.0
+ 40
+4.0
+  1
+__VERSION__
+  7
+BBS
+100
+AcDbText
+  0
+VIEWPORT
+  5
+4C
+330
+1B
+100
+AcDbEntity
+ 67
+1
+  8
+S-VPORT
+100
+AcDbViewport
+ 10
+420.5
+ 20
+317.0
+ 30
+0.0
+ 40
+791.0
+ 41
+504.0
+ 68
+2
+ 69
+3
+ 12
+__VCX__
+ 22
+__VCY__
+ 13
+0.0
+ 23
+0.0
+ 14
+10.0
+ 24
+10.0
+ 15
+10.0
+ 25
+10.0
+ 16
+0.0
+ 26
+0.0
+ 36
+1.0
+ 17
+0.0
+ 27
+0.0
+ 37
+0.0
+ 42
+50.0
+ 43
+0.0
+ 44
+0.0
+ 45
+__VH__
+ 50
+0.0
+ 51
+0.0
+ 72
+100
+ 90
+0
+  1
+
+281
+0
+ 71
+0
+ 74
+0
+110
+0.0
+120
+0.0
+130
+0.0
+111
+1.0
+121
+0.0
+131
+0.0
+112
+0.0
+122
+1.0
+132
+0.0
+ 79
+0
+146
+0.0
+282
+0
+  0
+ENDSEC
+  0
+SECTION
+  2
+OBJECTS
+  0
+DICTIONARY
+  5
+A
+330
+0
+100
+AcDbDictionary
+281
+1
+  3
+ACAD_COLOR
+350
+B
+  3
+ACAD_GROUP
+350
+C
+  3
+ACAD_LAYOUT
+350
+D
+  3
+ACAD_MATERIAL
+350
+E
+  3
+ACAD_MLEADERSTYLE
+350
+F
+  3
+ACAD_MLINESTYLE
+350
+10
+  3
+ACAD_PLOTSETTINGS
+350
+11
+  3
+ACAD_PLOTSTYLENAME
+350
+12
+  3
+ACAD_SCALELIST
+350
+14
+  3
+ACAD_TABLESTYLE
+350
+15
+  3
+ACAD_VISUALSTYLE
+350
+16
+  3
+EZDXF_META
+350
+2D
+  0
+DICTIONARY
+  5
+B
+330
+A
+100
+AcDbDictionary
+281
+1
+  0
+DICTIONARY
+  5
+C
+330
+A
+100
+AcDbDictionary
+281
+1
+  0
+DICTIONARY
+  5
+D
+330
+A
+100
+AcDbDictionary
+281
+1
+  3
+Model
+350
+1A
+  3
+A1
+350
+1E
+  0
+DICTIONARY
+  5
+E
+330
+A
+100
+AcDbDictionary
+281
+1
+  3
+ByBlock
+350
+1F
+  3
+ByLayer
+350
+20
+  3
+Global
+350
+21
+  0
+DICTIONARY
+  5
+F
+330
+A
+100
+AcDbDictionary
+281
+1
+  3
+Standard
+350
+2C
+  0
+DICTIONARY
+  5
+10
+330
+A
+100
+AcDbDictionary
+281
+1
+  3
+Standard
+350
+22
+  0
+DICTIONARY
+  5
+11
+330
+A
+100
+AcDbDictionary
+281
+1
+  0
+ACDBDICTIONARYWDFLT
+  5
+12
+330
+A
+100
+AcDbDictionary
+281
+1
+  3
+Normal
+350
+13
+100
+AcDbDictionaryWithDefault
+340
+13
+  0
+ACDBPLACEHOLDER
+  5
+13
+330
+12
+  0
+DICTIONARY
+  5
+14
+330
+A
+100
+AcDbDictionary
+281
+1
+  0
+DICTIONARY
+  5
+15
+330
+A
+100
+AcDbDictionary
+281
+1
+  0
+DICTIONARY
+  5
+16
+330
+A
+100
+AcDbDictionary
+281
+1
+  0
+LAYOUT
+  5
+1A
+330
+D
+100
+AcDbPlotSettings
+  1
+
+  4
+A3
+  6
+
+ 40
+7.5
+ 41
+20.0
+ 42
+7.5
+ 43
+20.0
+ 44
+420.0
+ 45
+297.0
+ 46
+0.0
+ 47
+0.0
+ 48
+0.0
+ 49
+0.0
+140
+0.0
+141
+0.0
+142
+1.0
+143
+1.0
+ 70
+1024
+ 72
+1
+ 73
+0
+ 74
+5
+  7
+
+ 75
+16
+ 76
+0
+ 77
+2
+ 78
+300
+147
+1.0
+148
+0.0
+149
+0.0
+100
+AcDbLayout
+  1
+Model
+ 70
+1
+ 71
+0
+ 10
+0.0
+ 20
+0.0
+ 11
+420.0
+ 21
+297.0
+ 12
+0.0
+ 22
+0.0
+ 32
+0.0
+ 14
+1e+20
+ 24
+1e+20
+ 34
+1e+20
+ 15
+-1e+20
+ 25
+-1e+20
+ 35
+-1e+20
+146
+0.0
+ 13
+0.0
+ 23
+0.0
+ 33
+0.0
+ 16
+1.0
+ 26
+0.0
+ 36
+0.0
+ 17
+0.0
+ 27
+1.0
+ 37
+0.0
+ 76
+1
+330
+17
+  0
+LAYOUT
+  5
+1E
+330
+D
+100
+AcDbPlotSettings
+  1
+
+  2
+DWG to PDF.pc3
+  4
+ezdxf_(841.00_x_594.00_MM)
+  6
+
+ 40
+0.0
+ 41
+0.0
+ 42
+0.0
+ 43
+0.0
+ 44
+841.0
+ 45
+594.0
+ 46
+0.0
+ 47
+0.0
+ 48
+0.0
+ 49
+0.0
+140
+0.0
+141
+0.0
+142
+1.0
+143
+1.0
+ 70
+672
+ 72
+1
+ 73
+0
+ 74
+5
+  7
+
+ 75
+16
+ 76
+0
+ 77
+2
+ 78
+300
+147
+1.0
+148
+0.0
+149
+0.0
+100
+AcDbLayout
+  1
+A1
+ 70
+1
+ 71
+1
+ 10
+-0.0
+ 20
+-0.0
+ 11
+841.0
+ 21
+594.0
+ 12
+0.0
+ 22
+0.0
+ 32
+0.0
+ 14
+1e+20
+ 24
+1e+20
+ 34
+1e+20
+ 15
+-1e+20
+ 25
+-1e+20
+ 35
+-1e+20
+146
+0.0
+ 13
+0.0
+ 23
+0.0
+ 33
+0.0
+ 16
+1.0
+ 26
+0.0
+ 36
+0.0
+ 17
+0.0
+ 27
+1.0
+ 37
+0.0
+ 76
+1
+330
+1B
+331
+3E
+  0
+MATERIAL
+  5
+1F
+102
+{ACAD_REACTORS
+330
+E
+102
+}
+330
+E
+100
+AcDbMaterial
+  1
+ByBlock
+  2
+
+ 70
+0
+ 40
+1.0
+ 71
+1
+ 41
+1.0
+ 91
+-1023410177
+ 42
+1.0
+ 72
+1
+  3
+
+ 73
+1
+ 74
+1
+ 75
+1
+ 44
+0.5
+ 73
+0
+ 45
+1.0
+ 46
+1.0
+ 77
+1
+  4
+
+ 78
+1
+ 79
+1
+170
+1
+ 48
+1.0
+171
+1
+  6
+
+172
+1
+173
+1
+174
+1
+140
+1.0
+141
+1.0
+175
+1
+  7
+
+176
+1
+177
+1
+178
+1
+143
+1.0
+179
+1
+  8
+
+270
+1
+271
+1
+272
+1
+145
+1.0
+146
+1.0
+273
+1
+  9
+
+274
+1
+275
+1
+276
+1
+ 42
+1.0
+ 72
+1
+  3
+
+ 73
+1
+ 74
+1
+ 75
+1
+ 94
+63
+  0
+MATERIAL
+  5
+20
+102
+{ACAD_REACTORS
+330
+E
+102
+}
+330
+E
+100
+AcDbMaterial
+  1
+ByLayer
+  2
+
+ 70
+0
+ 40
+1.0
+ 71
+1
+ 41
+1.0
+ 91
+-1023410177
+ 42
+1.0
+ 72
+1
+  3
+
+ 73
+1
+ 74
+1
+ 75
+1
+ 44
+0.5
+ 73
+0
+ 45
+1.0
+ 46
+1.0
+ 77
+1
+  4
+
+ 78
+1
+ 79
+1
+170
+1
+ 48
+1.0
+171
+1
+  6
+
+172
+1
+173
+1
+174
+1
+140
+1.0
+141
+1.0
+175
+1
+  7
+
+176
+1
+177
+1
+178
+1
+143
+1.0
+179
+1
+  8
+
+270
+1
+271
+1
+272
+1
+145
+1.0
+146
+1.0
+273
+1
+  9
+
+274
+1
+275
+1
+276
+1
+ 42
+1.0
+ 72
+1
+  3
+
+ 73
+1
+ 74
+1
+ 75
+1
+ 94
+63
+  0
+MATERIAL
+  5
+21
+102
+{ACAD_REACTORS
+330
+E
+102
+}
+330
+E
+100
+AcDbMaterial
+  1
+Global
+  2
+
+ 70
+0
+ 40
+1.0
+ 71
+1
+ 41
+1.0
+ 91
+-1023410177
+ 42
+1.0
+ 72
+1
+  3
+
+ 73
+1
+ 74
+1
+ 75
+1
+ 44
+0.5
+ 73
+0
+ 45
+1.0
+ 46
+1.0
+ 77
+1
+  4
+
+ 78
+1
+ 79
+1
+170
+1
+ 48
+1.0
+171
+1
+  6
+
+172
+1
+173
+1
+174
+1
+140
+1.0
+141
+1.0
+175
+1
+  7
+
+176
+1
+177
+1
+178
+1
+143
+1.0
+179
+1
+  8
+
+270
+1
+271
+1
+272
+1
+145
+1.0
+146
+1.0
+273
+1
+  9
+
+274
+1
+275
+1
+276
+1
+ 42
+1.0
+ 72
+1
+  3
+
+ 73
+1
+ 74
+1
+ 75
+1
+ 94
+63
+  0
+MLINESTYLE
+  5
+22
+102
+{ACAD_REACTORS
+330
+10
+102
+}
+330
+10
+100
+AcDbMlineStyle
+  2
+Standard
+ 70
+0
+  3
+
+ 62
+256
+ 51
+90.0
+ 52
+90.0
+ 71
+2
+ 49
+0.5
+ 62
+256
+  6
+BYLAYER
+ 49
+-0.5
+ 62
+256
+  6
+BYLAYER
+  0
+MLEADERSTYLE
+  5
+2C
+102
+{ACAD_REACTORS
+330
+F
+102
+}
+330
+F
+100
+AcDbMLeaderStyle
+179
+2
+170
+2
+171
+1
+172
+0
+ 90
+2
+ 40
+0.0
+ 41
+0.0
+173
+1
+ 91
+-1056964608
+ 92
+-2
+290
+1
+ 42
+2.0
+291
+1
+ 43
+8.0
+  3
+Standard
+ 44
+4.0
+300
+
+342
+29
+174
+1
+175
+1
+176
+0
+178
+1
+ 93
+-1056964608
+ 45
+4.0
+292
+0
+297
+0
+ 46
+4.0
+ 94
+-1056964608
+ 47
+1.0
+ 49
+1.0
+140
+1.0
+294
+1
+141
+0.0
+177
+0
+142
+1.0
+295
+0
+296
+0
+143
+3.75
+271
+0
+272
+9
+273
+9
+  0
+DICTIONARY
+  5
+2D
+330
+A
+100
+AcDbDictionary
+280
+1
+281
+1
+  3
+CREATED_BY_EZDXF
+350
+2E
+  3
+WRITTEN_BY_EZDXF
+350
+4F
+  0
+DICTIONARYVAR
+  5
+2E
+330
+2D
+100
+DictionaryVariables
+280
+0
+  1
+1.4.4 @ 2026-10-03T10:34:54.419972+00:00
+  0
+DICTIONARYVAR
+  5
+4F
+330
+2D
+100
+DictionaryVariables
+280
+0
+  1
+1.4.4 @ 2026-10-03T10:34:54.423596+00:00
+  0
+ENDSEC
+  0
+EOF
+</script>
+<script>
+/* BBS Studio core - v0.4.0
+ * Pure logic, no DOM. Units: millimetres, kilograms.
+ * Sections: standards, helpers, bar generation, cutting length, schedule,
+ * cutting plan, drawing primitives, detail drawings, SVG, DXF, BVBS, tables, 3D paths.
+ */
+(function (root) {
+  'use strict';
+  var VERSION = '0.4.0';
+
+  /* ---------- standards ---------- */
+  var STD = {
+    IS: {
+      name: 'IS 2502 / SP 34', short: 'IS', prefix: 'T', gradePrefix: 'M', round: 5,
+      dias: [8, 10, 12, 16, 20, 25, 32], grades: [20, 25, 30, 35, 40], fys: [415, 500, 550],
+      radius: function (d) { return (d <= 25 ? 4 : 6) * d; }   // IS 2502 k-factor, cold-worked bars
+    },
+    BS: {
+      name: 'BS 8666:2020', short: 'BS', prefix: 'H', gradePrefix: 'C', round: 25,
+      dias: [8, 10, 12, 16, 20, 25, 32, 40], grades: [25, 30, 35, 40], fys: [500],
+      radius: function (d) { return (d <= 16 ? 2 : 3.5) * d; } // BS 8666 minimum former radius
+    }
+  };
+  var TAU_BD = { 20: 1.2, 25: 1.4, 30: 1.5, 35: 1.7, 40: 1.9 };   // IS 456 cl. 26.2.1.1 (plain bars, tension)
+  var BS_LAP = { 25: 44, 30: 40, 35: 38, 40: 35 };                 // BS 8110-1 Table 3.27, fy 500 deformed type 2
+
+  function kgm(d) { return 0.00617 * d * d; }
+  function roundUp(v, m) { return Math.ceil(v / m - 1e-9) * m; }
+  function num(v, def) { var n = parseFloat(v); return isFinite(n) ? n : (def || 0); }
+  function r1(v) { return Math.round(v * 10) / 10; }
+  function r2(v) { return Math.round(v * 100) / 100; }
+  function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+
+  /* ---------- units: everything is stored in mm; these convert at the edges ---------- */
+  var UNITS = { mm: { f: 1, label: 'mm', dp: 1 }, cm: { f: 10, label: 'cm', dp: 2 }, m: { f: 1000, label: 'm', dp: 4 }, 'in': { f: 25.4, label: 'in', dp: 3 }, ftin: { f: 304.8, label: 'ft-in', dp: 0 } };
+  /**
+   * Reads a length in any supported form and returns millimetres, or NaN.
+   * Accepts 3000mm, 3 m, 30cm, 6", 6 1/2 in, 10ft, 9'-10 1/2", 9' 10", and bare numbers,
+   * which are taken in the current display unit (feet when that unit is ft-in; there "10-6" and "10 6 1/2" also work).
+   */
+  function parseLen(input, unit) {
+    var U = UNITS[unit] || UNITS.mm, m, v;
+    if (typeof input === 'number') return isFinite(input) && input >= 0 ? input * U.f : NaN;
+    var s = String(input === null || input === undefined ? '' : input).trim().toLowerCase()
+      .replace(/[\u2032\u2018\u2019]/g, "'").replace(/[\u2033\u201c\u201d]/g, '"').replace(/''/g, '"').replace(/(\d),(?=\d{3}(\D|$))/g, '$1');
+    if (s === '') return NaN;
+    function frac(w, a, b) { if (b !== undefined && +b === 0) return NaN; return (w ? parseFloat(w) : 0) + (a !== undefined ? a / b : 0); }
+    m = s.match(/^(\d+(?:\.\d+)?)\s*(?:'|ft\.?|feet|foot)\s*-?\s*(\d+(?:\.\d+)?)?\s*(?:(\d+)\s*\/\s*(\d+))?\s*(?:"|in\.?|inch|inches)?$/);
+    if (m) return parseFloat(m[1]) * 304.8 + frac(m[2], m[3], m[4]) * 25.4;
+    m = s.match(/^(\d+(?:\.\d+)?)?\s*(?:(\d+)\s*\/\s*(\d+))?\s*(?:"|in\.?|inch|inches)$/);
+    if (m && (m[1] !== undefined || m[2] !== undefined)) return frac(m[1], m[2], m[3]) * 25.4;
+    m = s.match(/^(\d*\.?\d+)\s*(mm|cm|m)?$/);
+    if (m) { v = parseFloat(m[1]); return isFinite(v) ? v * (m[2] ? UNITS[m[2]].f : U.f) : NaN; }
+    if (unit === 'ftin') {
+      m = s.match(/^(\d+)\s*[- ]\s*(\d+(?:\.\d+)?)?\s*(?:(\d+)\s*\/\s*(\d+))?$/);
+      if (m) return parseFloat(m[1]) * 304.8 + frac(m[2], m[3], m[4]) * 25.4;
+    }
+    return NaN;
+  }
+  /** Millimetres to a display string in the chosen unit (ft-in to the nearest 1/16 inch). */
+  function fmtLen(mm, unit) {
+    var U = UNITS[unit] || UNITS.mm;
+    if (unit !== 'ftin') return String(Math.round(mm / U.f * Math.pow(10, U.dp)) / Math.pow(10, U.dp));
+    var n = Math.round(mm / 25.4 * 16), ft = Math.floor(n / 192), rem = n - ft * 192, w = Math.floor(rem / 16), f = rem % 16, den = 16;
+    while (f && f % 2 === 0) { f /= 2; den /= 2; }
+    return ft + "'-" + w + (f ? ' ' + f + '/' + den : '') + '"';
+  }
+  /** Signed versions for coordinates, which may be negative. */
+  function parseCoord(input, unit) {
+    if (typeof input === 'number') return isFinite(input) ? input * (UNITS[unit] || UNITS.mm).f : NaN;
+    var s = String(input === null || input === undefined ? '' : input).trim(), neg = s.charAt(0) === '-', v = parseLen(neg ? s.slice(1) : s, unit);
+    return neg ? -v : v;
+  }
+  function fmtCoord(mm, unit) { return (mm < 0 ? '-' : '') + fmtLen(Math.abs(mm), unit); }
+  /** Value written to an Excel cell: a number in the display unit, or text for ft-in. */
+  function lenCell(mm, unit) { return unit === 'ftin' ? fmtLen(mm, unit) : parseFloat(fmtLen(mm, unit)); }
+
+  /** Anchorage / lap length as a multiple of bar diameter. */
+  function ldFactor(p, dia, grade) {
+    grade = grade || p.grade;
+    if (p.lapMode === 'table' && num(p.lapTable && p.lapTable[dia]) > 0) return num(p.lapTable[dia]);
+    if (p.standard === 'IS') return Math.ceil(0.87 * p.fy / (4 * (TAU_BD[grade] || 1.4) * 1.6) - 1e-9);
+    return BS_LAP[grade] || 44;
+  }
+
+  /* ---------- project model ---------- */
+  var MAT = ['bx', 'by', 'tx', 'ty'], KINDS = ['bx', 'by', 'tx', 'ty', 'st'];
+  var SET_LABEL = { bx: 'Bottom X', by: 'Bottom Y', tx: 'Top X', ty: 'Top Y', st: 'Starter', extra: 'Extra' };
+  var SET_POS = { bx: 'B1', by: 'B2', tx: 'T1', ty: 'T2', st: '' };
+  var SHAPES = ['00', '11', '21', '51'];
+  var SHAPE_NAME = { auto: 'Auto', '00': '00 straight', '11': '11 L-bar', '21': '21 U-bar', '51': '51 link' };
+  var MAT_SHAPES = ['auto', '00', '11', '21'], ST_SHAPES = ['auto', '11', '00'];
+  var GEO_SHAPES = { rect: 'Rectangle', poly: 'Polygon', circle: 'Circle' };
+  var TOPS = { flat: 'Flat', sloped: 'Sloped', stepped: 'Stepped' };
+  var COVER_MODES = { all: 'All faces the same', sb: 'Sides + bottom', stb: 'Sides + bottom + top' };
+
+  function newBar(dia, spc) { return { dia: dia, spc: spc, shape: 'auto', ov: {} }; }
+  function newFooting(mark) {
+    return { type: 'FOOTING', mark: mark || 'F1', qty: 1, shape: 'rect', L: 2000, B: 2000, D: 500, top: 'flat', edgeD: 0, topX: 0, topY: 0, rot: 0,
+      colX: 450, colY: 450, coverMode: '', cS: 0, cB: 0, cT: 0, grade: 0, pts: [], stProj: 0,
+      bars: { bx: newBar(12, 150), by: newBar(12, 150), tx: newBar(0, 0), ty: newBar(0, 0), st: { dia: 16, n: 8, shape: 'auto', ov: {} } } };
+  }
+  function newProject() {
+    return {
+      app: 'bbs-studio', version: VERSION, name: 'New project', standard: 'IS', grade: 25, fy: 500,
+      stock: 12000, minOffcut: 1000, coverMode: 'all', cS: 50, cB: 50, cT: 50, coverColumn: 40,
+      lapMode: 'code', lapTable: {}, bendDed: { 45: 1, 90: 2, 135: 3 },
+      form: 'standard', unit: 'mm', collapse: false, inventory: '', elements: [newFooting('F1')], extraBars: [], positions: []
+    };
+  }
+  function cleanOv(ov) { var o = {}; ['A', 'B', 'C', 'D'].forEach(function (k) { if (ov && num(ov[k]) > 0) o[k] = num(ov[k]); }); return o; }
+  function normBar(b, def, shapes, st) {
+    b = b || {};
+    var o = { dia: Math.max(0, num(b.dia, def.dia)), shape: shapes.indexOf(String(b.shape)) >= 0 ? String(b.shape) : 'auto', ov: cleanOv(b.ov) };
+    if (st) o.n = Math.max(0, Math.round(num(b.n, def.n))); else o.spc = Math.max(0, num(b.spc, def.spc));
+    return o;
+  }
+  /** Coerce a loaded project into a safe shape and migrate files written by 0.1 - 0.3. */
+  function normalise(p) {
+    var b = newProject(), k;
+    if (p.coverFooting !== undefined && p.cS === undefined) { p.cS = p.cB = p.cT = num(p.coverFooting, 50); p.coverMode = 'all'; }   // before 0.4.0: one footing cover
+    delete p.coverFooting;
+    for (k in b) if (p[k] === undefined || p[k] === null) p[k] = b[k];
+    if (!STD[p.standard]) p.standard = 'IS';
+    if (!UNITS[p.unit]) p.unit = 'mm';
+    if (!COVER_MODES[p.coverMode]) p.coverMode = 'all';
+    if (STD[p.standard].grades.indexOf(+p.grade) < 0) p.grade = 25;
+    if (STD[p.standard].fys.indexOf(+p.fy) < 0) p.fy = 500;
+    p.grade = +p.grade; p.fy = +p.fy; p.collapse = !!p.collapse;
+    ['stock', 'minOffcut', 'cS', 'cB', 'cT', 'coverColumn'].forEach(function (key) { p[key] = num(p[key], b[key]); });
+    p.bendDed = { 45: num(p.bendDed[45], 1), 90: num(p.bendDed[90], 2), 135: num(p.bendDed[135], 3) };
+    p.elements = (p.elements || []).map(function (e) {
+      var n = newFooting(''), d = n.bars;
+      n.mark = String(e.mark === undefined ? '' : e.mark).trim();
+      n.type = String(e.type || 'FOOTING').toUpperCase();
+      n.qty = Math.max(1, Math.round(num(e.qty, 1)));
+      n.shape = GEO_SHAPES[e.shape] ? e.shape : 'rect'; n.top = TOPS[e.top] ? e.top : 'flat';
+      ['L', 'B', 'D', 'edgeD', 'topX', 'topY', 'colX', 'colY', 'cS', 'cB', 'cT', 'stProj'].forEach(function (key) { n[key] = Math.max(0, num(e[key], n[key])); });
+      n.rot = num(e.rot, 0); n.coverMode = COVER_MODES[e.coverMode] ? e.coverMode : '';
+      n.grade = STD[p.standard].grades.indexOf(+e.grade) >= 0 ? +e.grade : 0;
+      n.pts = (e.pts || []).filter(function (q) { return q && q.length >= 2; }).map(function (q) { return [num(q[0]), num(q[1])]; });
+      if (n.shape === 'circle') n.B = n.L;                                    // keep stored sizes in step with the outline
+      if (n.shape === 'poly' && n.pts.length >= 3) {
+        var xs = n.pts.map(function (q) { return q[0]; }), ys = n.pts.map(function (q) { return q[1]; });
+        n.L = Math.max.apply(null, xs) - Math.min.apply(null, xs); n.B = Math.max.apply(null, ys) - Math.min.apply(null, ys);
+      }
+      if (e.bars) {
+        MAT.forEach(function (m) { n.bars[m] = normBar(e.bars[m], { dia: 0, spc: 0 }, MAT_SHAPES); });
+        n.bars.st = normBar(e.bars.st, { dia: 0, n: 0 }, ST_SHAPES, true);
+      } else {                                   // flat fields from 0.1 - 0.3
+        var legacyEnd = e.endBend;
+        MAT.forEach(function (m) {
+          var bar = newBar(Math.max(0, num(e[m + 'Dia'], d[m].dia)), Math.max(0, num(e[m + 'Spc'], d[m].spc))), end = e[m + 'End'] || legacyEnd;
+          if (m.charAt(0) === 'b' && end === 'none') bar.shape = '00';
+          if (m.charAt(0) === 'b' && end === 'up') { bar.shape = '21'; bar.ov = { A: Math.max(0, n.D - 2 * p.cS), C: Math.max(0, n.D - 2 * p.cS) }; }
+          n.bars[m] = bar;
+        });
+        n.bars.st = { dia: Math.max(0, num(e.stDia, 16)), n: Math.max(0, Math.round(num(e.stN, 8))), shape: 'auto', ov: {} };
+        if (num(e.stLeg, 300) !== 300) { n.bars.st.shape = '11'; n.bars.st.ov.B = num(e.stLeg); }
+      }
+      return n;
+    });
+    p.extraBars = (p.extraBars || []).map(function (x) {
+      return { member: String(x.member || '').trim(), dia: num(x.dia, 12), n: Math.max(0, Math.round(num(x.n, 1))),
+        shape: SHAPES.indexOf(String(x.shape)) >= 0 ? String(x.shape) : '00', A: num(x.A), B: num(x.B), C: num(x.C), D: num(x.D), note: String(x.note || '') };
+    });
+    p.positions = (p.positions || []).map(function (q) { return { mark: String(q.mark || '').trim(), ref: String(q.ref || 'P1').toUpperCase(), x: num(q.x), y: num(q.y), z: num(q.z) }; });
+    return p;
+  }
+
+  /* ---------- geometry ---------- */
+  /** Effective covers of one footing: side, bottom, top. A blank override falls back to the project value. */
+  function covers(p, el) {
+    var own = !!el.coverMode, mode = own ? el.coverMode : p.coverMode;
+    function pick(k) { return own && el[k] > 0 ? el[k] : p[k]; }
+    var s = pick('cS'), b = mode === 'all' ? s : pick('cB'), t = mode === 'stb' ? pick('cT') : s;
+    return { s: s, b: b, t: t, mode: mode, own: own };
+  }
+  /** Outline in the footing's own axes, centred on the bounding box, plus depths and covers. */
+  function geom(p, el) {
+    var g = { shape: el.shape, D: el.D, c: covers(p, el), rot: el.rot || 0, grade: el.grade || p.grade, poly: null, R: 0, cx: 0, cy: 0 };
+    if (el.shape === 'circle') { g.R = el.L / 2; g.L = g.B = el.L; g.ok = el.L > 0; }
+    else if (el.shape === 'poly') {
+      var xs = el.pts.map(function (q) { return q[0]; }), ys = el.pts.map(function (q) { return q[1]; });
+      if (el.pts.length >= 3) {
+        var x0 = Math.min.apply(null, xs), x1 = Math.max.apply(null, xs), y0 = Math.min.apply(null, ys), y1 = Math.max.apply(null, ys), area = 0;
+        g.cx = (x0 + x1) / 2; g.cy = (y0 + y1) / 2; g.L = x1 - x0; g.B = y1 - y0;
+        g.poly = el.pts.map(function (q) { return [q[0] - g.cx, q[1] - g.cy]; });
+        g.poly.forEach(function (q, i) { var r = g.poly[(i + 1) % g.poly.length]; area += q[0] * r[1] - r[0] * q[1]; });
+        g.ok = Math.abs(area) > 1;
+      } else { g.L = g.B = 0; g.poly = []; g.ok = false; }
+    } else { g.L = el.L; g.B = el.B; g.poly = rect(-el.L / 2, -el.B / 2, el.L / 2, el.B / 2); g.ok = el.L > 0 && el.B > 0; }
+    g.ok = g.ok && el.D > 0;
+    var sl = el.top !== 'flat' && el.shape === 'rect' && el.edgeD > 0 && el.edgeD < el.D;
+    g.top = sl ? el.top : 'flat'; g.edgeD = sl ? el.edgeD : el.D;
+    g.topX = sl ? Math.min(g.L, el.topX > 0 ? el.topX : el.colX + 150) : g.L;
+    g.topY = sl ? Math.min(g.B, el.topY > 0 ? el.topY : el.colY + 150) : g.B;
+    return g;
+  }
+  /**
+   * Clear bar lengths on a line through the footing. dir 'x' = line parallel to X at y = o.
+   * Returns [a, b] intervals along the line, each end pulled back so the bar keeps cover c
+   * measured square to the edge it meets (c / sin of the angle between bar and edge).
+   */
+  function chords(g, dir, o, c) {
+    if (g.shape === 'circle') { var r = g.R - c; if (Math.abs(o) >= r) return []; var h = Math.sqrt(r * r - o * o); return [[-h, h]]; }
+    var ix = dir === 'x' ? 0 : 1, io = 1 - ix, hits = [], n = g.poly.length, i;
+    for (i = 0; i < n; i++) {
+      var p1 = g.poly[i], p2 = g.poly[(i + 1) % n];
+      if ((p1[io] <= o) === (p2[io] <= o)) continue;
+      var t = (o - p1[io]) / (p2[io] - p1[io]), len = Math.sqrt(Math.pow(p2[0] - p1[0], 2) + Math.pow(p2[1] - p1[1], 2));
+      hits.push({ v: p1[ix] + t * (p2[ix] - p1[ix]), back: c / (Math.abs(p2[io] - p1[io]) / len) });
+    }
+    hits.sort(function (a, b) { return a.v - b.v; });
+    var out = [];
+    for (i = 0; i + 1 < hits.length; i += 2) { var a = hits[i].v + hits[i].back, b = hits[i + 1].v - hits[i + 1].back; if (b > a) out.push([a, b]); }
+    return out;
+  }
+  /** Outermost concrete extent on a line across the footing at offset o (used by the sections). */
+  function outlineChord(g, dir, o) {
+    o = o || 0;
+    if (g.shape === 'circle') { var h = Math.sqrt(Math.max(0, g.R * g.R - o * o)); return [-h, h]; }
+    var iv = chords(g, dir, o + 1e-7, 0);
+    return iv.length ? [iv[0][0], iv[iv.length - 1][1]] : [-(dir === 'x' ? g.L : g.B) / 2, (dir === 'x' ? g.L : g.B) / 2];
+  }
+  /** Named reference points of a footing in its own centred axes: P1.. for corners, C for the centre. */
+  function refPoints(g) {
+    var out = { C: [0, 0] };
+    if (g.poly) g.poly.forEach(function (q, i) { out['P' + (i + 1)] = q; });
+    return out;
+  }
+  function memberQty(p, el) { var n = p.positions.filter(function (q) { return q.mark === el.mark; }).length; return n || el.qty; }
+
+  /* ---------- cutting length ---------- */
+  /**
+   * Returns both lengths the user asked to see side by side:
+   *  std = geometric formula of the standard (former radius r, bar size d), rounded as the standard requires
+   *  ded = sum of outer legs minus an editable deduction per bend (site practice), rounded up to 5 mm
+   */
+  function cutLength(p, shape, m, d) {
+    var S = STD[p.standard], r = S.radius(d), b = p.bendDed;
+    var A = num(m.A), B = num(m.B), C = num(m.C), D = num(m.D), std, ded, f, bends = 0;
+    switch (shape) {
+      case '11': std = A + B - 0.5 * r - d; ded = A + B - b[90] * d; f = 'A + B - 0.5r - d'; bends = 1; break;
+      case '21': std = A + B + C - r - 2 * d; ded = A + B + C - 2 * b[90] * d; f = 'A + B + C - r - 2d'; bends = 2; break;
+      case '51': std = 2 * (A + B) + C + D - 2.5 * r - 5 * d; ded = 2 * (A + B) + C + D - 3 * b[90] * d - 2 * b[135] * d;
+        f = '2(A + B) + C + D - 2.5r - 5d'; bends = 5; break;
+      default: std = A; ded = A; f = 'A';
+    }
+    return { std: roundUp(std, S.round), ded: roundUp(ded, 5), formula: f, r: r, bends: bends };
+  }
+
+  /* ---------- bar generation (footing) ---------- */
+  function barCount(across, cover, dia, spc) {
+    if (!(spc > 0)) return 0;
+    return Math.max(2, Math.floor((across - 2 * cover - dia) / spc + 1e-9) + 1);
+  }
+  function setDims(shape, s, legA, legB, legC) {
+    return shape === '21' ? { A: legA, B: s, C: legC } : shape === '11' ? { A: s, B: legB } : { A: s };
+  }
+  /** One mat direction. Every bar is clipped to the outline and kept individually; equal lengths are grouped. */
+  function matSet(p, el, g, kind, warn) {
+    var b = el.bars[kind], top = kind.charAt(0) === 't', isX = kind.charAt(1) === 'x', dia = b.dia, spc = b.spc;
+    if (!(dia > 0) || !(spc > 0)) return null;
+    function w(t, level) { if (warn) warn.push({ level: level || 'warn', member: el.mark, text: SET_LABEL[kind] + ' bars: ' + t }); }
+    if (top && g.top !== 'flat') { w('not generated, because top bars on a ' + g.top + ' footing are not supported yet.', 'info'); return null; }
+    var across = isX ? g.B : g.L, col = isX ? el.colX : el.colY, n = barCount(across, g.c.s, dia, spc), minLen = Math.max(12 * dia, 200);
+    var bars = [], skipped = 0, i;
+    for (i = 0; i < n; i++) {
+      var o = -(n - 1) * spc / 2 + i * spc;
+      chords(g, isX ? 'x' : 'y', o, g.c.s).forEach(function (iv) { if (iv[1] - iv[0] >= minLen) bars.push({ a: iv[0], b: iv[1], o: o }); else skipped++; });
+    }
+    if (!bars.length) { w('no bar fits inside the outline with this cover.', 'error'); return null; }
+    if (skipped) w(skipped + ' bar' + (skipped === 1 ? '' : 's') + ' shorter than ' + minLen + ' mm left out near the edge.', 'info');
+    // anchorage is judged on the bar nearest the centre, from the column face to the nearer bar end
+    var mid = bars.reduce(function (m, q) { return Math.abs(q.o) < Math.abs(m.o) ? q : m; }, bars[0]);
+    var ld = ldFactor(p, dia, g.grade) * dia, avail = Math.min(mid.b - col / 2, -col / 2 - mid.a), need = ld - avail;
+    var maxLeg = g.edgeD - g.c.b - g.c.t, minLeg = Math.max(12 * dia, 150);
+    var shape = b.shape === 'auto' ? (!top && need > 0 ? '21' : '00') : b.shape;
+    var autoLeg = Math.max(0, Math.min(maxLeg, Math.max(minLeg, roundUp(Math.max(need, 0), 5))));
+    var ov = b.shape === 'auto' ? {} : b.ov;                                  // Auto means fully automatic; overrides need an explicit shape code
+    var legA = ov.A > 0 ? ov.A : autoLeg, legC = ov.C > 0 ? ov.C : legA, legB = ov.B > 0 ? ov.B : autoLeg;
+    var leg = shape === '21' ? Math.min(legA, legC) : shape === '11' ? legB : 0;
+    if (!top && avail + leg < ld - 1) w('anchorage ' + Math.round(avail + leg) + ' mm from the column face is less than Ld ' + Math.round(ld) + ' mm (' + ldFactor(p, dia, g.grade) + 'd). Increase depth or footing size, or check by calculation.');
+    if (leg > maxLeg + 0.5) w('a ' + Math.round(leg) + ' mm leg does not fit in the ' + Math.round(maxLeg) + ' mm clear depth.', 'error');
+    var exact = el.shape === 'rect', by = {}, groups = [];
+    bars.forEach(function (q) {
+      q.s = exact ? q.b - q.a : Math.floor((q.b - q.a) / 5 + 1e-9) * 5;
+      if (!by[q.s]) { by[q.s] = { s: q.s, n: 0, dims: setDims(shape, q.s, legA, legB, legC) }; groups.push(by[q.s]); }
+      by[q.s].n++;
+    });
+    groups.sort(function (a, c) { return c.s - a.s; });
+    return { member: el.mark, kind: kind, pos: SET_POS[kind], role: SET_LABEL[kind], dia: dia, spc: spc, shape: shape, top: top, dir: isX ? 'x' : 'y',
+      legA: legA, legB: legB, legC: legC, n: bars.length, bars: bars, groups: groups,
+      auto: shape === '21' ? { A: autoLeg, C: legA } : shape === '11' ? { B: autoLeg } : {}, canOv: b.shape !== 'auto', straightKey: shape === '21' ? 'B' : 'A' };
+  }
+  function starterSet(p, el, g) {
+    var st = el.bars.st; if (!(st.n > 0) || !(st.dia > 0)) return null;
+    var seat = g.c.b + el.bars.bx.dia + el.bars.by.dia;                       // starters sit on the bottom mat
+    var lap = el.stProj > 0 ? el.stProj : ldFactor(p, st.dia, g.grade) * st.dia;
+    var ov = st.shape === 'auto' ? {} : st.ov;
+    var autoA = roundUp(el.D - seat + lap, 5), A = ov.A > 0 ? ov.A : autoA, shape = st.shape === 'auto' ? '11' : st.shape;
+    var B = ov.B > 0 ? ov.B : 300, dims = shape === '11' ? { A: A, B: B } : { A: A };
+    return { member: el.mark, kind: 'st', pos: '', role: SET_LABEL.st, dia: st.dia, spc: 0, shape: shape, n: st.n, seat: seat, proj: A - (el.D - seat), foot: shape === '11' ? B : 0,
+      groups: [{ s: A, n: st.n, dims: dims }], auto: shape === '11' ? { A: autoA, B: 300 } : { A: autoA }, canOv: st.shape !== 'auto', straightKey: '' };
+  }
+  function generateBars(p, el, warn) {
+    var g = geom(p, el), sets = [];
+    if (!g.ok) return sets;
+    MAT.forEach(function (k) { var s = matSet(p, el, g, k, warn); if (s) sets.push(s); });
+    var st = starterSet(p, el, g); if (st) sets.push(st);
+    return sets;
+  }
+  /** Straight bars longer than stock are split into full stock lengths plus a remainder, lapped. */
+  function splitForStock(p, grp, dia, grade, shape) {
+    if (shape !== '00' || grp.dims.A <= p.stock) return [grp];
+    var lap = ldFactor(p, dia, grade) * dia, A = grp.dims.A, k = Math.ceil((A - lap) / (p.stock - lap)), rem = A + (k - 1) * lap - (k - 1) * p.stock;
+    return [{ s: p.stock, n: grp.n * (k - 1), dims: { A: p.stock }, lapped: true }, { s: rem, n: grp.n, dims: { A: roundUp(rem, 5) }, lapped: true }];
+  }
+
+  /* ---------- schedule ---------- */
+  function letters(i) { var s = ''; i++; while (i > 0) { i--; s = String.fromCharCode(97 + i % 26) + s; i = Math.floor(i / 26); } return s; }
+  function validateElement(p, el, g, warn, seen) {
+    var S = STD[p.standard], m = el.mark || '(no mark)';
+    function w(t, level) { warn.push({ level: level || 'error', member: m, text: t }); }
+    if (!el.mark) w('Element has no mark.');
+    else if (seen[el.mark]) w('Mark ' + el.mark + ' is used more than once. Use one row per mark and list repeats under Positions or Qty.');
+    seen[el.mark] = true;
+    if (el.shape === 'poly' && el.pts.length < 3) w('A polygon footing needs at least three corner points.');
+    else if (!g.ok) w('Length, width and depth must all be greater than zero.');
+    if (!g.ok) return;
+    if (el.colX >= g.L || el.colY >= g.B) w('Column is as large as the footing.');
+    if (g.edgeD <= g.c.b + g.c.t + el.bars.bx.dia + el.bars.by.dia) w('Depth is too small for the covers and bottom bars.');
+    if (el.top !== 'flat' && g.top === 'flat') w(el.shape !== 'rect' ? 'Sloped and stepped tops are only supported on rectangular footings; drawn flat.' : 'Edge depth must be greater than zero and less than the depth; drawn flat.', 'warn');
+    KINDS.forEach(function (k) { var d = el.bars[k].dia; if (d > 0 && S.dias.indexOf(d) < 0) w('Bar size ' + d + ' is not a ' + S.short + ' standard size.', 'warn'); });
+    if (!(el.bars.bx.dia > 0 && el.bars.bx.spc > 0) || !(el.bars.by.dia > 0 && el.bars.by.spc > 0)) w('Bottom bar size or spacing is missing.');
+  }
+  /**
+   * rows  = one line per group of identical bars (always per bar length; drives weights, cutting plan and BVBS)
+   * table = rows merged where a member has the same mark twice
+   * sets  = sets[member][kind] with the bar geometry, for drawings and 3D
+   */
+  function buildSchedule(p) {
+    var S = STD[p.standard], rows = [], warn = [], marks = {}, next = 1, seen = {}, byMark = {}, sets = {};
+    function addSet(el, s, grade) {
+      var qty = el.qty, varies = s.groups.length > 1, parent = '', lens = [];
+      if (varies) parent = pad2(next++);
+      s.groups.forEach(function (g0, gi) {
+        splitForStock(p, g0, s.dia, grade, s.shape).forEach(function (grp) {
+          var len = cutLength(p, s.shape, grp.dims, s.dia), mark;
+          if (varies) mark = parent + letters(gi);
+          else { var key = [s.dia, s.shape, grp.dims.A || 0, grp.dims.B || 0, grp.dims.C || 0, grp.dims.D || 0].join('|'); if (!marks[key]) marks[key] = pad2(next++); mark = marks[key]; if (!parent) parent = mark; }
+          if (len.std > p.stock) warn.push({ level: 'error', member: s.member, text: 'Bar mark ' + mark + ' (' + s.role + ') is ' + len.std + ' mm, longer than the ' + p.stock + ' mm stock length. Bent bars are not split automatically.' });
+          if (grp.lapped && gi === 0) warn.push({ level: 'info', member: s.member, text: s.role + ' bars split at stock length with ' + ldFactor(p, s.dia, grade) + 'd laps.' });
+          var total = grp.n * qty; lens.push(len.std);
+          rows.push({ member: s.member, qtyM: qty, mark: mark, pmark: parent, varies: varies, setKey: s.member + '|' + s.kind + (s.xi === undefined ? '' : s.xi), dia: s.dia, type: S.prefix + s.dia, n: grp.n, total: total,
+            shape: s.shape, dims: grp.dims, straightKey: s.straightKey, lenStd: len.std, lenDed: len.ded, formula: len.formula, pos: s.pos, spc: s.spc, role: s.role, kind: s.kind, note: s.note || '',
+            totLen: r2(total * len.std / 1000), wt: r2(total * len.std / 1000 * kgm(s.dia)) });
+        });
+      });
+      s.mark = parent; s.varies = varies; s.lenMin = Math.min.apply(null, lens); s.lenMax = Math.max.apply(null, lens);
+    }
+    p.elements.forEach(function (el) {
+      var g = geom(p, el), q = { qty: memberQty(p, el) };
+      validateElement(p, el, g, warn, seen); byMark[el.mark] = q; sets[el.mark] = {};
+      generateBars(p, el, warn).forEach(function (s) { sets[el.mark][s.kind] = s; addSet(q, s, g.grade); });
+    });
+    p.extraBars.forEach(function (x, i) {
+      if (!x.n || !x.dia || !(x.A > 0)) return;
+      var q = byMark[x.member];
+      if (!q) { warn.push({ level: 'warn', member: x.member || '(none)', text: 'Extra bar row ' + (i + 1) + ' names a member that is not in the geometry table; counted for one member.' }); q = { qty: 1 }; }
+      var dims = { A: x.A, B: x.B, C: x.C, D: x.D };
+      addSet(q, { member: x.member || 'MISC', kind: 'extra', xi: i, pos: '', role: x.note || 'Extra bar', dia: x.dia, spc: 0, shape: x.shape, n: x.n, note: x.note, straightKey: '', groups: [{ s: x.A, n: x.n, dims: dims }] }, p.grade);
+    });
+    p.positions.forEach(function (q, i) {
+      var el = p.elements.filter(function (e) { return e.mark === q.mark; })[0];
+      if (!el) warn.push({ level: 'warn', member: q.mark || '(none)', text: 'Position row ' + (i + 1) + ' names a mark that is not in the geometry table.' });
+      else if (!refPoints(geom(p, el))[q.ref]) warn.push({ level: 'warn', member: q.mark, text: 'Position row ' + (i + 1) + ': reference point ' + q.ref + ' does not exist on this footing; its centre is used.' });
+    });
+    var table = [], idx = {};
+    rows.forEach(function (r) {
+      var k = r.member + '|' + r.mark, t = idx[k];
+      if (!t) { t = idx[k] = Object.assign({}, r, { role: r.role + (r.pos ? ' ' + r.pos : ''), pos: '' }); table.push(t); return; }
+      t.n += r.n; t.total += r.total; t.totLen = r2(t.totLen + r.totLen); t.wt = r2(t.wt + r.wt);
+      t.role += ' + ' + r.role + (r.pos ? ' ' + r.pos : ''); if (t.spc !== r.spc) t.spc = 0;
+    });
+    var byDia = {}, byMember = {}, totalWt = 0;
+    table.forEach(function (r) {
+      var a = byDia[r.dia] || (byDia[r.dia] = { dia: r.dia, len: 0, wt: 0, bars: 0 });
+      a.len += r.totLen; a.wt += r.wt; a.bars += r.total;
+      var b = byMember[r.member] || (byMember[r.member] = { member: r.member, qty: r.qtyM, wt: 0, perDia: {} });
+      b.wt += r.wt; b.perDia[r.dia] = (b.perDia[r.dia] || 0) + r.wt; totalWt += r.wt;
+    });
+    return { rows: rows, table: table, sets: sets, warnings: warn, byDia: byDia, byMember: byMember, totalWt: r2(totalWt) };
+  }
+  /** Rows as shown in the BBS. With p.collapse a set of varying lengths becomes one line with a length range; totals are unchanged. */
+  function displayRows(p, sched) {
+    if (!p.collapse) return sched.table;
+    var out = [], idx = {};
+    sched.table.forEach(function (r) {
+      if (!r.varies) { out.push(r); return; }
+      var t = idx[r.setKey];
+      if (!t) { t = idx[r.setKey] = Object.assign({}, r, { mark: r.pmark, lo: r.lenStd, hi: r.lenStd, dlo: r.lenDed, dhi: r.lenDed, slo: r.dims[r.straightKey], shi: r.dims[r.straightKey], collapsed: true }); out.push(t); return; }
+      t.n += r.n; t.total += r.total; t.totLen = r2(t.totLen + r.totLen); t.wt = r2(t.wt + r.wt);
+      t.lo = Math.min(t.lo, r.lenStd); t.hi = Math.max(t.hi, r.lenStd); t.dlo = Math.min(t.dlo, r.lenDed); t.dhi = Math.max(t.dhi, r.lenDed);
+      t.slo = Math.min(t.slo, r.dims[r.straightKey]); t.shi = Math.max(t.shi, r.dims[r.straightKey]);
+    });
+    out.forEach(function (t) {
+      if (!t.collapsed) return;
+      t.lenStd = t.lo + ' to ' + t.hi; t.lenDed = t.dlo + ' to ' + t.dhi;
+      t.dims = Object.assign({}, t.dims); t.dims[t.straightKey] = t.slo + ' to ' + t.shi;
+    });
+    return out;
+  }
+  /** Tag for a bar set on the drawings. */
+  function tagText(p, s) {
+    if (p.standard === 'BS') return s.n + 'H' + s.dia + '-' + s.mark + (s.spc ? '-' + s.spc : '') + (s.pos ? ' ' + s.pos : '');
+    return s.n + '-T' + s.dia + (s.spc ? ' @ ' + s.spc + ' c/c' : '') + (s.pos ? ' ' + s.pos : '') + ' (' + s.mark + ')';
+  }
+
+  /* ---------- cutting plan with offcut reuse ---------- */
+  /** "16: 3200, 4100; 12: 2500" -> {16:[3200,4100],12:[2500]} */
+  function parseInventory(text) {
+    var out = {};
+    String(text || '').split(/[;\n]+/).forEach(function (part) {
+      var m = part.split(':'); if (m.length < 2) return;
+      var d = parseInt(m[0].replace(/[^0-9]/g, ''), 10); if (!d) return;
+      m[1].split(/[, ]+/).forEach(function (v) { var n = num(v); if (n > 0) (out[d] || (out[d] = [])).push(n); });
+    });
+    return out;
+  }
+  /**
+   * Best-fit decreasing. Yard offcuts are consumed before new stock bars are opened,
+   * and each piece goes into the open bar that leaves the least remainder.
+   * This is a heuristic: low wastage, not a proven minimum.
+   */
+  function cuttingPlan(p, rows) {
+    var inv = parseInventory(p.inventory), pieces = {}, out = [];
+    rows.forEach(function (r) {
+      if (r.lenStd > p.stock) return;
+      var a = pieces[r.dia] || (pieces[r.dia] = []);
+      for (var i = 0; i < r.total; i++) a.push({ len: r.lenStd, mark: r.mark });
+    });
+    Object.keys(pieces).map(Number).sort(function (a, b) { return a - b; }).forEach(function (dia) {
+      var list = pieces[dia].sort(function (a, b) { return b.len - a.len; });
+      var bins = (inv[dia] || []).slice().sort(function (a, b) { return a - b; }).map(function (l) { return { src: 'offcut', len: l, left: l, cuts: [] }; });
+      list.forEach(function (pc) {
+        var best = null;
+        bins.forEach(function (b) { if (b.left >= pc.len && (!best || b.left < best.left)) best = b; });
+        if (!best) { best = { src: 'new', len: p.stock, left: p.stock, cuts: [] }; bins.push(best); }
+        best.cuts.push(pc); best.left -= pc.len;
+      });
+      var used = bins.filter(function (b) { return b.cuts.length; });
+      var issued = 0, scrap = 0, reusable = [], newBars = 0, offUsed = 0, need = 0;
+      used.forEach(function (b) {
+        issued += b.len; if (b.src === 'new') newBars++; else offUsed++;
+        b.cuts.forEach(function (c) { need += c.len; });
+        if (b.left >= p.minOffcut) reusable.push(b.left); else scrap += b.left;
+      });
+      // identical bars collapse into one pattern line
+      var pat = {}, patterns = [];
+      used.forEach(function (b) {
+        var cs = {}; b.cuts.forEach(function (c) { var k = c.mark + '@' + c.len; cs[k] = (cs[k] || 0) + 1; });
+        var desc = Object.keys(cs).map(function (k) { var a = k.split('@'); return cs[k] + ' x ' + a[1] + ' (mk ' + a[0] + ')'; }).join(' + ');
+        var key = b.src + '|' + b.len + '|' + desc;
+        if (!pat[key]) { pat[key] = { src: b.src, len: b.len, desc: desc, left: b.left, count: 0 }; patterns.push(pat[key]); }
+        pat[key].count++;
+      });
+      out.push({ dia: dia, newBars: newBars, offcutsUsed: offUsed, issued: issued, need: need, scrap: scrap, reusable: reusable,
+        wastePct: issued ? r1(scrap / issued * 100) : 0, kg: r2(issued / 1000 * kgm(dia)), scrapKg: r2(scrap / 1000 * kgm(dia)), patterns: patterns });
+    });
+    return out;
+  }
+
+  /* ---------- drawing primitives ---------- */
+  function Dwg() { this.p = []; this.b = [1e12, 1e12, -1e12, -1e12]; }
+  Dwg.prototype.ext = function (x, y) { var b = this.b; if (x < b[0]) b[0] = x; if (y < b[1]) b[1] = y; if (x > b[2]) b[2] = x; if (y > b[3]) b[3] = y; };
+  Dwg.prototype.line = function (l, x1, y1, x2, y2, dash) { this.p.push({ t: 'line', l: l, x1: x1, y1: y1, x2: x2, y2: y2, dash: !!dash }); this.ext(x1, y1); this.ext(x2, y2); return this; };
+  Dwg.prototype.pl = function (l, pts, closed, dash) { var s = this; this.p.push({ t: 'pl', l: l, pts: pts, closed: !!closed, dash: !!dash }); pts.forEach(function (q) { s.ext(q[0], q[1]); }); return this; };
+  Dwg.prototype.circ = function (l, x, y, r, fill) { this.p.push({ t: 'circ', l: l, x: x, y: y, r: r, fill: !!fill }); this.ext(x - r, y - r); this.ext(x + r, y + r); return this; };
+  Dwg.prototype.text = function (l, x, y, h, s, a, rot) {
+    s = String(s); a = a || 'l'; rot = rot || 0;
+    this.p.push({ t: 'text', l: l, x: x, y: y, h: h, s: s, a: a, rot: rot });
+    var w = 0.62 * h * s.length, o = a === 'c' ? -w / 2 : a === 'r' ? -w : 0;
+    if (rot) { this.ext(x - h, y + o); this.ext(x, y + o + w); } else { this.ext(x + o, y); this.ext(x + o + w, y + h); }
+    return this;
+  };
+  Dwg.prototype.add = function (o, dx, dy) {
+    var s = this;
+    o.p.forEach(function (q) {
+      var c = Object.assign({}, q);
+      if (c.t === 'line') { c.x1 += dx; c.x2 += dx; c.y1 += dy; c.y2 += dy; }
+      else if (c.t === 'pl') c.pts = c.pts.map(function (v) { return [v[0] + dx, v[1] + dy]; });
+      else { c.x += dx; c.y += dy; }
+      s.p.push(c);
+    });
+    this.ext(o.b[0] + dx, o.b[1] + dy); this.ext(o.b[2] + dx, o.b[3] + dy); return this;
+  };
+  Dwg.prototype.w = function () { return this.b[2] - this.b[0]; };
+  Dwg.prototype.h = function () { return this.b[3] - this.b[1]; };
+  function rect(x1, y1, x2, y2) { return [[x1, y1], [x2, y1], [x2, y2], [x1, y2]]; }
+  function dimH(d, x1, x2, y, T, label) {
+    var k = 0.35 * T;
+    d.line('DIM', x1, y, x2, y).line('DIM', x1 - k, y - k, x1 + k, y + k).line('DIM', x2 - k, y - k, x2 + k, y + k);
+    d.line('DIM', x1, y - k, x1, y + 2 * k).line('DIM', x2, y - k, x2, y + 2 * k);
+    d.text('DIM', (x1 + x2) / 2, y + 0.35 * T, T, label, 'c');
+  }
+  function dimV(d, x, y1, y2, T, label) {
+    var k = 0.35 * T;
+    d.line('DIM', x, y1, x, y2).line('DIM', x - k, y1 - k, x + k, y1 + k).line('DIM', x - k, y2 - k, x + k, y2 + k);
+    d.line('DIM', x - k, y1, x + 2 * k, y1).line('DIM', x - k, y2, x + 2 * k, y2);
+    d.text('DIM', x - 0.35 * T, (y1 + y2) / 2, T, label, 'c', 90);
+  }
+
+  /* ---------- starter layout (shared by plan, section and 3D) ---------- */
+  function starterPositions(p, el) {
+    var n = el.bars.st.n, d = el.bars.st.dia, hx = el.colX / 2 - p.coverColumn - d / 2, hy = el.colY / 2 - p.coverColumn - d / 2, out = [];
+    if (n <= 0 || hx <= 0 || hy <= 0) return out;
+    [[-1, -1], [1, -1], [1, 1], [-1, 1]].slice(0, Math.min(4, n)).forEach(function (s) { out.push({ x: s[0] * hx, y: s[1] * hy, nx: s[0], ny: 0 }); });
+    var rem = n - 4; if (rem <= 0) return out;
+    var pairs = Math.floor(rem / 2), kx = Math.round(pairs * hx / (hx + hy)), ky = pairs - kx, i;
+    for (i = 1; i <= kx; i++) { var x = -hx + 2 * hx * i / (kx + 1); out.push({ x: x, y: -hy, nx: 0, ny: -1 }); out.push({ x: x, y: hy, nx: 0, ny: 1 }); }
+    for (i = 1; i <= ky; i++) { var y = -hy + 2 * hy * i / (ky + 1); out.push({ x: -hx, y: y, nx: -1, ny: 0 }); out.push({ x: hx, y: y, nx: 1, ny: 0 }); }
+    if (rem % 2) out.push({ x: 0, y: -hy, nx: 0, ny: -1 });
+    return out;
+  }
+
+  /* ---------- shape sketch ---------- */
+  function shapeSketch(d, shape, dims, x, y, w, h, T, labels) {
+    var L = 'SH', t = T * 0.8;
+    function lab(tx, ty, k, a, rot) { if (labels && dims[k]) d.text('DIM', tx, ty, t, k + ' ' + dims[k], a, rot); }
+    if (shape === '11') {
+      d.pl(L, [[x + 0.15 * w, y + 0.9 * h], [x + 0.15 * w, y + 0.25 * h], [x + 0.85 * w, y + 0.25 * h]]);
+      lab(x + 0.15 * w - 0.3 * t, y + 0.57 * h, 'A', 'c', 90); lab(x + 0.5 * w, y + 0.25 * h - 1.3 * t, 'B', 'c');
+    } else if (shape === '21') {
+      d.pl(L, [[x + 0.15 * w, y + 0.8 * h], [x + 0.15 * w, y + 0.25 * h], [x + 0.85 * w, y + 0.25 * h], [x + 0.85 * w, y + 0.8 * h]]);
+      lab(x + 0.15 * w - 0.3 * t, y + 0.52 * h, 'A', 'c', 90); lab(x + 0.5 * w, y + 0.25 * h - 1.3 * t, 'B', 'c');
+      lab(x + 0.85 * w + 1.3 * t, y + 0.52 * h, 'C', 'c', 90);
+    } else if (shape === '51') {
+      d.pl(L, rect(x + 0.25 * w, y + 0.2 * h, x + 0.75 * w, y + 0.85 * h), true);
+      d.line(L, x + 0.75 * w, y + 0.85 * h, x + 0.62 * w, y + 0.62 * h).line(L, x + 0.75 * w, y + 0.85 * h, x + 0.6 * w, y + 0.74 * h);
+      lab(x + 0.25 * w - 0.3 * t, y + 0.52 * h, 'A', 'c', 90); lab(x + 0.5 * w, y + 0.2 * h - 1.3 * t, 'B', 'c');
+    } else {
+      d.line(L, x + 0.1 * w, y + 0.45 * h, x + 0.9 * w, y + 0.45 * h); lab(x + 0.5 * w, y + 0.45 * h + 0.4 * t, 'A', 'c');
+    }
+  }
+
+  /* ---------- footing detail: plan, two sections, bar shapes ---------- */
+  function rowsOf(sched, mark) {
+    var R = Object.assign({}, sched.sets[mark] || {});
+    R.all = sched.table.filter(function (r) { return r.member === mark; });
+    return R;
+  }
+  function nearBar(s, target) { return s.bars.reduce(function (m, q) { return Math.abs(q.o - target) < Math.abs(m.o - target) ? q : m; }, s.bars[0]); }
+  function planView(p, el, g, R, T) {
+    var d = new Dwg(), L = g.L, B = g.B, k = 0.3 * T, regular = el.shape === 'rect';
+    if (g.shape === 'circle') d.circ('OUT', 0, 0, g.R); else d.pl('OUT', g.poly, true);
+    if (g.top !== 'flat') d.pl('OUT', rect(-g.topX / 2, -g.topY / 2, g.topX / 2, g.topY / 2), true, true);
+    d.pl('COL', rect(-el.colX / 2, -el.colY / 2, el.colX / 2, el.colY / 2), true);
+    function drawSet(s, layer, dash, frac, withRange) {
+      if (!s) return;
+      var isX = s.dir === 'x', rep = nearBar(s, (isX ? -B : L) * frac), list = regular ? [rep] : s.bars;
+      list.forEach(function (q) { if (isX) d.line(layer, q.a, q.o, q.b, q.o, dash); else d.line(layer, q.o, q.a, q.o, q.b, dash); });
+      var o0 = s.bars[0].o, o1 = s.bars[s.bars.length - 1].o;
+      if (isX) {
+        var xr = -L * 0.36;
+        if (regular && withRange) { d.line('DIM', xr, o0, xr, o1).line('DIM', xr - k, o0 - k, xr + k, o0 + k).line('DIM', xr - k, o1 - k, xr + k, o1 + k); d.circ('DIM', xr, rep.o, 0.22 * T, true); }
+        d.text('TAG', (regular ? xr : rep.a) + 0.7 * T, rep.o + 0.4 * T, T, tagText(p, s));
+      } else {
+        var yr = B * 0.36;
+        if (regular && withRange) { d.line('DIM', o0, yr, o1, yr).line('DIM', o0 - k, yr - k, o0 + k, yr + k).line('DIM', o1 - k, yr - k, o1 + k, yr + k); d.circ('DIM', rep.o, yr, 0.22 * T, true); }
+        d.text('TAG', rep.o - 0.4 * T, regular ? -B * 0.2 : rep.a + 0.7 * T, T, tagText(p, s), 'l', 90);
+      }
+    }
+    drawSet(R.bx, 'RB', false, 0.3, true); drawSet(R.by, 'RB', false, 0.3, true);
+    drawSet(R.tx, 'RT', true, 0.42, false); drawSet(R.ty, 'RT', true, 0.42, false);
+    starterPositions(p, el).forEach(function (s) { d.circ('RS', s.x, s.y, Math.max(el.bars.st.dia / 2, 0.14 * T), true); });
+    if (g.poly) g.poly.forEach(function (q, i) {            // corner names used by the positions table
+      var len = Math.sqrt(q[0] * q[0] + q[1] * q[1]) || 1;
+      d.text('DIM', q[0] + q[0] / len * 1.5 * T, q[1] + q[1] / len * 1.5 * T - 0.4 * T, 0.8 * T, 'P' + (i + 1), 'c');
+    });
+    dimH(d, -L / 2, L / 2, -B / 2 - 4 * T, T, (g.shape === 'circle' ? 'DIA ' : '') + Math.round(L));
+    if (g.shape !== 'circle') dimV(d, -L / 2 - 3.6 * T, -B / 2, B / 2, T, String(Math.round(B)));
+    d.text('TXT', 0, -B / 2 - 7 * T, 1.25 * T, 'PLAN', 'c');
+    return d;
+  }
+  function sectionView(p, el, g, R, T, axis) {
+    var d = new Dwg(), isX = axis === 'X', m = isX ? 'x' : 'y', cr = isX ? 'y' : 'x';
+    var cutAt = R['b' + m] ? nearBar(R['b' + m], 0).o : 0;                  // the section is cut along the main bar nearest the centre
+    var ext = outlineChord(g, m, cutAt), x0 = ext[0], x1 = ext[1], W = x1 - x0;
+    var col = isX ? el.colX : el.colY, D = g.D, eD = g.edgeD, tw = isX ? g.topX : g.topY, c = g.c, bd = el.bars;
+    var zb = { x: c.b + bd.bx.dia / 2, y: c.b + bd.bx.dia + bd.by.dia / 2 }, zt = { x: D - c.t - bd.tx.dia / 2, y: D - c.t - bd.tx.dia - bd.ty.dia / 2 };
+    var st = R.st, proj = st ? st.proj : 0, top = D + (st ? proj + 150 : 300);
+    if (g.top === 'sloped') d.pl('OUT', [[x0, 0], [x1, 0], [x1, eD], [tw / 2, D], [-tw / 2, D], [x0, eD]], true);
+    else if (g.top === 'stepped') d.pl('OUT', [[x0, 0], [x1, 0], [x1, eD], [tw / 2, eD], [tw / 2, D], [-tw / 2, D], [-tw / 2, eD], [x0, eD]], true);
+    else d.pl('OUT', rect(x0, 0, x1, D), true);
+    d.line('COL', -col / 2, D, -col / 2, top).line('COL', col / 2, D, col / 2, top);
+    d.pl('COL', [[-col / 2 - 0.5 * T, top], [-col / 6, top], [0, top + 0.6 * T], [0, top - 0.6 * T], [col / 6, top], [col / 2 + 0.5 * T, top]]);
+    function mainBar(s, z, layer) {
+      if (!s) return;
+      var q = nearBar(s, 0), a = q.a + s.dia / 2, b = q.b - s.dia / 2, sg = s.top ? -1 : 1;
+      if (s.shape === '21') d.pl(layer, [[a, z + sg * (s.legA - s.dia / 2)], [a, z], [b, z], [b, z + sg * (s.legC - s.dia / 2)]]);
+      else if (s.shape === '11') d.pl(layer, [[a, z], [b, z], [b, z + sg * (s.legB - s.dia / 2)]]);
+      else d.line(layer, a, z, b, z);
+    }
+    function crossDots(s, z, layer) {
+      var xs = []; if (!s) return xs;
+      s.bars.forEach(function (q) { if (q.a <= cutAt && q.b >= cutAt) { xs.push(q.o); d.circ(layer, q.o, z, Math.max(s.dia / 2, 0.13 * T), true); } });
+      return xs;
+    }
+    var rbM = R['b' + m], rbC = R['b' + cr], rtM = R['t' + m], rtC = R['t' + cr];
+    mainBar(rbM, zb[m], 'RB'); var dots = crossDots(rbC, zb[cr], 'RB');
+    mainBar(rtM, zt[m], 'RT'); var tdots = crossDots(rtC, zt[cr], 'RT');
+    if (rbM) { var lx = x0 + W * 0.25; d.line('TAG', lx, zb[m], lx, -1.1 * T); d.text('TAG', lx, -2.4 * T, T, tagText(p, rbM), 'c'); }
+    if (rbC && dots.length) { var dx = dots[Math.min(dots.length - 1, Math.round(dots.length * 0.75))]; d.line('TAG', dx, zb[cr], dx, -2.7 * T); d.text('TAG', dx, -4 * T, T, tagText(p, rbC), 'c'); }
+    var tEnd = -col / 2 - 0.6 * T;
+    if (rtM) { d.line('TAG', x0 + W * 0.08, zt[m], x0 + W * 0.08, D + 1.1 * T); d.text('TAG', tEnd, D + 1.3 * T, T, tagText(p, rtM), 'r'); }
+    if (rtC && tdots.length) { d.line('TAG', tdots[0], zt[cr], tdots[0], D + 2.7 * T); d.text('TAG', tEnd, D + 2.9 * T, T, tagText(p, rtC), 'r'); }
+    if (st) {
+      var xs = col / 2 - p.coverColumn - st.dia / 2, zs = st.seat + st.dia / 2;
+      [-1, 1].forEach(function (s) { d.pl('RS', st.foot ? [[s * (xs + st.foot), zs], [s * xs, zs], [s * xs, D + proj]] : [[s * xs, zs], [s * xs, D + proj]]); });
+      dimV(d, col / 2 + 2.6 * T, D, D + proj, T, 'LAP ' + Math.round(proj));
+      d.text('TAG', 0, top + 1.2 * T, T, tagText(p, st), 'c');
+    }
+    dimV(d, x0 - 2.2 * T, 0, D, T, String(Math.round(D)));
+    if (g.top !== 'flat') dimV(d, x1 + 2.6 * T, 0, eD, T, String(Math.round(eD)));
+    dimH(d, x0, x1, -6.4 * T, T, String(Math.round(W)));
+    d.text('TXT', (x0 + x1) / 2, -9.4 * T, 1.25 * T, 'SECTION ' + axis + '-' + axis, 'c');
+    return d;
+  }
+  function footingTitle(p, el, g) {
+    var size = g.shape === 'circle' ? 'DIA ' + Math.round(g.L) + ' x ' + g.D : Math.round(g.L) + ' x ' + Math.round(g.B) + ' x ' + g.D;
+    return 'FOOTING ' + el.mark + '  (' + memberQty(p, el) + ' no.)  ' + (g.shape === 'poly' ? 'polygon ' : '') + size +
+      (g.top !== 'flat' ? '  ' + g.top + ' to ' + g.edgeD + ' at edge' : '') + (g.rot ? '  rotated ' + g.rot + ' deg' : '');
+  }
+  /** stack = true lays the views out top to bottom (narrow preview pane); false puts them in a row (drawing sheet). */
+  function footingDetail(p, el, sched, Tsheet, stack) {
+    var g = geom(p, el), T = Math.min(Tsheet, Math.max(Math.min(g.L, g.B) / 26, 20));
+    var R = rowsOf(sched, el.mark), d = new Dwg(), gap = 7 * T;
+    var plan = planView(p, el, g, R, T), sx = sectionView(p, el, g, R, T, 'X'), sy = sectionView(p, el, g, R, T, 'Y');
+    d.add(plan, 0, 0);
+    if (stack) {
+      var pc = (plan.b[0] + plan.b[2]) / 2, y = plan.b[1] - 0.6 * gap;
+      d.add(sx, pc - (sx.b[0] + sx.b[2]) / 2, y - sx.b[3]); y -= sx.h() + 0.6 * gap;
+      d.add(sy, pc - (sy.b[0] + sy.b[2]) / 2, y - sy.b[3]);
+    } else {
+      var x = plan.b[2] + gap - sx.b[0]; d.add(sx, x, -g.B / 2);
+      x = x + sx.b[2] + gap - sy.b[0]; d.add(sy, x, -g.B / 2);
+    }
+    d.text('TXT', d.b[0], d.b[3] + 2 * T, 1.5 * T, footingTitle(p, el, g));
+    // one cell per bar mark; a set of varying lengths gets one cell with its range
+    var cells = [], seen = {}, S = STD[p.standard];
+    KINDS.forEach(function (k) {
+      var s = R[k]; if (!s || seen[s.mark]) return; seen[s.mark] = 1;
+      cells.push({ title: 'Mk ' + s.mark + (s.varies ? 'a-' + letters(s.groups.length - 1) : '') + '  ' + S.prefix + s.dia + '  shape ' + s.shape, shape: s.shape, dims: s.groups[0].dims,
+        len: 'L = ' + (s.varies ? s.lenMin + ' to ' + s.lenMax : s.lenMax) });
+    });
+    R.all.forEach(function (r) { if (r.kind !== 'extra' || seen[r.mark]) return; seen[r.mark] = 1; cells.push({ title: 'Mk ' + r.mark + '  ' + r.type + '  shape ' + r.shape, shape: r.shape, dims: r.dims, len: 'L = ' + r.lenStd }); });
+    var cw = 15 * T, ch = 8 * T, x0 = d.b[0], top = d.b[1] - 3 * T, perRow = Math.max(1, Math.floor((d.w() + T) / (cw + T)));
+    cells.forEach(function (c, i) {
+      var cx = x0 + (i % perRow) * (cw + T), y0 = top - ch - Math.floor(i / perRow) * (ch + T);
+      d.pl('TBL', rect(cx, y0, cx + cw, y0 + ch), true);
+      shapeSketch(d, c.shape, c.dims, cx, y0 + 1.6 * T, cw, ch - 3.4 * T, T, true);
+      d.text('TXT', cx + 0.5 * T, y0 + ch - 1.5 * T, T, c.title); d.text('TXT', cx + 0.5 * T, y0 + 0.4 * T, 0.85 * T, c.len);
+    });
+    return d;
+  }
+  /** Plan only, sized for the small live sketch beside the input sheets. */
+  function footingPlan(p, el, sched) {
+    var g = geom(p, el);
+    return planView(p, el, g, rowsOf(sched, el.mark), Math.max(Math.min(g.L, g.B) / 20, 20));
+  }
+
+  /* ---------- schedule table (shared by screen, CSV, XLSX and DXF) ---------- */
+  function dimv(k) { return function (r) { return r.dims[k] ? r.dims[k] : ''; }; }
+  function formColumns(p) {
+    var S = STD[p.standard];
+    var bs = [
+      { h: 'Member', w: 6, v: function (r) { return r.member; } }, { h: 'Bar mark', w: 5, v: function (r) { return r.mark; } },
+      { h: 'Type and size', w: 6, v: function (r) { return r.type; } }, { h: 'No. of mbrs', w: 5, v: function (r) { return r.qtyM; } },
+      { h: 'No. in each', w: 5, v: function (r) { return r.n; } }, { h: 'Total no.', w: 5, v: function (r) { return r.total; } },
+      { h: 'Length (mm)', w: 8, v: function (r) { return r.lenStd; } }, { h: 'Length by deduction', w: 8, v: function (r) { return r.lenDed; } },
+      { h: 'Shape code', w: 5, v: function (r) { return r.shape; } },
+      { h: 'A', w: 6, v: dimv('A') }, { h: 'B', w: 6, v: dimv('B') }, { h: 'C', w: 5, v: dimv('C') }, { h: 'D', w: 5, v: dimv('D') }, { h: 'E/R', w: 4, v: function () { return ''; } }
+    ];
+    var wt = [{ h: 'Total length (m)', w: 7, v: function (r) { return r.totLen; } }, { h: 'kg/m', w: 5, v: function (r) { return r2(kgm(r.dia)); } }, { h: 'Weight (kg)', w: 6.5, v: function (r) { return r.wt; } }];
+    if (p.form === 'cads') return bs.concat(wt);
+    if (p.standard === 'BS') return bs;
+    return [
+      { h: 'Member', w: 6, v: function (r) { return r.member; } }, { h: 'Bar mark', w: 5, v: function (r) { return r.mark; } },
+      { h: 'Description', w: 16, v: function (r) { return r.role; } },
+      { h: 'Dia', w: 4, v: function (r) { return r.dia; } }, { h: 'Spacing', w: 5, v: function (r) { return r.spc || ''; } },
+      { h: 'Shape code', w: 5, v: function (r) { return r.shape; } },
+      { h: 'a', w: 6, v: dimv('A') }, { h: 'b', w: 6, v: dimv('B') }, { h: 'c', w: 5, v: dimv('C') }, { h: 'd', w: 5, v: dimv('D') },
+      { h: 'Cutting length (' + S.short + ')', w: 9, v: function (r) { return r.lenStd; } }, { h: 'Cutting length (deduction)', w: 11, v: function (r) { return r.lenDed; } },
+      { h: 'No. per member', w: 6.5, v: function (r) { return r.n; } }, { h: 'Members', w: 5, v: function (r) { return r.qtyM; } }, { h: 'Total no.', w: 5, v: function (r) { return r.total; } }
+    ].concat(wt);
+  }
+  function scheduleAOA(p, sched) {
+    var cols = formColumns(p), out = [cols.map(function (c) { return c.h; })];
+    displayRows(p, sched).forEach(function (r) { out.push(cols.map(function (c) { return c.v(r); })); });
+    return out;
+  }
+  function tableDwg(p, sched, T) {
+    var d = new Dwg(), cols = formColumns(p), rh = 2.2 * T, x = 0, xs = [0], y = 0, i;
+    cols.forEach(function (c) { x += c.w * T; xs.push(x); });
+    d.text('TBT', 0, 1.2 * T, 1.5 * T, 'BAR BENDING SCHEDULE  -  ' + STD[p.standard].name + '  -  ' + p.name);
+    var rows = scheduleAOA(p, sched), n = rows.length;
+    for (i = 0; i <= n; i++) d.line('TBL', 0, -i * rh, x, -i * rh);
+    xs.forEach(function (v) { d.line('TBL', v, 0, v, -n * rh); });
+    rows.forEach(function (row, ri) {
+      row.forEach(function (v, ci) { d.text('TBT', (xs[ci] + xs[ci + 1]) / 2, -(ri + 1) * rh + 0.6 * T, ri === 0 || String(v).length > 7 ? 0.8 * T : T, v, 'c'); });
+    });
+    y = -n * rh - 2.4 * T;
+    d.text('TBT', 0, y, T, 'Total weight ' + sched.totalWt + ' kg.  Lengths: ' + STD[p.standard].short + ' formula, rounded up to ' + STD[p.standard].round + ' mm.  Project cover: side ' + p.cS + (p.coverMode !== 'all' ? ', bottom ' + p.cB : '') + (p.coverMode === 'stb' ? ', top ' + p.cT : '') + ' mm.');
+    return d;
+  }
+  function composeSheet(p, sched, T) {
+    var d = new Dwg(), y = 0, maxX = 0;
+    p.elements.forEach(function (el) {
+      if (el.type !== 'FOOTING' || !geom(p, el).ok) return;
+      var det = footingDetail(p, el, sched, T);
+      d.add(det, -det.b[0], y - det.b[3]); y -= det.h() + 8 * T; maxX = Math.max(maxX, det.w());
+    });
+    var tb = tableDwg(p, sched, T);
+    d.add(tb, maxX + 10 * T - tb.b[0], -tb.b[3]);
+    return d;
+  }
+
+  /* ---------- SVG ---------- */
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  function f1(v) { return (Math.round(v * 10) / 10).toString(); }
+  function toSVG(d, opts) {
+    opts = opts || {};
+    var b = d.b, pad = opts.pad === undefined ? Math.max(d.w(), d.h()) * 0.03 : opts.pad;
+    if (b[0] > b[2]) return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"></svg>';
+    var vb = [b[0] - pad, -b[3] - pad, d.w() + 2 * pad, d.h() + 2 * pad].map(f1).join(' ');
+    var o = ['<svg xmlns="http://www.w3.org/2000/svg" class="dwg" viewBox="' + vb + '" role="img" aria-label="' + esc(opts.label || 'Reinforcement detail') + '">'];
+    d.p.forEach(function (q) {
+      var cls = 'ly-' + q.l + (q.dash ? ' dash' : '');
+      if (q.t === 'line') o.push('<line class="' + cls + '" x1="' + f1(q.x1) + '" y1="' + f1(-q.y1) + '" x2="' + f1(q.x2) + '" y2="' + f1(-q.y2) + '"/>');
+      else if (q.t === 'pl') o.push('<' + (q.closed ? 'polygon' : 'polyline') + ' class="' + cls + '" points="' + q.pts.map(function (v) { return f1(v[0]) + ',' + f1(-v[1]); }).join(' ') + '"/>');
+      else if (q.t === 'circ') o.push('<circle class="' + cls + (q.fill ? ' fill' : '') + '" cx="' + f1(q.x) + '" cy="' + f1(-q.y) + '" r="' + f1(q.r) + '"/>');
+      else o.push('<text class="tx-' + q.l + '" x="' + f1(q.x) + '" y="' + f1(-q.y) + '" font-size="' + f1(q.h * 1.25) + '" text-anchor="' + (q.a === 'c' ? 'middle' : q.a === 'r' ? 'end' : 'start') + '"' +
+        (q.rot ? ' transform="rotate(' + (-q.rot) + ' ' + f1(q.x) + ' ' + f1(-q.y) + ')"' : '') + '>' + esc(q.s) + '</text>');
+    });
+    o.push('</svg>'); return o.join('');
+  }
+  var SVG_CSS_FIXED = '.dwg{background:#fff}.dwg line,.dwg polyline,.dwg polygon,.dwg circle{fill:none;stroke:#18283a;stroke-width:1.2;vector-effect:non-scaling-stroke}' +
+    '.dwg .ly-RB{stroke:#c0392b;stroke-width:2}.dwg .ly-RT{stroke:#8e44ad;stroke-width:2}.dwg .ly-RS{stroke:#d35400;stroke-width:2}.dwg .ly-SH{stroke:#c0392b;stroke-width:2}' +
+    '.dwg .ly-DIM{stroke:#2c7a4b;stroke-width:.8}.dwg .ly-TAG{stroke:#8a6100;stroke-width:.8}.dwg .ly-COL{stroke:#1d4f91}.dwg .ly-TBL{stroke:#8a959c;stroke-width:.8}' +
+    '.dwg .dash{stroke-dasharray:6 4}.dwg circle.fill.ly-RB{fill:#c0392b}.dwg circle.fill.ly-RT{fill:#8e44ad}.dwg circle.fill.ly-RS{fill:#d35400}.dwg circle.fill.ly-DIM{fill:#2c7a4b}' +
+    '.dwg text{font-family:Arial,sans-serif;fill:#18283a;stroke:none}.dwg .tx-DIM{fill:#2c7a4b}.dwg .tx-TAG{fill:#8a6100}';
+
+  /* ---------- DXF (entities injected into an ezdxf-built R2010 skeleton) ---------- */
+  var LAYER = { OUT: 'S-FTG-OUTLINE', COL: 'S-COL-OUTLINE', RB: 'S-REBAR-BOT', RT: 'S-REBAR-TOP', RS: 'S-REBAR-STARTER', SH: 'S-REBAR-SHAPE',
+    DIM: 'S-DIM', TAG: 'S-TAG', TXT: 'S-TEXT', TBL: 'S-TABLE', TBT: 'S-TABLE-TEXT' };
+  var SCALES = [5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000];
+  var VP = { w: 791, h: 504 };
+  function dxfText(s) {
+    return String(s).replace(/[\r\n]+/g, ' ').replace(/[^\x20-\x7e]/g, function (ch) { return '\\U+' + ('0000' + ch.charCodeAt(0).toString(16).toUpperCase()).slice(-4); });
+  }
+  function n6(v) { return (Math.round(v * 1000) / 1000).toString(); }
+  /** Picks the sheet scale so everything fits the A1 viewport, with 2.5 mm text on paper. */
+  function fitSheet(p, sched) {
+    var s = 25, d = null, i, need, s2;
+    for (i = 0; i < 6; i++) {
+      d = composeSheet(p, sched, 2.5 * s);
+      need = Math.max(d.w() / VP.w, d.h() / VP.h) * 1.04;
+      s2 = SCALES.filter(function (v) { return v >= need; })[0] || Math.ceil(need / 1000) * 1000;
+      if (s2 === s || (s2 < s && i > 0)) return { dwg: d, scale: s };
+      s = s2;
+    }
+    return { dwg: composeSheet(p, sched, 2.5 * s), scale: s };
+  }
+  function toDXF(template, p, sched, msOwner, dateStr) {
+    var fit = fitSheet(p, sched), d = fit.dwg, s = fit.scale, h = 0x1000, out = [];
+    function head(type, layer, dash) {
+      out.push('  0', type, '  5', (h++).toString(16).toUpperCase(), '330', msOwner, '100', 'AcDbEntity', '  8', LAYER[layer] || '0');
+      if (dash) out.push('  6', 'DASHED', ' 48', n6(s / 25));
+    }
+    d.p.forEach(function (q) {
+      if (q.t === 'line') { head('LINE', q.l, q.dash); out.push('100', 'AcDbLine', ' 10', n6(q.x1), ' 20', n6(q.y1), ' 30', '0', ' 11', n6(q.x2), ' 21', n6(q.y2), ' 31', '0'); }
+      else if (q.t === 'pl') {
+        head('LWPOLYLINE', q.l, q.dash); out.push('100', 'AcDbPolyline', ' 90', String(q.pts.length), ' 70', q.closed ? '1' : '0');
+        q.pts.forEach(function (v) { out.push(' 10', n6(v[0]), ' 20', n6(v[1])); });
+      } else if (q.t === 'circ') {
+        if (q.fill) {   // solid dot: closed two-vertex polyline with bulge 1 and width = r
+          head('LWPOLYLINE', q.l); out.push('100', 'AcDbPolyline', ' 90', '2', ' 70', '1', ' 43', n6(q.r),
+            ' 10', n6(q.x - q.r / 2), ' 20', n6(q.y), ' 42', '1', ' 10', n6(q.x + q.r / 2), ' 20', n6(q.y), ' 42', '1');
+        } else { head('CIRCLE', q.l); out.push('100', 'AcDbCircle', ' 10', n6(q.x), ' 20', n6(q.y), ' 30', '0', ' 40', n6(q.r)); }
+      } else {
+        head('TEXT', q.l);
+        out.push('100', 'AcDbText', ' 10', n6(q.x), ' 20', n6(q.y), ' 30', '0', ' 40', n6(q.h), '  1', dxfText(q.s));
+        if (q.rot) out.push(' 50', n6(q.rot));
+        out.push('  7', 'BBS');
+        if (q.a !== 'l') out.push(' 72', q.a === 'c' ? '1' : '2', ' 11', n6(q.x), ' 21', n6(q.y), ' 31', '0');
+        out.push('100', 'AcDbText');
+      }
+    });
+    var at = template.indexOf('\nENTITIES\n');
+    if (at < 0) throw new Error('DXF template has no ENTITIES section');
+    at += '\nENTITIES\n'.length;
+    var body = template.slice(0, at) + out.join('\n') + '\n' + template.slice(at);
+    var S = STD[p.standard];
+    var rep = { '__VCX__': n6((d.b[0] + d.b[2]) / 2), '__VCY__': n6((d.b[1] + d.b[3]) / 2), '__VH__': n6(VP.h * s), '__HANDSEED__': (h + 16).toString(16).toUpperCase(),
+      '__PROJECT__': dxfText(p.name), '__STD__': dxfText(S.name + '  ' + S.gradePrefix + p.grade + ' / fy ' + p.fy), '__SCALE__': '1:' + s, '__DATE__': dxfText(dateStr || ''), '__VERSION__': 'BBS Studio v' + VERSION };
+    Object.keys(rep).forEach(function (k) { body = body.split(k).join(rep[k]); });
+    return { text: body, scale: s, entities: d.p.length };
+  }
+
+  /* ---------- BVBS BF2D ---------- */
+  function bvbs(p, sched) {
+    var by = {}, order = [], lines = [];
+    sched.table.forEach(function (r) {
+      if (!by[r.mark]) { by[r.mark] = { r: r, total: 0 }; order.push(r.mark); }
+      by[r.mark].total += r.total;
+    });
+    order.forEach(function (mk, i) {
+      var r = by[mk].r, m = r.dims, legs;
+      if (r.shape === '11') legs = [[m.A, 90], [m.B, 0]];
+      else if (r.shape === '21') legs = [[m.A, 90], [m.B, 90], [m.C, 0]];
+      else if (r.shape === '51') legs = [[m.C, 135], [m.A, 90], [m.B, 90], [m.A, 90], [m.B, 135], [m.D, 0]];
+      else legs = [[m.A, 0]];
+      var roller = Math.round(2 * STD[p.standard].radius(r.dia));
+      var s = 'BF2D@Hj' + p.name.replace(/[@\r\n]/g, ' ') + '@rBBS@i' + (i + 1) + '@p' + mk + '@l' + r.lenStd + '@n' + by[mk].total +
+        '@e' + (r.lenStd / 1000 * kgm(r.dia)).toFixed(3) + '@d' + r.dia + '@g' + (p.standard === 'BS' ? 'B500B' : 'Fe' + p.fy) + '@s' + roller + '@v@a@G';
+      legs.forEach(function (l) { s += 'l' + Math.round(l[0]) + '@w' + l[1] + '@'; });
+      s += 'C';
+      var sum = 0, k; for (k = 0; k < s.length; k++) sum += s.charCodeAt(k);
+      lines.push(s + (96 - (sum % 32)) + '@');
+    });
+    return lines.join('\r\n') + '\r\n';
+  }
+
+  /* ---------- tables for CSV / XLSX ---------- */
+  function csv(aoa) {
+    return aoa.map(function (row) { return row.map(function (v) { v = String(v === undefined || v === null ? '' : v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }).join(','); }).join('\r\n') + '\r\n';
+  }
+  function summaryAOA(p, sched, plan) {
+    var S = STD[p.standard], dias = Object.keys(sched.byDia).map(Number).sort(function (a, b) { return a - b; });
+    var byDia = [['Bar size', 'No. of bars', 'Total length (m)', 'kg/m', 'Weight (kg)']];
+    dias.forEach(function (d) { var a = sched.byDia[d]; byDia.push([S.prefix + d, a.bars, r2(a.len), r2(kgm(d)), r2(a.wt)]); });
+    byDia.push(['Total', '', '', '', sched.totalWt]);
+    var byMem = [['Member', 'No. of members'].concat(dias.map(function (d) { return S.prefix + d + ' (kg)'; })).concat(['Weight (kg)'])];
+    Object.keys(sched.byMember).forEach(function (m) { var a = sched.byMember[m]; byMem.push([a.member, a.qty].concat(dias.map(function (d) { return r2(a.perDia[d] || 0); })).concat([r2(a.wt)])); });
+    var cut = [['Bar size', 'Source', 'Bar length (mm)', 'No. of bars', 'Cut pattern', 'Left over (mm)', 'Left over is']];
+    plan.forEach(function (g) {
+      g.patterns.forEach(function (t) { cut.push([S.prefix + g.dia, t.src === 'new' ? 'New stock' : 'Yard offcut', t.len, t.count, t.desc, t.left, t.left >= p.minOffcut ? 'Reusable offcut' : 'Scrap']); });
+      cut.push([S.prefix + g.dia + ' total', g.newBars + ' new + ' + g.offcutsUsed + ' offcuts', g.issued, '', 'Steel issued ' + g.kg + ' kg', g.scrap, 'Scrap ' + g.wastePct + '%']);
+    });
+    return { byDia: byDia, byMember: byMem, cutting: cut };
+  }
+  /* ---------- input sheets: geometry, polygon points, positions, rebar ---------- */
+  var NONE = { t: 'none' };
+  var SHEETS = {
+    geo: { name: 'Footing geometry', cols: [
+      { k: 'mark', h: 'Mark' }, { k: 'qty', h: 'Qty' }, { k: 'shape', h: 'Shape' }, { k: 'L', h: 'Length X / dia', len: 1 }, { k: 'B', h: 'Width Y', len: 1 }, { k: 'D', h: 'Depth', len: 1 },
+      { k: 'top', h: 'Top' }, { k: 'edgeD', h: 'Edge depth', len: 1 }, { k: 'topX', h: 'Top flat X', len: 1 }, { k: 'topY', h: 'Top flat Y', len: 1 }, { k: 'rot', h: 'Rotation (deg)' },
+      { k: 'colX', h: 'Column X', len: 1 }, { k: 'colY', h: 'Column Y', len: 1 }, { k: 'coverMode', h: 'Cover type' }, { k: 'cS', h: 'Side cover', len: 1 }, { k: 'cB', h: 'Bottom cover', len: 1 }, { k: 'cT', h: 'Top cover', len: 1 },
+      { k: 'grade', h: 'Concrete grade' }] },
+    pts: { name: 'Footing points', cols: [{ k: 'mark', h: 'Mark' }, { k: 'pt', h: 'Point' }, { k: 'x', h: 'X', len: 1 }, { k: 'y', h: 'Y', len: 1 }] },
+    pos: { name: 'Footing positions', cols: [{ k: 'mark', h: 'Mark' }, { k: 'ref', h: 'Reference point' }, { k: 'x', h: 'X', len: 1 }, { k: 'y', h: 'Y', len: 1 }, { k: 'z', h: 'Z top face', len: 1 }] },
+    bar: { name: 'Footing rebar', cols: [
+      { k: 'mark', h: 'Mark' }, { k: 'set', h: 'Bar set' }, { k: 'size', h: 'Bar size' }, { k: 'spc', h: 'Spacing', len: 1 }, { k: 'n', h: 'No. of bars' }, { k: 'shape', h: 'Shape code' },
+      { k: 'dA', h: 'A', len: 1 }, { k: 'dB', h: 'B', len: 1 }, { k: 'dC', h: 'C', len: 1 }, { k: 'dD', h: 'D', len: 1 },
+      { k: 'bm', h: 'Bar mark', calc: 1 }, { k: 'len', h: 'Cut length', len: 1, calc: 1 }, { k: 'lend', h: 'Cut length by deduction', len: 1, calc: 1 }, { k: 'tot', h: 'Total no.', calc: 1 }, { k: 'wt', h: 'Weight kg', calc: 1 },
+      { k: 'note', h: 'Note' }] }
+  };
+  function optList(obj, first) { var o = first ? [first] : []; Object.keys(obj).forEach(function (k) { o.push([k, obj[k]]); }); return o; }
+  function sheetModel(p, sched, id) {
+    var S = STD[p.standard], rows = [], u = p.unit;
+    function diaOpts(zero) { return (zero ? [[0, 'none']] : []).concat(S.dias.map(function (d) { return [d, S.prefix + d]; })); }
+    function rng(a, b) { return a === b ? { t: 'len', v: a, ro: true } : { t: 'label', ro: true, v: fmtLen(a, u) + ' to ' + fmtLen(b, u) }; }
+    if (id === 'geo') {
+      p.elements.forEach(function (el, ei) {
+        var g = geom(p, el), own = !!el.coverMode, mode = own ? el.coverMode : '', hasPos = p.positions.some(function (q) { return q.mark === el.mark; }), sl = el.top !== 'flat';
+        function cov(k, on) { return own && on ? { t: 'len', v: el[k], blankZero: true, ph: fmtLen(p[k], u) } : NONE; }
+        rows.push({ ei: ei, cells: {
+          mark: { t: 'text', v: el.mark }, qty: hasPos ? { t: 'int', v: memberQty(p, el), ro: true } : { t: 'int', v: el.qty },
+          shape: { t: 'sel', v: el.shape, opts: optList(GEO_SHAPES) },
+          L: el.shape === 'poly' ? { t: 'len', v: g.L, ro: true } : { t: 'len', v: el.L }, B: el.shape === 'circle' ? NONE : el.shape === 'poly' ? { t: 'len', v: g.B, ro: true } : { t: 'len', v: el.B },
+          D: { t: 'len', v: el.D }, top: el.shape === 'rect' ? { t: 'sel', v: el.top, opts: optList(TOPS) } : NONE,
+          edgeD: sl && el.shape === 'rect' ? { t: 'len', v: el.edgeD } : NONE,
+          topX: sl && el.shape === 'rect' ? { t: 'len', v: el.topX, blankZero: true, ph: fmtLen(el.colX + 150, u) } : NONE,
+          topY: sl && el.shape === 'rect' ? { t: 'len', v: el.topY, blankZero: true, ph: fmtLen(el.colY + 150, u) } : NONE,
+          rot: { t: 'num', v: el.rot }, colX: { t: 'len', v: el.colX }, colY: { t: 'len', v: el.colY },
+          coverMode: { t: 'sel', v: mode, opts: optList(COVER_MODES, ['', 'Project default']) },
+          cS: cov('cS', true), cB: cov('cB', mode !== 'all'), cT: cov('cT', mode === 'stb'),
+          grade: { t: 'sel', v: el.grade, opts: [[0, 'Project (' + S.gradePrefix + p.grade + ')']].concat(S.grades.map(function (x) { return [x, S.gradePrefix + x]; })) }
+        } });
+      });
+    } else if (id === 'pts') {
+      p.elements.forEach(function (el, ei) {
+        if (el.shape !== 'poly') return;
+        el.pts.forEach(function (q, pi) { rows.push({ ei: ei, pi: pi, first: pi === 0, cells: { mark: pi ? NONE : { t: 'label', v: el.mark }, pt: { t: 'label', v: 'P' + (pi + 1) }, x: { t: 'coord', v: q[0] }, y: { t: 'coord', v: q[1] } } }); });
+        rows.push({ blank: true });
+      });
+    } else if (id === 'pos') {
+      var marks = p.elements.map(function (e) { return [e.mark, e.mark]; });
+      p.positions.forEach(function (q, qi) {
+        var el = p.elements.filter(function (e) { return e.mark === q.mark; })[0], refs = [['C', 'Centre']];
+        if (el) Object.keys(refPoints(geom(p, el))).forEach(function (k) { if (k !== 'C') refs.push([k, k]); });
+        if (!refs.some(function (r) { return r[0] === q.ref; })) refs.push([q.ref, q.ref + ' (missing)']);
+        rows.push({ qi: qi, cells: { mark: { t: 'sel', v: q.mark, opts: el ? marks : marks.concat([[q.mark, q.mark + ' (missing)']]) }, ref: { t: 'sel', v: q.ref, opts: refs },
+          x: { t: 'coord', v: q.x }, y: { t: 'coord', v: q.y }, z: { t: 'coord', v: q.z } } });
+      });
+    } else {
+      p.elements.forEach(function (el, ei) {
+        var R = sched.sets[el.mark] || {};
+        KINDS.forEach(function (kind, i) {
+          var b = el.bars[kind], s = R[kind], st = kind === 'st', c = {}, shapes = st ? ST_SHAPES : MAT_SHAPES;
+          c.mark = i ? NONE : { t: 'label', v: el.mark }; c.set = { t: 'label', v: SET_LABEL[kind] };
+          c.size = { t: 'sel', v: b.dia, opts: diaOpts(kind !== 'bx' && kind !== 'by') };
+          c.spc = st ? NONE : { t: 'len', v: b.spc, blankZero: !b.dia };
+          c.n = st ? { t: 'int', v: b.n } : (s ? { t: 'int', v: s.n, ro: true } : NONE);
+          c.shape = b.dia ? { t: 'sel', v: b.shape, x: b.shape === 'auto' ? 'Auto' : b.shape,
+            opts: shapes.map(function (k) { return [k, k === 'auto' ? 'Auto' + (s ? ' (' + s.shape + ')' : '') : SHAPE_NAME[k]]; }) } : NONE;
+          ['A', 'B', 'C', 'D'].forEach(function (k) {
+            var cell = NONE;
+            if (s) {
+              if (s.auto[k] !== undefined) cell = s.canOv ? { t: 'len', v: b.ov[k] || 0, blankZero: true, ph: fmtLen(s.auto[k], u), ov: true } : { t: 'len', v: s.groups[0].dims[k], ro: true };
+              else if (k === s.straightKey) cell = rng(s.groups[s.groups.length - 1].s, s.groups[0].s);
+            }
+            c['d' + k] = cell;
+          });
+          if (s) { c.bm = { t: 'label', ro: true, v: s.mark + (s.varies ? 'a-' + letters(s.groups.length - 1) : '') }; c.len = rng(s.lenMin, s.lenMax); }
+          else { c.bm = NONE; c.len = NONE; }
+          var rs = sched.rows.filter(function (r) { return r.member === el.mark && r.kind === kind; });
+          if (rs.length) {
+            var lo = Math.min.apply(null, rs.map(function (r) { return r.lenDed; })), hi = Math.max.apply(null, rs.map(function (r) { return r.lenDed; }));
+            c.lend = rng(lo, hi); c.tot = { t: 'label', ro: true, v: rs.reduce(function (a, r) { return a + r.total; }, 0) }; c.wt = { t: 'label', ro: true, v: r2(rs.reduce(function (a, r) { return a + r.wt; }, 0)) };
+          } else { c.lend = NONE; c.tot = NONE; c.wt = NONE; }
+          c.note = NONE;
+          rows.push({ ei: ei, kind: kind, first: i === 0, cells: c });
+        });
+        p.extraBars.forEach(function (x, xi) { if (x.member === el.mark) rows.push(extraRow(x, xi, ei)); });
+        rows.push({ blank: true });
+      });
+      var known = {}; p.elements.forEach(function (e) { known[e.mark] = 1; });
+      p.extraBars.forEach(function (x, xi) { if (!known[x.member]) rows.push(extraRow(x, xi, -1)); });
+    }
+    function extraRow(x, xi, ei) {
+      var rs = sched.rows.filter(function (r) { return r.setKey === (x.member || 'MISC') + '|extra' + xi; }), r = rs[0];
+      return { ei: ei, kind: 'extra', xi: xi, first: ei < 0, cells: {
+        mark: ei < 0 ? { t: 'text', v: x.member } : NONE, set: { t: 'label', v: 'Extra' }, size: { t: 'sel', v: x.dia, opts: diaOpts(false) }, spc: NONE, n: { t: 'int', v: x.n },
+        shape: { t: 'sel', v: x.shape, opts: SHAPES.map(function (k) { return [k, SHAPE_NAME[k]]; }) },
+        dA: { t: 'len', v: x.A }, dB: { t: 'len', v: x.B, blankZero: true }, dC: { t: 'len', v: x.C, blankZero: true }, dD: { t: 'len', v: x.D, blankZero: true },
+        bm: r ? { t: 'label', ro: true, v: r.mark } : NONE, len: r ? rng(r.lenStd, r.lenStd) : NONE, lend: r ? rng(r.lenDed, r.lenDed) : NONE,
+        tot: r ? { t: 'label', ro: true, v: rs.reduce(function (a, q) { return a + q.total; }, 0) } : NONE, wt: r ? { t: 'label', ro: true, v: r2(rs.reduce(function (a, q) { return a + q.wt; }, 0)) } : NONE,
+        note: { t: 'text', v: x.note } } };
+    }
+    return { id: id, name: SHEETS[id].name, cols: SHEETS[id].cols, rows: rows };
+  }
+  /** Writes one edited cell back to the project. Lengths and coordinates arrive in mm. */
+  function applyCell(p, id, row, k, v) {
+    var el = row.ei >= 0 ? p.elements[row.ei] : null;
+    if (id === 'geo') {
+      if (k === 'mark') { var nw = String(v).trim(), old = el.mark; p.extraBars.forEach(function (e) { if (e.member === old) e.member = nw; }); p.positions.forEach(function (q) { if (q.mark === old) q.mark = nw; }); el.mark = nw; }
+      else if (k === 'shape') {
+        var g = geom(p, el);
+        if (v === 'poly' && el.pts.length < 3) el.pts = (g.ok && g.poly ? g.poly : rect(-1000, -1000, 1000, 1000)).map(function (q) { return [q[0], q[1]]; });   // start from the current outline
+        if (v !== 'poly' && el.shape === 'poly' && g.L > 0) { el.L = g.L; el.B = g.B; }
+        if (v === 'circle' && el.shape !== 'circle') el.L = Math.max(g.L || 0, g.B || 0) || el.L;
+        el.shape = v;
+      } else if (k === 'grade') el.grade = +v;
+      else el[k] = v;
+    } else if (id === 'pts') { el.pts[row.pi][k === 'x' ? 0 : 1] = v; }
+    else if (id === 'pos') { var q = p.positions[row.qi]; if (k === 'mark') { q.mark = v; q.ref = 'P1'; } else q[k] = v; }
+    else {
+      var x = row.kind === 'extra' ? p.extraBars[row.xi] : null;
+      if (x) { var map = { mark: 'member', size: 'dia', n: 'n', shape: 'shape', dA: 'A', dB: 'B', dC: 'C', dD: 'D', note: 'note' }; if (map[k]) x[map[k]] = k === 'size' ? +v : v; return; }
+      var b = el.bars[row.kind];
+      if (k === 'size') b.dia = +v; else if (k === 'spc') b.spc = v; else if (k === 'n') b.n = v; else if (k === 'shape') b.shape = v;
+      else if (/^d[A-D]$/.test(k)) { if (v > 0) b.ov[k.charAt(1)] = v; else delete b.ov[k.charAt(1)]; }
+    }
+  }
+  /** One sheet as rows for Excel: header with units, blank rows kept. Auto values stay blank so that a re-import does not freeze them as overrides. */
+  function sheetAOA(p, sched, id) {
+    var M = sheetModel(p, sched, id), u = p.unit;
+    var out = [M.cols.map(function (c) { return c.h + (c.len ? ' (' + UNITS[u].label + ')' : ''); })];
+    M.rows.forEach(function (r) {
+      if (r.blank) { out.push([]); return; }
+      out.push(M.cols.map(function (c) {
+        var q = r.cells[c.k];
+        if (!q || q.t === 'none' || q.v === '' || q.v === undefined) return '';
+        if (q.t === 'len' || q.t === 'coord') return q.blankZero && !q.v ? '' : (q.t === 'coord' && u === 'ftin' ? fmtCoord(q.v, u) : q.t === 'coord' ? parseFloat(fmtCoord(q.v, u)) : lenCell(q.v, u));
+        if (q.t === 'sel') { if (q.x !== undefined) return q.x; var o = q.opts.filter(function (a) { return String(a[0]) === String(q.v); })[0]; return o ? o[1] : q.v; }
+        return q.v;
+      }));
+    });
+    while (out.length > 1 && !out[out.length - 1].length) out.pop();
+    return out;
+  }
+  /** Header lookup shared by the sheet readers. */
+  function readTable(aoa, id, fallbackUnit, need) {
+    var cols = SHEETS[id].cols, hi = -1, map = {}, unit = fallbackUnit || 'mm', i;
+    function base(h) { return String(h || '').replace(/\(.*\)/, '').trim().toLowerCase(); }
+    for (i = 0; i < Math.min((aoa || []).length, 15) && hi < 0; i++) { var names = (aoa[i] || []).map(base); if (need.every(function (n) { return names.indexOf(n) >= 0; })) hi = i; }
+    if (hi < 0) return null;
+    aoa[hi].forEach(function (h, ci) {
+      var col = cols.filter(function (c) { return base(c.h) === base(h); })[0], u = (String(h || '').match(/\(([^)]+)\)/) || [])[1];
+      if (!col) return; map[col.k] = ci;
+      if (col.len && u) Object.keys(UNITS).forEach(function (k) { if (UNITS[k].label === u.trim().toLowerCase()) unit = k; });
+    });
+    var rows = [];
+    for (i = hi + 1; i < aoa.length; i++) {
+      var row = aoa[i] || [];
+      rows.push({ rn: i + 1, blank: !row.some(function (v) { return v !== '' && v !== null && v !== undefined; }), row: row });
+    }
+    return { rows: rows, unit: unit, raw: function (r, k) { var v = map[k] === undefined ? '' : r.row[map[k]]; return v === undefined || v === null ? '' : v; } };
+  }
+  function pickKey(obj, s, def) {
+    s = String(s).trim().toLowerCase(); if (!s) return def;
+    var hit = Object.keys(obj).filter(function (k) { return k === s || String(obj[k]).toLowerCase() === s; })[0];
+    return hit === undefined ? def : hit;
+  }
+  /** Reads the four footing sheets of a workbook ({sheet name: rows}). Numbers are taken in the unit named in each header; text may carry its own unit. */
+  function importSheets(book, fallbackUnit) {
+    var res = { elements: [], extraBars: [], positions: [], errors: [], found: false }, byMark = {};
+    function lenOf(T, r, k, name, signed) {
+      var v = T.raw(r, k); if (v === '') return 0;
+      var mm = signed ? parseCoord(v, T.unit) : parseLen(v, T.unit);
+      if (isNaN(mm)) { res.errors.push(name + ', row ' + r.rn + ': could not read "' + v + '" as a length.'); return 0; }
+      return mm;
+    }
+    function diaOf(v) { return num(String(v).replace(/[^0-9.]/g, ''), 0); }
+    var G = readTable(book[SHEETS.geo.name], 'geo', fallbackUnit, ['mark', 'depth']);
+    if (!G) return res;
+    res.found = true;
+    G.rows.forEach(function (r) {
+      var mark = String(G.raw(r, 'mark')).trim(); if (r.blank || !mark) return;
+      var el = newFooting(mark); MAT.forEach(function (m) { el.bars[m] = newBar(0, 0); }); el.bars.st = { dia: 0, n: 0, shape: 'auto', ov: {} };
+      el.qty = Math.max(1, Math.round(num(G.raw(r, 'qty'), 1))); el.shape = pickKey(GEO_SHAPES, G.raw(r, 'shape'), 'rect'); el.top = pickKey(TOPS, G.raw(r, 'top'), 'flat');
+      ['L', 'B', 'D', 'edgeD', 'topX', 'topY', 'colX', 'colY', 'cS', 'cB', 'cT'].forEach(function (k) { el[k] = lenOf(G, r, k, SHEETS.geo.name); });
+      el.rot = num(G.raw(r, 'rot'), 0); el.coverMode = pickKey(COVER_MODES, G.raw(r, 'coverMode'), ''); el.grade = diaOf(G.raw(r, 'grade')) && !/project/i.test(String(G.raw(r, 'grade'))) ? diaOf(G.raw(r, 'grade')) : 0;
+      res.elements.push(el); byMark[mark] = el;
+    });
+    var P = readTable(book[SHEETS.pts.name], 'pts', fallbackUnit, ['mark', 'x', 'y']), cur = null;
+    if (P) P.rows.forEach(function (r) {
+      if (r.blank) { cur = null; return; }
+      var mark = String(P.raw(r, 'mark')).trim(); if (mark) cur = byMark[mark] || null;
+      if (!cur) { res.errors.push(SHEETS.pts.name + ', row ' + r.rn + ': no footing with that mark in the geometry sheet.'); return; }
+      cur.pts.push([lenOf(P, r, 'x', SHEETS.pts.name, true), lenOf(P, r, 'y', SHEETS.pts.name, true)]);
+    });
+    var Q = readTable(book[SHEETS.pos.name], 'pos', fallbackUnit, ['mark', 'x', 'y']);
+    if (Q) Q.rows.forEach(function (r) {
+      var mark = String(Q.raw(r, 'mark')).trim(); if (r.blank || !mark) return;
+      var ref = String(Q.raw(r, 'ref')).trim().toUpperCase();
+      res.positions.push({ mark: mark, ref: /^P\d+$/.test(ref) ? ref : (ref.charAt(0) === 'C' ? 'C' : 'P1'), x: lenOf(Q, r, 'x', SHEETS.pos.name, true), y: lenOf(Q, r, 'y', SHEETS.pos.name, true), z: lenOf(Q, r, 'z', SHEETS.pos.name, true) });
+    });
+    var B = readTable(book[SHEETS.bar.name], 'bar', fallbackUnit, ['bar set', 'bar size']), kinds = {}; cur = null;
+    KINDS.forEach(function (k) { kinds[SET_LABEL[k].toLowerCase()] = k; });
+    if (B) B.rows.forEach(function (r) {
+      if (r.blank) return;
+      var mark = String(B.raw(r, 'mark')).trim(), name = SHEETS.bar.name; if (mark) cur = byMark[mark] || null;
+      var setName = String(B.raw(r, 'set')).trim().toLowerCase(); if (!setName) return;
+      if (!cur) { res.errors.push(name + ', row ' + r.rn + ': a bar row with no footing above it was skipped.'); return; }
+      var kind = kinds[setName], sc = String(B.raw(r, 'shape')).trim().toLowerCase(), code = /^auto/.test(sc) || !sc ? 'auto' : ('0' + sc.replace(/[^0-9]/g, '')).slice(-2), dims = {};
+      if (kind) {
+        // calculated dimensions are exported too, so only cells that can be overrides for this shape code are read back
+        var bar = { dia: diaOf(B.raw(r, 'size')), shape: code, ov: {} }, allow = code === 'auto' ? '' : kind === 'st' ? (code === '11' ? 'AB' : 'A') : code === '21' ? 'AC' : code === '11' ? 'B' : '';
+        if (kind === 'st') bar.n = Math.round(num(B.raw(r, 'n'), 0)); else bar.spc = lenOf(B, r, 'spc', name);
+        allow.split('').forEach(function (k) { var v = lenOf(B, r, 'd' + k, name); if (v > 0) bar.ov[k] = v; });
+        cur.bars[kind] = bar;
+      } else if (setName === 'extra') { ['A', 'B', 'C', 'D'].forEach(function (k) { dims[k] = lenOf(B, r, 'd' + k, name); }); res.extraBars.push({ member: cur.mark, dia: diaOf(B.raw(r, 'size')), n: Math.round(num(B.raw(r, 'n'), 1)), shape: code === 'auto' ? '00' : code, A: dims.A, B: dims.B, C: dims.C, D: dims.D, note: String(B.raw(r, 'note')) }); }
+      else res.errors.push(name + ', row ' + r.rn + ': bar set "' + B.raw(r, 'set') + '" is not one of Bottom X, Bottom Y, Top X, Top Y, Starter, Extra.');
+    });
+    return res;
+  }
+
+  /* ---------- 3D: bar centre-lines and where each footing stands ---------- */
+  /** Every individual bar of one element as a 3D polyline (footing's own axes; origin at the base, under the bounding-box centre). */
+  function bars3D(p, el, sched) {
+    var R = sched.sets[el.mark] || {}, g = geom(p, el), c = g.c, D = g.D, bd = el.bars, out = [];
+    var z = { bx: c.b + bd.bx.dia / 2, by: c.b + bd.bx.dia + bd.by.dia / 2, tx: D - c.t - bd.tx.dia / 2, ty: D - c.t - bd.tx.dia - bd.ty.dia / 2 };
+    MAT.forEach(function (k) {
+      var s = R[k]; if (!s) return;
+      var sg = s.top ? -1 : 1, h = s.dia / 2;
+      s.bars.forEach(function (q) {
+        var a = q.a + h, b = q.b - h, pts = [[a, q.o, z[k]], [b, q.o, z[k]]], anch = [];
+        if (s.shape === '21') { pts = [[a, q.o, z[k] + sg * (s.legA - h)]].concat(pts).concat([[b, q.o, z[k] + sg * (s.legC - h)]]); anch = [[0, 1], [2, 3]]; }
+        else if (s.shape === '11') { pts.push([b, q.o, z[k] + sg * (s.legB - h)]); anch = [[1, 2]]; }
+        if (s.dir === 'y') pts = pts.map(function (v) { return [v[1], v[0], v[2]]; });
+        out.push({ dia: s.dia, kind: k, pts: pts, anch: anch.map(function (i) { return [pts[i[0]], pts[i[1]]]; }) });
+      });
+    });
+    if (R.st) {
+      var st = R.st, zs = st.seat + st.dia / 2, topZ = D + st.proj;
+      starterPositions(p, el).forEach(function (s) {
+        var knee = [s.x, s.y, zs], tip = [s.x, s.y, topZ];
+        out.push({ dia: st.dia, kind: 'st', pts: st.foot ? [[s.x + s.nx * st.foot, s.y + s.ny * st.foot, zs], knee, tip] : [knee, tip], anch: [[[s.x, s.y, D], tip]] });
+      });
+    }
+    return out;
+  }
+  /**
+   * Where each footing instance stands: x, y of its bounding-box centre, z of its base, rotation in degrees.
+   * Uses the positions table (named corner at the top face); marks without positions are lined up beside the rest.
+   */
+  function placements(p) {
+    var list = [], placed = {}, maxX = -Infinity, minY = Infinity;
+    p.positions.forEach(function (q) {
+      var ei = -1; p.elements.forEach(function (e, i) { if (e.mark === q.mark && ei < 0) ei = i; });
+      if (ei < 0) return;
+      var el = p.elements[ei], g = geom(p, el); if (!g.ok) return;
+      var rp = refPoints(g)[q.ref] || [0, 0], a = g.rot * Math.PI / 180, cs = Math.cos(a), sn = Math.sin(a);
+      var x = q.x - (rp[0] * cs - rp[1] * sn), y = q.y - (rp[0] * sn + rp[1] * cs);
+      list.push({ ei: ei, x: x, y: y, z: q.z - g.D, rot: g.rot }); placed[ei] = 1;
+      maxX = Math.max(maxX, x + Math.max(g.L, g.B)); minY = Math.min(minY, y);
+    });
+    var cur = list.length ? maxX + 2000 : 0, y0 = list.length ? minY : 0;
+    p.elements.forEach(function (el, ei) {
+      if (placed[ei]) return; var g = geom(p, el); if (!g.ok) return;
+      list.push({ ei: ei, x: cur + g.L / 2, y: y0, z: 0, rot: 0 }); cur += g.L + 800;
+    });
+    return { list: list, positioned: p.positions.length > 0 };
+  }
+  /** Rounds the corners of a 3D polyline with radius R (bend radius to bar centre-line). */
+  function filletPolyline(pts, R, seg) {
+    if (pts.length < 3 || !(R > 0)) return pts.slice();
+    seg = seg || 5;
+    var out = [pts[0]], i, j;
+    function sub(a, b) { return [a[0] - b[0], a[1] - b[1], a[2] - b[2]]; }
+    function len(a) { return Math.sqrt(a[0] * a[0] + a[1] * a[1] + a[2] * a[2]); }
+    function mul(a, k) { return [a[0] * k, a[1] * k, a[2] * k]; }
+    function addv(a, b) { return [a[0] + b[0], a[1] + b[1], a[2] + b[2]]; }
+    for (i = 1; i < pts.length - 1; i++) {
+      var p0 = pts[i - 1], p1 = pts[i], p2 = pts[i + 1], a = sub(p0, p1), b = sub(p2, p1), la = len(a), lb = len(b);
+      if (la < 1e-6 || lb < 1e-6) { out.push(p1); continue; }
+      var ua = mul(a, 1 / la), ub = mul(b, 1 / lb), cos = ua[0] * ub[0] + ua[1] * ub[1] + ua[2] * ub[2];
+      var ang = Math.acos(Math.max(-1, Math.min(1, cos)));
+      if (ang > Math.PI - 1e-3) { out.push(p1); continue; }
+      var t = Math.min(R / Math.tan(ang / 2), la * 0.49, lb * 0.49), s = addv(p1, mul(ua, t)), e = addv(p1, mul(ub, t));
+      for (j = 0; j <= seg; j++) {         // quadratic Bezier through the corner: close to a circular arc for 90 degree bends
+        var u = j / seg, w0 = (1 - u) * (1 - u), w1 = 2 * u * (1 - u), w2 = u * u;
+        out.push([w0 * s[0] + w1 * p1[0] + w2 * e[0], w0 * s[1] + w1 * p1[1] + w2 * e[1], w0 * s[2] + w1 * p1[2] + w2 * e[2]]);
+      }
+    }
+    out.push(pts[pts.length - 1]); return out;
+  }
+
+  var API = {
+    VERSION: VERSION, STD: STD, SHAPES: SHAPES, SHAPE_NAME: SHAPE_NAME, GEO_SHAPES: GEO_SHAPES, TOPS: TOPS, COVER_MODES: COVER_MODES, KINDS: KINDS, MAT: MAT, SET_LABEL: SET_LABEL, VP: VP, UNITS: UNITS, SHEETS: SHEETS,
+    kgm: kgm, roundUp: roundUp, num: num, r2: r2, ldFactor: ldFactor, parseLen: parseLen, fmtLen: fmtLen, parseCoord: parseCoord, fmtCoord: fmtCoord,
+    newProject: newProject, newFooting: newFooting, normalise: normalise, covers: covers, geom: geom, chords: chords, refPoints: refPoints, memberQty: memberQty,
+    cutLength: cutLength, generateBars: generateBars, buildSchedule: buildSchedule, displayRows: displayRows, tagText: tagText,
+    parseInventory: parseInventory, cuttingPlan: cuttingPlan, Dwg: Dwg, shapeSketch: shapeSketch, starterPositions: starterPositions,
+    footingDetail: footingDetail, footingPlan: footingPlan, formColumns: formColumns, scheduleAOA: scheduleAOA, composeSheet: composeSheet, fitSheet: fitSheet,
+    toSVG: toSVG, SVG_CSS_FIXED: SVG_CSS_FIXED, esc: esc, toDXF: toDXF, bvbs: bvbs, csv: csv, summaryAOA: summaryAOA,
+    sheetModel: sheetModel, applyCell: applyCell, sheetAOA: sheetAOA, importSheets: importSheets, bars3D: bars3D, placements: placements, filletPolyline: filletPolyline
+  };
+  if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.BBS = API;
+})(typeof window !== 'undefined' ? window : this);
+
+</script>
+<script>
+/* BBS Studio UI - v0.4.0 : geometry, points, positions and rebar sheets; shapes, covers, sub-marks */
+(function () {
+  'use strict';
+  var B = window.BBS, esc = B.esc;
+  function $(s, r) { return (r || document).querySelector(s); }
+  function all(s, fn) { Array.prototype.forEach.call(document.querySelectorAll(s), fn); }
+  var KEY = 'bbs-studio.project.v1', THEME_KEY = 'bbs-studio.theme';
+  var TPL = $('#dxf-template').textContent.replace(/^\s*\n/, ''), MSP = $('#dxf-template').getAttribute('data-msp');
+  var st = { p: null, sel: 0, step: 'input', sched: null, plan: null, sheets: {}, mode3: 'sel', solid: true, open: {} };
+  var STEPS = ['input', 'review', 'outputs'], STEP_NAME = { input: 'Input', review: 'Review', outputs: 'Outputs' };
+
+  /* ---------- storage ---------- */
+  function loadProject() {
+    try { var raw = localStorage.getItem(KEY); if (raw) { var p = JSON.parse(raw); if (p && p.app === 'bbs-studio') return B.normalise(p); } } catch (e) { /* empty or blocked storage */ }
+    return B.normalise(B.newProject());
+  }
+  var saveTimer = null;
+  function recalc() {
+    st.sched = B.buildSchedule(st.p); st.plan = B.cuttingPlan(st.p, st.sched.table);
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(function () { try { localStorage.setItem(KEY, JSON.stringify(st.p)); } catch (e) { /* storage unavailable */ } }, 400);
+  }
+
+  /* ---------- helpers ---------- */
+  var toastTimer = null;
+  function toast(msg) { var t = $('#toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.classList.remove('on'); }, 4200); }
+  function ask(title, bodyHTML, buttons) {
+    return new Promise(function (res) {
+      var d = $('#dlg');
+      d.innerHTML = '<h2>' + esc(title) + '</h2><div class="dlg-body">' + bodyHTML + '</div><div class="dlg-btns">' +
+        buttons.map(function (b, i) { return '<button data-v="' + esc(b.v) + '"' + (i === 0 ? ' class="primary"' : '') + '>' + esc(b.t) + '</button>'; }).join('') + '</div>';
+      function done(v) { d.removeEventListener('click', onClick); d.removeEventListener('cancel', onCancel); if (d.open) d.close(); res(v); }
+      function onClick(e) { var b = e.target.closest('button[data-v]'); if (b) done(b.dataset.v); }
+      function onCancel(e) { e.preventDefault(); done('cancel'); }
+      d.addEventListener('click', onClick); d.addEventListener('cancel', onCancel);
+      if (d.showModal) d.showModal(); else d.setAttribute('open', '');
+    });
+  }
+  function slug() { return (st.p.name || 'project').replace(/[^A-Za-z0-9_-]+/g, '_').replace(/^_+|_+$/g, '') || 'project'; }
+  function today() { var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+  function table(aoa) {
+    return '<div class="scroll"><table class="data"><thead><tr>' + aoa[0].map(function (h) { return '<th>' + esc(h) + '</th>'; }).join('') + '</tr></thead><tbody>' +
+      aoa.slice(1).map(function (r) { return '<tr>' + r.map(function (v) { return '<td>' + esc(v === undefined || v === null ? '' : v) + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table></div>';
+  }
+  function opts(arr, cur, label) { return arr.map(function (v) { return '<option value="' + v + '"' + (String(v) === String(cur) ? ' selected' : '') + '>' + (label ? label(v) : v) + '</option>'; }).join(''); }
+  function fld(label, control, hint, cls) { return '<label class="f' + (cls ? ' ' + cls : '') + '"><span>' + label + '</span>' + control + (hint ? '<small>' + hint + '</small>' : '') + '</label>'; }
+  function numC(g, k, v, extra) { return '<input type="number" min="0" step="any" data-g="' + g + '" data-k="' + k + '" value="' + esc(v) + '"' + (extra || '') + '>'; }
+  function validEl(e) { return !!e && e.type === 'FOOTING' && B.geom(st.p, e).ok; }
+  function sizeText(e) { var g = B.geom(st.p, e); return g.shape === 'circle' ? 'dia ' + Math.round(g.L) + ' x ' + g.D : Math.round(g.L) + ' x ' + Math.round(g.B) + ' x ' + g.D; }
+
+  /* ---------- downloads ---------- */
+  var ALLOWED = /\.(png|jpg|jpeg|webp|gif|txt|json|md|csv|html|svg|pdf|xlsx|zip|docx|pptx)$/i, capPromise = null;
+  function downloadsCap() {
+    if (!capPromise) capPromise = (window.claude && window.claude.use) ? window.claude.use('downloads').catch(function () { return null; }) : Promise.resolve(null);
+    return capPromise;
+  }
+  /** Saves a file. Inside the Claude viewer only some extensions are allowed, so others are wrapped in a zip. */
+  function saveFile(name, data, mime) {
+    return downloadsCap().then(function (cap) {
+      if (!cap) {
+        var blob = data instanceof Blob ? data : new Blob([data], { type: mime || 'application/octet-stream' });
+        var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click();
+        setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 2000); toast('Saved ' + name); return;
+      }
+      var ready = Promise.resolve({ name: name, data: data });
+      if (!ALLOWED.test(name)) {
+        if (!window.JSZip) { toast('Cannot save ' + name + ': the zip library did not load.'); return; }
+        var z = new window.JSZip(); z.file(name, data);
+        ready = z.generateAsync({ type: 'blob' }).then(function (b) { return { name: name + '.zip', data: b }; });
+      }
+      return ready.then(function (f) { return cap.save({ filename: f.name, data: f.data }).then(function () { toast('Saved ' + f.name); }); })
+        .catch(function (e) {
+          var c = e && e.code;
+          toast(c === 'declined' ? 'Save cancelled.' : c === 'rate_limited' ? 'Another save prompt is open. Finish it, then try again.' : 'This view cannot save ' + name + (c ? ' (' + c + ').' : '.'));
+        });
+    });
+  }
+
+  /* ---------- shared pieces ---------- */
+  function chips() {
+    return st.p.elements.map(function (e, i) {
+      var m = st.sched.byMember[e.mark];
+      return '<button class="chip" data-sel="' + i + '" aria-pressed="' + (i === st.sel) + '"><strong>' + esc(e.mark || '?') + '</strong><span>' + sizeText(e) + '</span><span>' + B.memberQty(st.p, e) + ' no.' + (m ? ', ' + B.r2(m.wt) + ' kg' : '') + '</span></button>';
+    }).join('');
+  }
+  function setHeader() {
+    $('#ptitle').textContent = st.p.name;
+    all('.steps button', function (b) { if (b.dataset.step === st.step) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
+    all('.page', function (pg) { pg.hidden = pg.id !== 'page-' + st.step; });
+    var i = STEPS.indexOf(st.step);
+    $('#nav').innerHTML = (i > 0 ? '<button data-step="' + STEPS[i - 1] + '">Back to ' + STEP_NAME[STEPS[i - 1]].toLowerCase() + '</button>' : '<span></span>') +
+      (i < 2 ? '<button class="primary" data-step="' + STEPS[i + 1] + '">Next: ' + STEP_NAME[STEPS[i + 1]].toLowerCase() + '</button>' : '<span></span>');
+  }
+
+  /* ---------- page 1: input (collapsible settings above Excel-style sheets) ---------- */
+  function unitLabel() { return B.UNITS[st.p.unit].label; }
+  function lenC(g, k, v) { return '<input type="text" inputmode="text" autocomplete="off" data-g="' + g + '" data-k="' + k + '" data-len="1" value="' + esc(B.fmtLen(v, st.p.unit)) + '">'; }
+  function det(id, title, body) { return '<details class="card" data-d="' + id + '"' + (st.open[id] ? ' open' : '') + '><summary>' + title + '</summary>' + body + '</details>'; }
+  function sheetCell(q, id, ri, col, label) {
+    var u = st.p.unit, a = 'data-s="' + id + '" data-r="' + ri + '" data-c="' + col.k + '" data-t="' + (q ? q.t : '') + '" aria-label="' + esc(label) + '"';
+    if (!q || q.t === 'none') return '<td class="na"></td>';
+    if (q.ro || q.t === 'label') {
+      var shown = q.t === 'len' ? B.fmtLen(q.v, u) : q.v;
+      return '<td class="' + (q.t === 'label' && !q.ro ? 'lab' : 'ro') + '">' + esc(shown === undefined ? '' : shown) + '</td>';
+    }
+    if (q.t === 'sel') return '<td><select ' + a + '>' + q.opts.map(function (o) { return '<option value="' + esc(o[0]) + '"' + (String(o[0]) === String(q.v) ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select></td>';
+    var val = q.v;
+    if (q.t === 'len') val = q.blankZero && !q.v ? '' : B.fmtLen(q.v, u);
+    else if (q.t === 'coord') val = B.fmtCoord(q.v, u);
+    return '<td' + (q.ov && q.v ? ' class="ovr"' : '') + '><input type="text" autocomplete="off"' + (q.t === 'int' ? ' inputmode="numeric"' : '') + ' value="' + esc(val) + '"' + (q.ph ? ' placeholder="' + esc(q.ph) + '"' : '') + ' ' + a + '></td>';
+  }
+  function sheetHTML(id, emptyText) {
+    var p = st.p, M = st.sheets[id] = B.sheetModel(p, st.sched, id), U = unitLabel(), deletable = id === 'pts' || id === 'pos';
+    var h = '<div class="scroll"><table class="sheet"><thead><tr class="letters"><th></th>' + M.cols.map(function (c, i) { return '<th>' + String.fromCharCode(65 + i) + '</th>'; }).join('') + '</tr>' +
+      '<tr class="names"><th>1</th>' + M.cols.map(function (c) { return '<th class="' + (c.calc ? 'gc' : id === 'bar' ? 'gb' : 'gm') + '">' + c.h + (c.len ? ' <small>' + U + '</small>' : '') + '</th>'; }).join('') + '</tr></thead><tbody>';
+    M.rows.forEach(function (r, ri) {
+      var n = ri + 2;
+      if (r.blank) { h += '<tr class="blank"><th>' + n + '</th><td colspan="' + M.cols.length + '"></td></tr>'; return; }
+      var ei = r.ei === undefined ? -1 : r.ei, mk = ei >= 0 ? p.elements[ei].mark : '', del = deletable || r.kind === 'extra';
+      h += '<tr' + (ei >= 0 ? ' data-ei="' + ei + '"' : '') + ' class="' + (r.first ? 'first ' : '') + (ei === st.sel ? 'sel' : '') + '"><th>' + n +
+        (del ? '<button class="x" data-act="delrow" data-s="' + id + '" data-r="' + ri + '" aria-label="Delete row ' + n + '">&times;</button>' : '') + '</th>' +
+        M.cols.map(function (c) { return sheetCell(r.cells[c.k], id, ri, c, (mk ? mk + ' ' : '') + c.h + ' row ' + n); }).join('') + '</tr>';
+    });
+    if (!M.rows.length) h += '<tr class="blank"><th>2</th><td colspan="' + M.cols.length + '">' + emptyText + '</td></tr>';
+    return h + '</tbody></table></div>';
+  }
+  function sheetsHTML() {
+    var p = st.p, el = p.elements[st.sel], mk = el ? esc(el.mark || '?') : '', anyPoly = p.elements.some(function (e) { return e.shape === 'poly'; });
+    return '<div class="sheet-bar"><div class="seg" role="group" aria-label="Display unit">' + ['mm', 'cm', 'm', 'in', 'ftin'].map(function (u) { return '<button data-unit="' + u + '" aria-pressed="' + (p.unit === u) + '">' + B.UNITS[u].label + '</button>'; }).join('') + '</div>' +
+      '<div class="row-btns"><button data-act="add">Add footing</button>' + (el ? '<button data-act="dup">Duplicate ' + mk + '</button><button data-act="del">Delete ' + mk + '</button>' : '') + '</div></div>' +
+      '<h3 class="sh">Geometry <small>concrete outline, depths, covers</small></h3>' + sheetHTML('geo', 'No footings yet. Use Add footing above.') +
+      (anyPoly ? '<div class="sh-row"><h3 class="sh">Corner points <small>polygon footings only; X and Y in the footing\'s own axes, in order around the outline</small></h3>' +
+        (el && el.shape === 'poly' ? '<button data-act="addpt">Add point to ' + mk + '</button>' : '') + '</div>' + sheetHTML('pts', '') : '') +
+      '<div class="sh-row"><h3 class="sh">Positions <small>one row per footing on site: a named corner (or the centre) at the top face</small></h3>' + (el ? '<button data-act="addpos">Add position for ' + mk + '</button>' : '') + '</div>' +
+      sheetHTML('pos', 'No positions. Without them Qty in the geometry table is used and the 3D view lines the footings up side by side.') +
+      '<div class="sh-row"><h3 class="sh">Rebar <small>steel per footing; white cells are yours, grey cells are calculated</small></h3>' + (el ? '<button data-act="addx">Add extra bar to ' + mk + '</button>' : '') + '</div>' +
+      sheetHTML('bar', 'Add a footing to enter its bars.');
+  }
+  function coverFields() {
+    var p = st.p, U = unitLabel();
+    return fld('Footing cover type', '<select data-g="p" data-k="coverMode">' + opts(Object.keys(B.COVER_MODES), p.coverMode, function (k) { return B.COVER_MODES[k]; }) + '</select>') +
+      fld(p.coverMode === 'all' ? 'Footing cover, all faces' : 'Footing side cover', lenC('p', 'cS', p.cS), U) +
+      (p.coverMode !== 'all' ? fld('Footing bottom cover', lenC('p', 'cB', p.cB), U) : '') + (p.coverMode === 'stb' ? fld('Footing top cover', lenC('p', 'cT', p.cT), U) : '') +
+      fld('Column cover', lenC('p', 'coverColumn', p.coverColumn), U);
+  }
+  function renderInput() {
+    var p = st.p, S = B.STD[p.standard], U = unitLabel(), codeLd = function (d) { return B.ldFactor(Object.assign({}, p, { lapMode: 'code' }), d); };
+    var lap = fld('Lap and anchorage length from', '<select data-g="p" data-k="lapMode">' + opts(['code', 'table'], p.lapMode, function (v) { return v === 'code' ? 'Code (' + (p.standard === 'IS' ? 'IS 456' : 'BS 8110') + ')' : 'My project table'; }) + '</select>',
+      'Code gives ' + codeLd(16) + ' x bar size for ' + S.gradePrefix + p.grade + ', fy ' + p.fy);
+    if (p.lapMode === 'table') lap += '<div class="laps">' + S.dias.map(function (d) { return fld(S.prefix + d, '<input type="number" min="0" data-g="lap" data-k="' + d + '" value="' + esc(p.lapTable[d] || '') + '" placeholder="' + codeLd(d) + '">', 'x bar size'); }).join('') + '</div>';
+    if (st.open.proj === undefined) st.open.proj = true;
+    $('#inBody').innerHTML =
+      det('proj', 'Project settings', '<div class="fields">' +
+        fld('Project name', '<input type="text" data-g="p" data-k="name" value="' + esc(p.name) + '" autocomplete="off">', '', 'wide2') +
+        fld('Detailing standard', '<select data-g="p" data-k="standard">' + opts(['IS', 'BS'], p.standard, function (v) { return B.STD[v].name; }) + '</select>') +
+        fld('Concrete grade', '<select data-g="p" data-k="grade">' + opts(S.grades, p.grade, function (v) { return S.gradePrefix + v; }) + '</select>') +
+        fld('Steel grade', '<select data-g="p" data-k="fy">' + opts(S.fys, p.fy, function (v) { return 'fy ' + v; }) + '</select>') + coverFields() + '</div>' +
+        '<p class="hint">Covers and concrete grade here are the defaults. Any footing can override them in the geometry table.</p>') +
+      det('stock', 'Steel stock, offcuts, laps and bend deductions', '<div class="fields">' +
+        fld('Stock bar length', lenC('p', 'stock', p.stock), U + '. Longer straight bars are split and lapped.') +
+        fld('Keep offcuts longer than', lenC('p', 'minOffcut', p.minOffcut), U + '. Anything shorter counts as scrap.') +
+        fld('Offcuts already in the yard', '<textarea data-g="p" data-k="inventory" rows="2" placeholder="16: 3200, 4100; 12: 2500">' + esc(p.inventory) + '</textarea>', 'Bar size, a colon, then lengths in mm. These are cut before any new bar is opened.', 'wide') + lap +
+        fld('Deduction per 45&deg; bend', numC('ded', '45', p.bendDed[45]), 'x bar size') + fld('Deduction per 90&deg; bend', numC('ded', '90', p.bendDed[90]), 'x bar size') + fld('Deduction per 135&deg; bend', numC('ded', '135', p.bendDed[135]), 'x bar size') + '</div>') +
+
+      '<section class="card"><h2>Footings</h2><div id="sheets">' + sheetsHTML() + '</div>' +
+      '<div class="tabs2" role="tablist" aria-label="Element types"><button role="tab" aria-selected="true">Footings</button><button role="tab" disabled>Columns (next version)</button><button role="tab" disabled>Beams (later)</button></div>' +
+      '<div class="sheet-foot"><div><p class="hint" id="unitHint"></p>' +
+      '<p class="hint"><strong>Shape code.</strong> Auto picks straight (00) or bent up (21) from the anchorage needed, and sizes the legs. Pick 00, 11 or 21 yourself to fix the shape; A to C then show the automatic value in grey and take your own value if you type one. Clear the cell to go back to automatic.</p>' +
+      '<p class="hint"><strong>Irregular footings.</strong> Every bar is clipped to the outline and counted on its own; a set with several lengths gets sub-marks such as 04a, 04b. Enter and the arrow keys move down and up a column.</p></div>' +
+      '<aside class="el-sketch"><h3 id="skTitle">Plan sketch</h3><div id="inSketch"></div></aside></div></section>' +
+
+      '<section class="card"><h2>Excel and project files</h2><div class="row-btns"><button data-act="tpl">Download Excel sheets</button><button data-act="imp">Import Excel</button>' +
+      '<button data-act="savep">Save project file</button><button data-act="openp">Open project file</button><button data-act="newp">New project</button></div>' +
+      '<p class="hint">The Excel file has the same sheets as above (geometry, points, positions, rebar) in the current display unit. Excel files made before v0.4.0 do not import; project files from any version still open.</p></section>';
+    renderSketch();
+  }
+  function renderSketch() {
+    var box = $('#inSketch'), el = st.p.elements[st.sel], U = unitLabel(); if (!box) return;
+    box.innerHTML = validEl(el) ? B.toSVG(B.footingPlan(st.p, el, st.sched), { label: 'Plan of ' + el.mark }) : '<p class="empty">Complete the size of this footing to see its plan.</p>';
+    $('#skTitle').textContent = 'Plan sketch' + (el ? ' of ' + (el.mark || '?') + ' (mm)' : '');
+    $('#unitHint').innerHTML = '<strong>Units.</strong> Type a length with any unit: <code>3000mm</code>, <code>3m</code>, <code>30cm</code>, <code>18in</code>, <code>9\'-10 1/2"</code>. A number on its own is read as <strong>' + (st.p.unit === 'ftin' ? 'feet (or 10-6 for feet and inches)' : U) + '</strong>. Bar sizes are always in mm.';
+  }
+  /** Redraws the sheets after an edit without losing the cell the user has just moved to. */
+  function redrawSheet() {
+    setTimeout(function () {
+      var a = document.activeElement, d = a && a.dataset ? a.dataset : {}, w = $('#sheets'); if (!w) return;
+      var lefts = Array.prototype.map.call(w.querySelectorAll('.scroll'), function (s) { return s.scrollLeft; });
+      w.innerHTML = sheetsHTML(); renderSketch();
+      Array.prototype.forEach.call(w.querySelectorAll('.scroll'), function (s, i) { if (lefts[i]) s.scrollLeft = lefts[i]; });
+      if (d.r !== undefined) { var n = w.querySelector('[data-s="' + d.s + '"][data-r="' + d.r + '"][data-c="' + d.c + '"]'); if (n) { n.focus(); if (n.select) n.select(); } }
+    }, 0);
+  }
+  function badLength(t) {
+    t.setAttribute('aria-invalid', 'true');
+    toast('Could not read "' + t.value + '" as a length. Try 3000, 3m, 30cm or 9\'-10 1/2".');
+  }
+
+  /* ---------- page 2: review ---------- */
+  function miniSketch(r) { var d = new B.Dwg(); B.shapeSketch(d, r.shape, r.dims, 0, 0, 60, 30, 5, false); d.ext(0, 0); d.ext(60, 30); return B.toSVG(d, { pad: 1, label: 'Shape ' + r.shape }); }
+  function chart(title, rows, unit) {
+    var max = Math.max.apply(null, rows.map(function (r) { return r[1]; }).concat([1e-9]));
+    return '<div class="chart"><h3>' + title + '</h3>' + (rows.length ? rows.map(function (r) {
+      return '<div class="cr"><span class="cl">' + esc(r[0]) + '</span><span class="cb"><i style="width:' + (r[1] / max * 100).toFixed(1) + '%"></i></span><span class="cv">' + B.r2(r[1]) + ' ' + unit + '</span></div>';
+    }).join('') : '<p class="empty">No bars yet.</p>') + '</div>';
+  }
+  function renderReview() {
+    var p = st.p, s = st.sched, S = B.STD[p.standard], cols = B.formColumns(p), el = p.elements[st.sel];
+    var errs = s.warnings.filter(function (w) { return w.level !== 'info'; }).length;
+    var warn = s.warnings.length ? '<ul class="warns">' + s.warnings.map(function (w) { return '<li class="' + w.level + '"><strong>' + esc(w.member) + '</strong> ' + esc(w.text) + '</li>'; }).join('') + '</ul>'
+      : '<p class="ok">No problems found in ' + p.elements.length + ' element' + (p.elements.length === 1 ? '' : 's') + '.</p>';
+    var newBars = 0, issued = 0, scrapKg = 0, kg = 0; st.plan.forEach(function (g) { newBars += g.newBars; scrapKg += g.scrapKg; kg += g.kg; });
+    var marks = {}; s.table.forEach(function (r) { marks[r.mark] = 1; });
+    var dias = Object.keys(s.byDia).map(Number).sort(function (a, b) { return a - b; });
+    $('#rvTop').innerHTML =
+      '<section class="card"><h2>Checks' + (errs ? ': ' + errs + ' to look at' : '') + '</h2>' + warn + '</section>' +
+      '<section class="card"><h2>Steel summary</h2><dl class="stats"><div><dt>Total steel</dt><dd>' + s.totalWt + ' kg</dd></div><div><dt>Bar marks</dt><dd>' + Object.keys(marks).length + '</dd></div>' +
+      '<div><dt>New ' + (p.stock / 1000) + ' m bars to order</dt><dd>' + newBars + '</dd></div><div><dt>Scrap from cutting</dt><dd>' + (kg ? B.r2(scrapKg / kg * 100) : 0) + '%</dd></div></dl>' +
+      '<div class="charts">' + chart('Weight by bar size', dias.map(function (d) { return [S.prefix + d, s.byDia[d].wt]; }), 'kg') +
+      chart('Weight by element (all repeats)', Object.keys(s.byMember).map(function (m) { return [m + ' x ' + s.byMember[m].qty, s.byMember[m].wt]; }), 'kg') + '</div></section>';
+    $('#rvEls').innerHTML = '<h2>Element drawings</h2><div class="chips">' + chips() + '</div>';
+    $('#detail').innerHTML = validEl(el) ? B.toSVG(B.footingDetail(p, el, s, 1e9, true), { label: 'Plan, sections and bar shapes of ' + el.mark }) : '<p class="empty">This element has no valid size yet. Go back to Input to complete it.</p>';
+    var shown = B.displayRows(p, s), varies = s.table.some(function (r) { return r.varies; });
+    var body = shown.map(function (r) { return '<tr' + (el && r.member === el.mark ? ' class="on"' : '') + '><td class="sk">' + miniSketch(r) + '</td>' + cols.map(function (c) { return '<td>' + esc(c.v(r)) + '</td>'; }).join('') + '</tr>'; }).join('');
+    var plan = st.plan.map(function (g) {
+      return '<div class="cut"><h3>' + S.prefix + g.dia + '</h3><p class="cut-s"><span><strong>' + g.newBars + '</strong> new bars</span><span><strong>' + g.offcutsUsed + '</strong> yard offcuts used</span>' +
+        '<span><strong>' + g.wastePct + '%</strong> scrap (' + g.scrapKg + ' kg)</span><span>Offcuts to keep: ' + (g.reusable.length ? g.reusable.map(Math.round).join(', ') + ' mm' : 'none') + '</span></p><ul>' +
+        g.patterns.map(function (t) {
+          return '<li><span class="cnt">' + t.count + ' x</span><span class="bar" title="' + esc(t.desc) + '"><i style="width:' + ((t.len - t.left) / t.len * 100).toFixed(1) + '%"></i>' + (t.left >= p.minOffcut ? '<b style="width:' + (t.left / t.len * 100).toFixed(1) + '%"></b>' : '') + '</span>' +
+            '<span class="pd">' + (t.src === 'new' ? 'New ' : 'Offcut ') + t.len + ': ' + esc(t.desc) + ', left ' + Math.round(t.left) + '</span></li>';
+        }).join('') + '</ul></div>';
+    }).join('');
+    $('#rvBottom').innerHTML =
+      '<section class="card"><div class="card-h"><h2>Bar bending schedule</h2>' + fld('Schedule form', '<select data-g="p" data-k="form">' + opts(['standard', 'cads'], p.form, function (v) { return v === 'cads' ? 'CADS RC form with weights' : S.short + ' standard form'; }) + '</select>', '', 'inline') + '</div>' +
+      (varies ? '<label class="chk"><input type="checkbox" data-g="p" data-k="collapse"' + (p.collapse ? ' checked' : '') + '> Show each set of varying lengths as one line with its length range (totals and the cutting plan still count every bar)</label>' : '') +
+      (s.table.length ? '<div class="scroll"><table class="data bbs"><thead><tr><th>Sketch</th>' + cols.map(function (c) { return '<th>' + esc(c.h) + '</th>'; }).join('') + '</tr></thead><tbody>' + body + '</tbody></table></div>' : '<p class="empty">No bars yet. Add an element on the Input page.</p>') +
+      '<p class="hint">Two cutting lengths are shown: the ' + S.short + ' shape formula with the minimum former radius, rounded up to ' + S.round + ' mm, and the sum of legs less ' + p.bendDed[90] + ' bar sizes per 90&deg; bend. Weights and the cutting plan use the first. Rows of the selected element are shaded.</p></section>' +
+      '<section class="card"><h2>Cutting plan</h2><p class="hint">Each strip is one bar. Red is cut pieces, yellow is an offcut worth keeping, hatching is scrap.</p>' + (plan || '<p class="empty">Nothing to cut yet.</p>') + '</section>';
+    build3D();
+  }
+
+  /* ---------- page 3: outputs ---------- */
+  function renderOutputs() {
+    var s = st.sched, errs = s.warnings.filter(function (w) { return w.level === 'error'; }).length;
+    var rows = [
+      ['x-all', 'Everything in one zip', 'Workbook, CSV, BVBS, DXF drawing, HTML report, 3D model and the project file.', 'Download everything', 1],
+      ['x-xlsx', 'Excel workbook', 'Schedule, weight by bar size, weight by element, cutting plan, and your input sheets.', 'Download Excel'],
+      ['x-dxf', 'DXF drawing', 'Every element detail at 1:1 with the schedule table, plus an A1 layout. Arrives in a zip inside Claude.', 'Download DXF'],
+      ['x-html', 'HTML report', 'Schedule, summaries, cutting plan and all details on one page. Open it and print to make a PDF.', 'Download report'],
+      ['x-csv', 'CSV schedule', 'The schedule table only, for other software.', 'Download CSV'],
+      ['x-bvbs', 'BVBS bending file', 'BF2D lines (.abs) for bending machines. Arrives in a zip inside Claude.', 'Download BVBS'],
+      ['x-glb', '3D model', 'All elements with solid bars as a GLB file. Arrives in a zip inside Claude.', 'Download 3D model'],
+      ['snap', '3D snapshot', 'A PNG image of the 3D view as last set on the Review page.', 'Download image']
+    ];
+    $('#outBody').innerHTML = '<section class="card"><h2>Downloads</h2><p class="hint">' + st.p.elements.length + ' element' + (st.p.elements.length === 1 ? '' : 's') + ', ' + s.totalWt + ' kg of steel, ' + B.STD[st.p.standard].name + '.' +
+      (errs ? ' <strong class="errtxt">' + errs + ' problem' + (errs === 1 ? '' : 's') + ' on the Review page should be fixed before these files are issued.</strong>' : '') + '</p>' +
+      '<ul class="outs">' + rows.map(function (r) { return '<li><div><h3>' + r[1] + '</h3><p>' + r[2] + '</p></div><button data-act="' + r[0] + '"' + (r[4] ? ' class="primary"' : '') + '>' + r[3] + '</button></li>'; }).join('') + '</ul></section>';
+  }
+
+  /* ---------- 3D ---------- */
+  var T3 = null;
+  function cssVar(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+  function init3D() {
+    if (T3 || !window.THREE) return !!T3;
+    var THREE = window.THREE, canvas = $('#c3d');
+    try {
+      var r = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, preserveDrawingBuffer: true });
+      var cam = new THREE.PerspectiveCamera(35, 1, 10, 1e7); cam.up.set(0, 0, 1);
+      var scene = new THREE.Scene(), grp = new THREE.Group(); scene.add(grp);
+      scene.add(new THREE.AmbientLight(0xffffff, 0.75)); var dl = new THREE.DirectionalLight(0xffffff, 0.7); dl.position.set(1, -2, 3); scene.add(dl);
+      var ctl = THREE.OrbitControls ? new THREE.OrbitControls(cam, canvas) : null;
+      T3 = { r: r, cam: cam, scene: scene, grp: grp, ctl: ctl };
+      if (ctl) ctl.addEventListener('change', draw3D);
+      if (window.ResizeObserver) new ResizeObserver(function () { if (st.step === 'review') { size3D(); draw3D(); } }).observe($('#stage3d'));
+    } catch (e) { T3 = null; return false; }
+    return true;
+  }
+  function size3D() { var box = $('#stage3d'), w = Math.max(200, box.clientWidth || 800), h = Math.max(200, box.clientHeight || 600); T3.r.setPixelRatio(Math.min(2, window.devicePixelRatio || 1)); T3.r.setSize(w, h, false); T3.cam.aspect = w / h; T3.cam.updateProjectionMatrix(); }
+  function draw3D() { if (T3) T3.r.render(T3.scene, T3.cam); }
+  function concreteMeshes(THREE, g, el, mat, lineMat) {
+    var out = [], D = g.D, geo;
+    function add(gm, z) { var m = new THREE.Mesh(gm, mat); m.position.z = z; out.push(m); var e = new THREE.LineSegments(new THREE.EdgesGeometry(gm, 20), lineMat); e.position.z = z; out.push(e); }
+    if (g.shape === 'circle') { geo = new THREE.CylinderGeometry(g.R, g.R, D, 48); geo.rotateX(Math.PI / 2); add(geo, D / 2); }
+    else if (g.shape === 'poly') {
+      var sh = new THREE.Shape(); g.poly.forEach(function (q, i) { if (i) sh.lineTo(q[0], q[1]); else sh.moveTo(q[0], q[1]); });
+      add(new THREE.ExtrudeGeometry(sh, { depth: D, bevelEnabled: false }), 0);
+    } else if (g.top === 'stepped') { add(new THREE.BoxGeometry(g.L, g.B, g.edgeD), g.edgeD / 2); add(new THREE.BoxGeometry(g.topX, g.topY, D - g.edgeD), g.edgeD + (D - g.edgeD) / 2); }
+    else if (g.top === 'sloped') {
+      var hx = g.L / 2, hy = g.B / 2, tx = g.topX / 2, ty = g.topY / 2, e = g.edgeD, v = [];
+      var b = [[-hx, -hy, 0], [hx, -hy, 0], [hx, hy, 0], [-hx, hy, 0]], m = b.map(function (q) { return [q[0], q[1], e]; }), t = [[-tx, -ty, D], [tx, -ty, D], [tx, ty, D], [-tx, ty, D]];
+      function quad(a, b2, c, d) { [a, b2, c, a, c, d].forEach(function (q) { v.push(q[0], q[1], q[2]); }); }
+      quad(b[0], b[3], b[2], b[1]); quad(t[0], t[1], t[2], t[3]);
+      for (var i = 0; i < 4; i++) { var j = (i + 1) % 4; quad(b[i], b[j], m[j], m[i]); quad(m[i], m[j], t[j], t[i]); }
+      geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(v, 3)); geo.computeVertexNormals(); add(geo, 0);
+    } else add(new THREE.BoxGeometry(g.L, g.B, D), D / 2);
+    return out;
+  }
+  function build3D() {
+    if (!init3D()) { $('#msg3d').textContent = '3D view is unavailable: the 3D library or WebGL did not load in this browser.'; return; }
+    var THREE = window.THREE, p = st.p, root = T3.grp, S = B.STD[p.standard];
+    root.traverse(function (o) { if (o.geometry) o.geometry.dispose(); });
+    while (root.children.length) root.remove(root.children[0]);
+    T3.scene.background = new THREE.Color(cssVar('--sheet') || '#ffffff');
+    var col = { bx: cssVar('--rebar'), by: cssVar('--rebar'), tx: cssVar('--rebar-top'), ty: cssVar('--rebar-top'), st: cssVar('--starter') }, mats = {}, hi = cssVar('--hi');
+    function mat(c) { return mats[c] || (mats[c] = new THREE.MeshLambertMaterial({ color: new THREE.Color(c) })); }
+    function v3(a) { return new THREE.Vector3(a[0], a[1], a[2]); }
+    var concMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(cssVar('--concrete')), transparent: true, opacity: 0.16, depthWrite: false, side: THREE.DoubleSide });
+    var inkMat = new THREE.LineBasicMaterial({ color: new THREE.Color(cssVar('--ink')) }), colMat = new THREE.LineBasicMaterial({ color: new THREE.Color(cssVar('--accent')) });
+    function bar(grp, pts, dia, c, fat) {
+      if (!st.solid) { grp.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts.map(v3)), new THREE.LineBasicMaterial({ color: new THREE.Color(c) }))); return; }
+      var path = new THREE.CurvePath(), i; for (i = 0; i < pts.length - 1; i++) path.add(new THREE.LineCurve3(v3(pts[i]), v3(pts[i + 1])));
+      grp.add(new THREE.Mesh(new THREE.TubeGeometry(path, pts.length === 2 ? 1 : (pts.length - 1) * 3, dia / 2 * (fat || 1), 8, false), mat(c)));
+    }
+    var place = B.placements(p), single = st.mode3 === 'sel';
+    var list = single ? (p.elements[st.sel] ? [{ ei: st.sel, x: 0, y: 0, z: 0, rot: 0 }] : []) : place.list;
+    list.forEach(function (pl) {
+      var el = p.elements[pl.ei], g = B.geom(p, el); if (!g.ok) return;
+      var grp = new THREE.Group(); grp.position.set(pl.x, pl.y, pl.z); grp.rotation.z = pl.rot * Math.PI / 180; root.add(grp);
+      concreteMeshes(THREE, g, el, concMat, inkMat).forEach(function (m) { grp.add(m); });
+      var s0 = st.sched.sets[el.mark] && st.sched.sets[el.mark].st, stub = (s0 ? s0.proj : 300) + 150;
+      var ce = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(el.colX, el.colY, stub)), colMat); ce.position.set(0, 0, g.D + stub / 2); grp.add(ce);
+      B.bars3D(p, el, st.sched).forEach(function (b) {
+        bar(grp, st.solid ? B.filletPolyline(b.pts, S.radius(b.dia) + b.dia / 2, 5) : b.pts, b.dia, col[b.kind]);
+        if (single) b.anch.forEach(function (a) { bar(grp, a, b.dia, hi, 1.35); });
+      });
+    });
+    size3D();
+    var box = new THREE.Box3().setFromObject(root);
+    if (!box.isEmpty()) {
+      var c = box.getCenter(new THREE.Vector3()), r = box.getSize(new THREE.Vector3()).length() / 2, dist = r / Math.sin(T3.cam.fov * Math.PI / 360) * 1.3;
+      T3.cam.position.set(c.x + dist * 0.55, c.y - dist * 0.7, c.z + dist * 0.45); T3.cam.near = dist / 100; T3.cam.far = dist * 20; T3.cam.updateProjectionMatrix();
+      if (T3.ctl) { T3.ctl.target.copy(c); T3.ctl.update(); } else T3.cam.lookAt(c);
+    }
+    var el0 = p.elements[st.sel], s1 = el0 && st.sched.sets[el0.mark] && st.sched.sets[el0.mark].st;
+    $('#msg3d').textContent = 'Drag to turn, scroll or pinch to zoom. ' + (single ? 'Yellow marks anchorage and lap lengths' + (s1 ? '; starter lap is ' + Math.round(s1.proj) + ' mm.' : '.') :
+      place.positioned ? 'Footings stand where the Positions table puts them; marks without a position are lined up beside.' : 'One of each mark, side by side. Add rows to the Positions table to place them.');
+    all('[data-m3]', function (b) { b.setAttribute('aria-pressed', String(b.dataset.m3 === st.mode3)); });
+    all('[data-solid]', function (b) { b.setAttribute('aria-pressed', String((b.dataset.solid === '1') === st.solid)); });
+    draw3D();
+  }
+  function glb() {
+    return new Promise(function (res) {
+      if (!window.THREE || !window.THREE.GLTFExporter) return res(null);
+      var keep = { mode: st.mode3, solid: st.solid };
+      function back() { st.mode3 = keep.mode; st.solid = keep.solid; build3D(); }
+      try {
+        st.mode3 = 'all'; st.solid = true; build3D(); if (!T3) return res(null);
+        new window.THREE.GLTFExporter().parse(T3.grp, function (out) { back(); res(out instanceof ArrayBuffer ? out : null); }, { binary: true });
+      } catch (e) { back(); res(null); }
+    });
+  }
+
+  /* ---------- exports ---------- */
+  function workbook(templateOnly) {
+    var X = window.XLSX, p = st.p, wb = X.utils.book_new();
+    function add(name, aoa) { var ws = X.utils.aoa_to_sheet(aoa); ws['!cols'] = aoa[0].map(function (h) { return { wch: Math.max(10, String(h).length + 2) }; }); X.utils.book_append_sheet(wb, ws, name); }
+    if (!templateOnly) {
+      var sm = B.summaryAOA(p, st.sched, st.plan);
+      add('BBS', B.scheduleAOA(p, st.sched)); add('Weight by size', sm.byDia); add('Weight by element', sm.byMember); add('Cutting plan', sm.cutting);
+    }
+    ['geo', 'pts', 'pos', 'bar'].forEach(function (id) { add(B.SHEETS[id].name, B.sheetAOA(p, st.sched, id)); });
+    add('Columns', [['Columns are not generated in this version of BBS Studio.']]); add('Beams', [['Beams are not generated in this version of BBS Studio.']]);
+    return X.write(wb, { type: 'array', bookType: 'xlsx' });
+  }
+  function reportHTML() {
+    var p = st.p, S = B.STD[p.standard], sm = B.summaryAOA(p, st.sched, st.plan);
+    var dets = p.elements.filter(validEl).map(function (e) { return '<div class="det">' + B.toSVG(B.footingDetail(p, e, st.sched, 1e9)) + '</div>'; }).join('');
+    return '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>' + esc(p.name) + ' - bar bending schedule</title><style>' +
+      'body{font:14px/1.45 Arial,Helvetica,sans-serif;color:#18283a;margin:24px;max-width:1200px}h1{font-size:22px;margin:0 0 4px}h2{font-size:16px;margin:28px 0 8px}' +
+      'table{border-collapse:collapse;width:100%;font-size:12px}th,td{border:1px solid #9aa6ad;padding:4px 6px;text-align:center}th{background:#e9edea}.scroll{overflow-x:auto}' +
+      '.det{border:1px solid #9aa6ad;margin:12px 0;page-break-inside:avoid}.det svg{width:100%;height:auto;display:block}p.m{color:#4a5a68;margin:0}' + B.SVG_CSS_FIXED +
+      '@media print{body{margin:8mm}}</style></head><body><h1>' + esc(p.name) + '</h1><p class="m">Bar bending schedule to ' + S.name + ', ' + S.gradePrefix + p.grade + ', fy ' + p.fy +
+      '. Issued ' + today() + '. Total steel ' + st.sched.totalWt + ' kg. Made with BBS Studio v' + B.VERSION + '.</p>' +
+      '<h2>Schedule</h2>' + table(B.scheduleAOA(p, st.sched)) + '<h2>Weight by bar size</h2>' + table(sm.byDia) + '<h2>Weight by element</h2>' + table(sm.byMember) +
+      '<h2>Cutting plan</h2>' + table(sm.cutting) + '<h2>Details</h2>' + dets + '</body></html>';
+  }
+  function dxf() { return B.toDXF(TPL, st.p, st.sched, MSP, today()); }
+  function exportAll() {
+    if (!window.JSZip) { toast('The zip library did not load. Download the files one at a time.'); return; }
+    var z = new window.JSZip(), n = slug(), d = dxf();
+    if (window.XLSX) z.file(n + '_BBS.xlsx', workbook(false));
+    z.file(n + '_BBS.csv', B.csv(B.scheduleAOA(st.p, st.sched))); z.file(n + '_BBS.abs', B.bvbs(st.p, st.sched));
+    z.file(n + '_details.dxf', d.text); z.file(n + '_report.html', reportHTML()); z.file(n + '_project.json', JSON.stringify(st.p, null, 1));
+    glb().then(function (g) { if (g) z.file(n + '_model.glb', g); return z.generateAsync({ type: 'blob' }); }).then(function (b) { return saveFile(n + '_BBS_package.zip', b, 'application/zip'); });
+  }
+  function importExcel(file) {
+    if (!window.XLSX) { toast('The Excel library did not load, so files cannot be read.'); return; }
+    file.arrayBuffer().then(function (buf) {
+      var wb = window.XLSX.read(buf, { type: 'array' });
+      var book = {}; wb.SheetNames.forEach(function (n) { book[n] = window.XLSX.utils.sheet_to_json(wb.Sheets[n], { header: 1, defval: '' }); });
+      var res = B.importSheets(book, st.p.unit);
+      if (!res.found) { toast('No "Footing geometry" sheet found. Excel files made before v0.4.0 cannot be imported; open the project file instead.'); return; }
+      if (!res.elements.length) { toast('The Footing geometry sheet has no rows.'); return; }
+      var body = '<p>Found ' + res.elements.length + ' footing' + (res.elements.length === 1 ? '' : 's') + ', ' + res.positions.length + ' position' + (res.positions.length === 1 ? '' : 's') + ' and ' + res.extraBars.length + ' extra bar row' + (res.extraBars.length === 1 ? '' : 's') + ' in ' + esc(file.name) + '.</p>' +
+        (res.errors.length ? '<p><strong>' + res.errors.length + ' cell' + (res.errors.length === 1 ? '' : 's') + ' could not be read and were left empty:</strong></p><ul>' + res.errors.slice(0, 6).map(function (e) { return '<li>' + esc(e) + '</li>'; }).join('') + '</ul>' : '');
+      return ask('Import Excel', body, [{ v: 'replace', t: 'Replace current footings' }, { v: 'add', t: 'Add to current footings' }, { v: 'cancel', t: 'Cancel' }]).then(function (v) {
+        if (v === 'cancel') return;
+        ['elements', 'extraBars', 'positions'].forEach(function (k) { st.p[k] = (v === 'add' ? st.p[k] : []).concat(res[k]); });
+        B.normalise(st.p); st.sel = 0; refresh(); toast('Imported ' + res.elements.length + ' footings.');
+      });
+    }).catch(function () { toast('That file could not be read as an Excel workbook.'); });
+  }
+  function openProject(file) {
+    file.text().then(function (t) {
+      var p = JSON.parse(t); if (!p || p.app !== 'bbs-studio') throw new Error('not a project');
+      st.p = B.normalise(p); st.sel = 0; refresh(); toast('Opened ' + file.name + '.');
+    }).catch(function () { toast('That is not a BBS Studio project file.'); });
+  }
+  function pick(accept, cb) { var i = $('#file'); i.value = ''; i.accept = accept; i.onchange = function () { if (i.files && i.files[0]) cb(i.files[0]); }; i.click(); }
+
+  /* ---------- navigation, refresh, events ---------- */
+  function renderPage() { if (st.step === 'input') renderInput(); else if (st.step === 'review') renderReview(); else renderOutputs(); }
+  function refresh() { recalc(); setHeader(); renderPage(); }
+  function go(step) { st.step = step; setHeader(); renderPage(); window.scrollTo(0, 0); }
+
+  document.addEventListener('change', function (e) {
+    var t = e.target, d = t.dataset || {}, g = d.g, k = d.k, p = st.p, v;
+    if (d.s !== undefined && d.r !== undefined) {   // a cell of one of the sheets
+      var row = st.sheets[d.s].rows[+d.r], raw = t.value.trim();
+      if (d.t === 'len') { v = raw === '' ? 0 : B.parseLen(raw, p.unit); if (isNaN(v)) { badLength(t); return; } }
+      else if (d.t === 'coord') { v = raw === '' ? 0 : B.parseCoord(raw, p.unit); if (isNaN(v)) { badLength(t); return; } }
+      else if (d.t === 'int') v = Math.max(0, Math.round(B.num(raw)));
+      else if (d.t === 'num') v = B.num(raw);
+      else v = t.value;
+      B.applyCell(p, d.s, row, d.c, v); B.normalise(p); recalc(); setHeader(); redrawSheet(); return;
+    }
+    if (!g) return;
+    if (d.len) { v = B.parseLen(t.value, p.unit); if (isNaN(v)) { badLength(t); return; } t.removeAttribute('aria-invalid'); t.value = B.fmtLen(v, p.unit); }
+    else if (t.type === 'checkbox') v = t.checked;
+    else v = t.type === 'number' ? B.num(t.value) : t.value;
+    if (g === 'lap') p.lapTable[k] = v;
+    else if (g === 'ded') p.bendDed[k] = v;
+    else if (g === 'p') p[k] = k === 'name' ? (String(v).trim() || 'Untitled project') : v;
+    B.normalise(p); recalc(); setHeader();
+    if (st.step !== 'input') { renderPage(); return; }
+    if (g === 'p' && ['standard', 'lapMode', 'grade', 'fy', 'coverMode'].indexOf(k) >= 0) renderInput(); else redrawSheet();
+  });
+  document.addEventListener('focusin', function (e) {
+    var t = e.target, d = t.dataset || {}; if (d.s === undefined || d.r === undefined || !st.sheets[d.s]) return;
+    var row = st.sheets[d.s].rows[+d.r], ei = row && row.ei; if (ei === undefined || ei < 0 || ei === st.sel) return;
+    st.sel = ei; all('#sheets tr[data-ei]', function (tr) { tr.classList.toggle('sel', +tr.dataset.ei === ei); });
+    renderSketch();
+    // buttons that name the selected footing are refreshed on the next redraw; update their labels now without rebuilding the tables
+    var mk = st.p.elements[ei].mark || '?';
+    all('#sheets [data-act="dup"]', function (b) { b.textContent = 'Duplicate ' + mk; }); all('#sheets [data-act="del"]', function (b) { b.textContent = 'Delete ' + mk; });
+    all('#sheets [data-act="addx"]', function (b) { b.textContent = 'Add extra bar to ' + mk; }); all('#sheets [data-act="addpos"]', function (b) { b.textContent = 'Add position for ' + mk; });
+    all('#sheets [data-act="addpt"]', function (b) { b.textContent = 'Add point to ' + mk; b.hidden = st.p.elements[ei].shape !== 'poly'; });
+  });
+  document.addEventListener('keydown', function (e) {   // Excel-style: Enter and the arrow keys move along a column
+    var t = e.target, d = t.dataset || {}; if (d.s === undefined || d.r === undefined || t.tagName !== 'INPUT') return;
+    var dir = e.key === 'Enter' || e.key === 'ArrowDown' ? 1 : e.key === 'ArrowUp' ? -1 : 0; if (!dir) return;
+    for (var r = +d.r + dir; r >= 0 && r < st.sheets[d.s].rows.length; r += dir) {
+      var n = $('#sheets [data-s="' + d.s + '"][data-r="' + r + '"][data-c="' + d.c + '"]');
+      if (n) { e.preventDefault(); n.focus(); if (n.select) n.select(); return; }
+    }
+  });
+  document.addEventListener('toggle', function (e) { var d = e.target; if (d.tagName === 'DETAILS' && d.dataset.d) st.open[d.dataset.d] = d.open; }, true);
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    var p = st.p, a = b.dataset.act, n = slug();
+    if (b.dataset.unit) { p.unit = b.dataset.unit; B.normalise(p); recalc(); renderInput(); return; }
+    if (b.dataset.sel !== undefined) { st.sel = +b.dataset.sel; renderPage(); return; }
+    if (b.dataset.step) { go(b.dataset.step); return; }
+    if (b.dataset.m3) { st.mode3 = b.dataset.m3; build3D(); return; }
+    if (b.dataset.solid) { st.solid = b.dataset.solid === '1'; build3D(); return; }
+    if (!a) return;
+    if (a === 'add' || a === 'dup') {
+      var used = {}, i = 1; p.elements.forEach(function (x) { used[x.mark] = 1; }); while (used['F' + i]) i++;
+      var src = a === 'dup' ? p.elements[st.sel] : null;
+      p.elements.push(src ? Object.assign(JSON.parse(JSON.stringify(src)), { mark: 'F' + i }) : B.newFooting('F' + i));
+      if (src) p.extraBars.filter(function (x) { return x.member === src.mark; }).forEach(function (x) { p.extraBars.push(Object.assign({}, x, { member: 'F' + i })); });
+      st.sel = p.elements.length - 1; refresh();
+    } else if (a === 'del') {
+      if (!p.elements.length) return;
+      ask('Delete ' + (p.elements[st.sel].mark || 'element') + '?', '<p>This removes the footing with its bars, extra bar rows and positions.</p>', [{ v: 'yes', t: 'Delete footing' }, { v: 'cancel', t: 'Keep it' }]).then(function (v) {
+        if (v !== 'yes') return; var gone = p.elements[st.sel].mark; p.elements.splice(st.sel, 1);
+        p.extraBars = p.extraBars.filter(function (x) { return x.member !== gone; }); p.positions = p.positions.filter(function (q) { return q.mark !== gone; }); st.sel = Math.max(0, st.sel - 1); refresh();
+      });
+    } else if (a === 'addx') { if (!p.elements[st.sel]) return; p.extraBars.push({ member: p.elements[st.sel].mark, dia: 12, n: 1, shape: '00', A: 1000, B: 0, C: 0, D: 0, note: '' }); refresh(); }
+    else if (a === 'addpos') { if (!p.elements[st.sel]) return; p.positions.push({ mark: p.elements[st.sel].mark, ref: B.geom(p, p.elements[st.sel]).poly ? 'P1' : 'C', x: 0, y: 0, z: 0 }); refresh(); }
+    else if (a === 'addpt') { var pe = p.elements[st.sel]; if (!pe || pe.shape !== 'poly' || !pe.pts.length) return; var q1 = pe.pts[pe.pts.length - 1], q0 = pe.pts[0]; pe.pts.push([(q1[0] + q0[0]) / 2, (q1[1] + q0[1]) / 2]); refresh(); }
+    else if (a === 'delrow') {
+      var row = st.sheets[b.dataset.s].rows[+b.dataset.r]; if (!row) return;
+      if (b.dataset.s === 'pos') p.positions.splice(row.qi, 1);
+      else if (b.dataset.s === 'bar') p.extraBars.splice(row.xi, 1);
+      else if (p.elements[row.ei].pts.length > 3) p.elements[row.ei].pts.splice(row.pi, 1); else { toast('A polygon needs at least three points.'); return; }
+      refresh();
+    }
+    else if (a === 'tpl') { if (window.XLSX) saveFile(n + '_BBS_input.xlsx', workbook(true)); else toast('The Excel library did not load.'); }
+    else if (a === 'imp') pick('.xlsx,.xls,.csv', importExcel);
+    else if (a === 'savep') saveFile(n + '_project.json', JSON.stringify(p, null, 1), 'application/json');
+    else if (a === 'openp') pick('.json', openProject);
+    else if (a === 'newp') ask('Start a new project?', '<p>The current project is cleared from this browser. Save a project file first if you need it again.</p>', [{ v: 'yes', t: 'Start new project' }, { v: 'cancel', t: 'Cancel' }]).then(function (v) { if (v === 'yes') { st.p = B.normalise(B.newProject()); st.sel = 0; refresh(); } });
+    else if (a === 'x-xlsx') { if (window.XLSX) saveFile(n + '_BBS.xlsx', workbook(false)); else toast('The Excel library did not load.'); }
+    else if (a === 'x-csv') saveFile(n + '_BBS.csv', B.csv(B.scheduleAOA(p, st.sched)), 'text/csv');
+    else if (a === 'x-html') saveFile(n + '_report.html', reportHTML(), 'text/html');
+    else if (a === 'x-dxf') { var d = dxf(); saveFile(n + '_details.dxf', d.text, 'application/dxf'); }
+    else if (a === 'x-bvbs') saveFile(n + '_BBS.abs', B.bvbs(p, st.sched), 'text/plain');
+    else if (a === 'x-glb') glb().then(function (g) { if (g) saveFile(n + '_model.glb', g, 'model/gltf-binary'); else toast('The 3D model could not be built in this browser.'); });
+    else if (a === 'x-all') exportAll();
+    else if (a === 'snap') { build3D(); if (!T3) { toast('3D is unavailable in this browser.'); return; } $('#c3d').toBlob(function (blob) { if (blob) saveFile(n + '_3D.png', blob, 'image/png'); }); }
+    else if (a === 'theme') {
+      var cur = document.documentElement.getAttribute('data-theme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      var nx = cur === 'dark' ? 'light' : 'dark'; document.documentElement.setAttribute('data-theme', nx);
+      try { localStorage.setItem(THEME_KEY, nx); } catch (er) { /* storage unavailable */ }
+      if (st.step === 'review') build3D();
+    } else if (a === 'about') ask('BBS Studio v' + B.VERSION, $('#about').innerHTML, [{ v: 'ok', t: 'Close' }]);
+  });
+
+  /* ---------- start ---------- */
+  try { var th = localStorage.getItem(THEME_KEY); if (th === 'light' || th === 'dark') document.documentElement.setAttribute('data-theme', th); } catch (e) { /* storage unavailable */ }
+  $('#ver').textContent = 'v' + B.VERSION;
+  st.p = loadProject(); refresh();
+  window.__bbs = st;
+})();
+
+</script>
+</body>
+</html>
