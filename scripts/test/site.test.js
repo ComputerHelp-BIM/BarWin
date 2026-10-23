@@ -13,7 +13,7 @@ const { loadApps, protectData, MINIFY } = require('../build-site.js');
 const ROOT = path.resolve(__dirname, '..', '..');
 
 test('every app manifest is valid, with a semantic version read from its source', () => {
-  const apps = loadApps();
+  const apps = loadApps({ requireEntry: false });   // npm test runs before any build
   assert.ok(apps.length >= 5);
   for (const a of apps) {
     assert.match(a.slug, /^[a-z0-9]+(-[a-z0-9]+)*$/);
@@ -24,7 +24,7 @@ test('every app manifest is valid, with a semantic version read from its source'
 });
 
 test('versions on the cards match the apps', () => {
-  const v = Object.fromEntries(loadApps().map((a) => [a.slug, a.version]));
+  const v = Object.fromEntries(loadApps({ requireEntry: false }).map((a) => [a.slug, a.version]));
   const B = require('../../apps/beam-sections/src/beams.js');
   assert.equal(v['beam-sections'], B.VERSION);
 });

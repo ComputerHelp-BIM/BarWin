@@ -57,8 +57,11 @@ const protectData = (html) => html.replace(DATA_SCRIPT, (m) => IGNORE + m + IGNO
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
-/** Reads, checks and returns every app manifest, sorted. Throws with every problem listed at once. */
-function loadApps() {
+/**
+ * Reads, checks and returns every app manifest, sorted. Throws with every problem listed at once.
+ * requireEntry: false skips the check that each built page exists (manifest checks before a build, e.g. in npm test).
+ */
+function loadApps({ requireEntry = true } = {}) {
   const problems = [];
   const apps = [];
   for (const slug of fs.readdirSync(APPS).sort()) {
@@ -72,7 +75,7 @@ function loadApps() {
     for (const k of ['name', 'status', 'summary', 'entry']) if (!m[k] || typeof m[k] !== 'string') problems.push(`${where}: "${k}" is required`);
     if (m.status && !STATUSES.includes(m.status)) problems.push(`${where}: status must be one of ${STATUSES.join(', ')}`);
     const entry = path.join(dir, m.entry || '');
-    if (m.entry && !fs.existsSync(entry)) problems.push(`${where}: entry ${m.entry} not found (run npm run build first?)`);
+    if (requireEntry && m.entry && !fs.existsSync(entry)) problems.push(`${where}: entry ${m.entry} not found (run npm run build first?)`);
     let version = null;
     if (!m.version || !m.version.file || !m.version.pattern) problems.push(`${where}: "version" needs file and pattern`);
     else {
