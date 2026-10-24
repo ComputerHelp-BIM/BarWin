@@ -10,7 +10,7 @@ Every app is also a single HTML page that opens straight from disk in any modern
 
 | App | Folder | Version | Status | What it is |
 |---|---|---|---|---|
-| Beam Sections | [`apps/beam-sections`](apps/beam-sections) | 0.15.1 | Active | Simply supported beam: L-section and sections A-A / B-B / C-C with links, top and bottom bars by zone, laps, extras, layers, anchorage. |
+| Beam Sections | [`apps/beam-sections`](apps/beam-sections) | 0.16.0 | Active | Simply supported beam: L-section and sections A-A / B-B / C-C with links, top and bottom bars by zone, laps, extras, layers, anchorage. |
 | SS Beam Geometry | [`apps/ss-beam-geometry`](apps/ss-beam-geometry) | 0.4.0 | Frozen | The approved geometry-only template (concrete and covers, no steel) that Beam Sections grew from. |
 | BBS Studio | [`apps/bbs-studio`](apps/bbs-studio) | 0.14.2 | Active | Reads the steel quantity workbook; walls, columns, beams (step 1). Schedule, shop drawings, 3D, IFC, BOQ, cost, PDFs, DXF. |
 | BBS Studio, footings | [`apps/bbs-studio-footings`](apps/bbs-studio-footings) | 0.4.0 | Frozen | The earlier footing-only BBS Studio, kept at its own version. |

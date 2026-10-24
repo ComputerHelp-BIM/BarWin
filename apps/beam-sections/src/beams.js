@@ -23,7 +23,7 @@
  */
 (function (root) {
   'use strict';
-  var VERSION = '0.15.1';
+  var VERSION = '0.16.0';
   // each end keeps its column and its beam sizes, so switching an end back and forth loses nothing
   var DEFAULTS = { typeL: 'col', typeR: 'beam', LcolW: 900, LbeamW: 300, LbeamD: 900, RcolW: 900, RbeamW: 300, RbeamD: 900,
     span: 5000, D: 900, B: 300, ctop: 25, cbot: 40, cside: 25, ccol: 40,
@@ -41,6 +41,7 @@
     ldF: 50,                                        // Ld as a multiple of the bar size
     Lanch: 'auto', Ranch: 'auto',                   // anchorage at each end: auto, or an override (column: ld, bend; beam: bendfull, ld, cover)
     Lcolx: 'ld', Rcolx: 'ld',                       // at a column or wall: Ld, or Ld + 10 x bar size
+    legMin: '12d',                                  // a bent leg is never shorter than: 'is' 8 x bar (IS 456), 'bs' P (BS 8666 Table 2), '12d', '10d'
     // extra top bars over each support: count (0 for none), size, and how far into the span from the support face:
     // 'l4' span / 4, 'l3' span / 3, 'p03' 0.3 x span, or 'typed' (xLen)
     LxN: 2, LxDia: 25, LxMode: 'l4', LxLen: 1250, LxLayer: 'auto',   // layer: 'auto', '1' (with the main bars) or '2' (second layer)
@@ -61,6 +62,7 @@
     tLapStyle: 'inline', bLapStyle: 'inline',
     showLabels: true,                               // bar tags, notes, bar lists and the Ld / lap / cut-off dimensions; off for a clean drawing
     textScale: 100,                                 // text size on the drawings, % (70 to 130)
+    panel: 'tabs', tab: 'geo',                      // settings panel: 'tabs' (one tab at a time) or 'groups' (collapsible); the open tab
     colors: {} };                                   // bar colour overrides by group (see GROUPS); empty = the theme's colours
   var NAMES = { LcolW: 'left column or wall width', LbeamW: 'left support beam width', LbeamD: 'left support beam depth',
     RcolW: 'right column or wall width', RbeamW: 'right support beam width', RbeamD: 'right support beam depth',
@@ -96,11 +98,12 @@
    */
   function label(x, y, txt, o) {
     var tr = o.rot ? ' transform="rotate(' + o.rot + ' ' + n(x) + ' ' + n(y) + ')"' : '';
-    var t = '<text class="' + (o.cls || 'tx') + (o.key && COVER[o.key] ? ' cv' : '') + '" x="' + n(x) + '" y="' + n(y) + '" font-size="' + n(o.fs) + '" text-anchor="middle">' + esc(txt) + '</text>';
+    var an = o.anchor === 'start' || o.anchor === 'end' ? o.anchor : 'middle';
+    var t = '<text class="' + (o.cls || 'tx') + (o.key && COVER[o.key] ? ' cv' : '') + '" x="' + n(x) + '" y="' + n(y) + '" font-size="' + n(o.fs) + '" text-anchor="' + an + '">' + esc(txt) + '</text>';
     if (!(o.key && o.ia)) return tr ? '<g' + tr + '>' + t + '</g>' : t;
-    var w = txt.length * o.fs * MONO_EM;
-    var hit = '<rect class="hit" x="' + n(x - w / 2 - o.fs * 0.45) + '" y="' + n(y - o.fs * 1.05) + '" width="' + n(w + o.fs * 0.9) + '" height="' + n(o.fs * 1.5) + '" rx="' + n(o.fs * 0.15) + '"/>';
-    var ul = line(x - w / 2 - o.fs * 0.08, y + o.fs * 0.22, x + w / 2 + o.fs * 0.08, y + o.fs * 0.22, 'ul');
+    var w = txt.length * o.fs * MONO_EM, x0 = an === 'start' ? x : an === 'end' ? x - w : x - w / 2;
+    var hit = '<rect class="hit" x="' + n(x0 - o.fs * 0.45) + '" y="' + n(y - o.fs * 1.05) + '" width="' + n(w + o.fs * 0.9) + '" height="' + n(o.fs * 1.5) + '" rx="' + n(o.fs * 0.15) + '"/>';
+    var ul = line(x0 - o.fs * 0.08, y + o.fs * 0.22, x0 + w + o.fs * 0.08, y + o.fs * 0.22, 'ul');
     return '<g class="ed' + (COVER[o.key] ? ' cvr' : '') + '" data-k="' + o.key + '" tabindex="0" role="button" aria-label="Edit ' + NAMES[o.key] + ', ' + esc(txt) + ' mm"' + tr + '>' + hit + t + ul + '</g>';
   }
   /**
@@ -140,7 +143,7 @@
   }
   /** A small vertical dimension (a cover): the line runs on past one end and the value sits level beyond it. */
   function vdimOut(y1, y2, x, txt, o, where) {
-    var t = o.fs * 0.32, run = o.fs * 1.0, s = ticks(x, y1, x, y2, t, 'tk');
+    var t = o.fs * 0.32, run = o.fs * (o.run || 1.0), s = ticks(x, y1, x, y2, t, 'tk');
     if (where === 'above') return s + line(x, y2, x, y1 - run, 'dm') + label(x, y1 - run - o.fs * 0.25, txt, o);
     return s + line(x, y1, x, y2 + run, 'dm') + label(x, y2 + run + o.fs * 0.9, txt, o);
   }
@@ -208,16 +211,33 @@
     var ok = t === 'col' ? ['ld', 'bend'] : ['bendfull', 'ld', 'cover'], m = v[k + 'anch'], mode = ok.indexOf(m) >= 0 ? m : auto;
     return { mode: mode, auto: auto, ld: ld, avail: avail, override: mode !== auto && ok.indexOf(m) >= 0, fits: mode !== 'ld' || avail >= ld };
   }
+  /** BS 8666:2020 Table 2: minimum end projection P beyond a bend (bar bent to the minimum radius, then at least 5d straight). */
+  var BS_P = { 6: 110, 8: 115, 10: 120, 12: 125, 16: 130, 20: 190, 25: 240, 32: 305, 40: 380, 50: 475 };
+  /** The rules a bent leg may be held to (legMin). */
+  var LEG_MIN = { is: 'IS 456: 8 \u00D7 bar size (a 90\u00B0 bend is worth 8\u00D8, cl. 26.2.2.1)', bs: 'BS 8666: end projection P (Table 2)', '12d': '12 \u00D7 bar size', '10d': '10 \u00D7 bar size' };
+  /**
+   * The shortest bent leg allowed for a bar of size dia under the chosen rule: { min, mode, basis }.
+   * IS 456 cl. 26.2.2.1: a 90 degree bend develops 8 x bar size, so the leg is at least that. BS 8666 Table 2: the minimum
+   * end projection P (sizes not in the table: radius + bar + 5 x bar, rounded up to 5). Or a plain 12 x or 10 x bar size.
+   */
+  function legMin(v, dia) {
+    var m = LEG_MIN.hasOwnProperty(v.legMin) ? v.legMin : '12d';
+    if (m === 'is') return { min: 8 * dia, mode: m, basis: '8\u00D8 IS 456' };
+    if (m === 'bs') { var r = dia <= 16 ? 2 * dia : 3.5 * dia; return { min: BS_P[dia] || Math.ceil((r + 6 * dia) / 5) * 5, mode: m, basis: 'P BS 8666' }; }
+    var f = m === '10d' ? 10 : 12;
+    return { min: f * dia, mode: m, basis: f + '\u00D8' };
+  }
   /**
    * The bent leg at end k for a bar of size dia, in mm (0 when the bar is straight): at a column or wall the leg makes up
-   * what the straight run leaves of Ld, never less than 12 x the bar size; bent to the cover at a support beam it runs to
-   * the far cover, so the smaller of beam and support depth less the top and bottom covers. Returns { leg, run, ld, mode }.
+   * what the straight run leaves of Ld, never less than the chosen minimum (legMin); bent to the cover at a support beam it
+   * runs to the far cover, so the smaller of beam and support depth less the top and bottom covers.
+   * Returns { leg, run, ld, mode, min, minRules (the minimum set the leg), minBasis }.
    */
   function bendLeg(v, k, dia) {
-    var a = anchorage(v, k, dia), t = v['type' + k] === 'beam' ? 'beam' : 'col', run = a.avail;
-    if (a.mode === 'bend') return { leg: Math.max(a.ld - run, 12 * dia), run: run, ld: a.ld, mode: a.mode };
-    if (a.mode === 'bendfull') return { leg: Math.min(v.D, t === 'beam' ? v[k + 'beamD'] : v.D) - v.ctop - v.cbot, run: run, ld: a.ld, mode: a.mode };
-    return { leg: 0, run: run, ld: a.ld, mode: a.mode };
+    var a = anchorage(v, k, dia), t = v['type' + k] === 'beam' ? 'beam' : 'col', run = a.avail, lm = legMin(v, dia);
+    if (a.mode === 'bend') return { leg: Math.max(a.ld - run, lm.min), run: run, ld: a.ld, mode: a.mode, min: lm.min, minRules: a.ld - run < lm.min, minBasis: lm.basis };
+    if (a.mode === 'bendfull') return { leg: Math.min(v.D, t === 'beam' ? v[k + 'beamD'] : v.D) - v.ctop - v.cbot, run: run, ld: a.ld, mode: a.mode, min: lm.min, minRules: false, minBasis: lm.basis };
+    return { leg: 0, run: run, ld: a.ld, mode: a.mode, min: lm.min, minRules: false, minBasis: lm.basis };
   }
   var ANCH_NAME = { ld: 'STRAIGHT LD', bend: 'BENT', bendfull: 'BENT TO COVER', cover: 'STRAIGHT TO COVER' };
 
@@ -506,6 +526,14 @@
       return { k: k, t: t, d: d, w: w, kase: kase, Ds: Ds, under: kase === 'shallower' && v[k + 'under'] === 'under', xo: xi + d * w, X: function (u) { return xi + d * u; } };
     });
     var L = ends[0], R = ends[1];
+    // rows of dimensions outside the beam, so nothing but bars and links sits inside it. Above: the top laps (when an end
+    // laps), extra-bar lengths, lap points, the chain and the overall length. Below, under the bottom bar tags: the bottom
+    // extras' cut-offs and the bottom laps; everything further down (section marks, link zones, title) moves down by bS.
+    var TCh = { L: barChange(v, 't', 'L'), R: barChange(v, 't', 'R') }, BCh = { L: barChange(v, 'b', 'L'), R: barChange(v, 'b', 'R') }, XB = extraBot(v);
+    var hasTopLap = LB && (TCh.L.ch !== 'none' || TCh.R.ch !== 'none');
+    var hasCut = LB && XB.n > 0 && (XB.cut.L > 0 || XB.cut.R > 0), hasBLap = LB && (BCh.L.ch !== 'none' || BCh.R.ch !== 'none');
+    var yLapRow = -470 - 150 * TS, yX = hasTopLap ? yLapRow - 300 * TS : -470 - 350 * TS, yLapDim = yX - 165 * TS, yC = yLapDim - 165 * TS, yO = yC - 350 * TS, yTop = yO - 350 * TS;
+    var bRows = (hasCut ? 1 : 0) + (hasBLap ? 1 : 0), yBC = D + 130 + 175 * TS, yBL = hasCut ? yBC + 150 * TS : yBC, bS = bRows ? (bRows * 150 + 60) * TS : 0;
 
     ends.forEach(function (e) {
       var X = e.X, w = e.w;
@@ -546,6 +574,8 @@
     // and every link drawn is a real one (see linkLayout), the first and last 50 from the support faces.
     var mode = layoutMode(v), EZ = endZone(v), zones, LK = linkLayout(v);
     var X = function (mm) { return S * mm / v.span; };
+    /** The centre for a label of txt (font size f, em width per char) wanted at cx, kept inside the span so it never runs over a support. */
+    function inSpan(cx, txt, f, em) { var h = txt.length * f * (em || MONO_EM) / 2; return Math.min(Math.max(cx, h + 60), S - h - 60); }
     if (mode === 'single') zones = [{ a: 0, b: S, k: 'lsOne', z: 0 }];
     else if (mode === 'whole') zones = [{ a: 0, b: S, k: 'lsEnd', z: 0, whole: true }];
     else if (mode === 'two') { var zL = X(Math.min(v.lLeft, v.span)); zones = [{ a: 0, b: zL, k: 'lsL', len: 'lLeft', z: 0 }, { a: zL, b: S, k: 'lsR', len: 'right', z: 1 }]; }
@@ -567,7 +597,7 @@
     }
 
     // chain and overall dimensions above
-    var yC = -1150, yO = -1500, g = 50, ov = 110;   // above the extra-bar lengths, the section marks and the top bar tags
+    var g = 50, ov = 110;
     function ext(e, x, toY) { return line(x, e.t === 'col' ? cT - g : -g, x, toY, 'ex'); }
     function key(e) { return e.k + (e.t === 'col' ? 'colW' : 'beamW'); }
     s += ext(L, L.xo, yO - ov) + ext(L, 0, yC - ov) + ext(R, S, yC - ov) + ext(R, R.xo, yO - ov);
@@ -576,7 +606,7 @@
 
     // extra top bar lengths above the beam, between the section marks and the chain dimension: typed in red with the
     // valid range in grey, a rule of the span in grey with the rule under it
-    var yX = -820, xo = assign(o, { fs: fs * 0.85 });
+    var xo = assign(o, { fs: fs * 0.85 });
     ['L', 'R'].forEach(function (k) {
       var x = extraTop(v, k); if (!x.n) return;
       var xc = k === 'L' ? S * x.len / v.span : S - S * x.len / v.span, a = k === 'L' ? 0 : xc, b = k === 'L' ? xc : S;
@@ -584,14 +614,9 @@
       s += hdim(a, b, yX, fmt(x.len), x.mode === 'typed' ? assign(xo, { key: k + 'xLen', prefer: k === 'L' ? 'after' : 'before' }) : { fs: xo.fs, cls: 'tx ov' });
       var lc = topChange(v, k), lapHere = lc.ch !== 'none' && lc.mode === 'x';
       var note = x.mode === 'typed' ? (o.ia ? 'min 100 \u00B7 max ' + v.span : '') : '= ' + x.basis;
-      if (note && LB) s += label((a + b) / 2, yX + 115, (x.mode === 'typed' ? '' : (lapHere ? 'EXTRA TOP + LAP POINT ' : 'EXTRA TOP ')) + note, { fs: xo.fs * 0.72, cls: x.mode === 'typed' ? 'nm rng' : 'nm' });
-    });
-
-    // a support beam's depth beside it, outside. The main beam's depth is not dimensioned here: the cross-sections carry it.
-    ends.forEach(function (e) {
-      if (e.t !== 'beam') return;
-      var x = e.xo + e.d * 500;
-      s += line(e.xo + e.d * g, 0, x + e.d * ov, 0, 'ex') + line(e.xo + e.d * g, e.Ds, x + e.d * ov, e.Ds, 'ex') + vdim(0, e.Ds, x, fmt(v[e.k + 'beamD']), assign(o, { key: e.k + 'beamD' }));
+      var nt0 = (x.mode === 'typed' ? '' : (lapHere ? 'EXTRA TOP + LAP POINT ' : 'EXTRA TOP ')) + note, nh = nt0.length * xo.fs * 0.72 * 0.56 / 2;
+      var ncx = k === 'L' ? Math.min((a + b) / 2, b - nh - 30) : Math.max((a + b) / 2, a + nh + 30);   // a long note runs out over the support, where there is room
+      if (note && LB) s += label(ncx, yX + 115, nt0, { fs: xo.fs * 0.72, cls: x.mode === 'typed' ? 'nm rng halo' : 'nm halo' });
     });
 
     // covers: beam top and bottom are placed after the bar tags (in a free gap); column or wall cover on its outer face (shown once)
@@ -607,10 +632,10 @@
       var k = m[0], x = m[1], on = v['show' + k] !== false;
       if (!on && !o.ia) return;
       var g = line(x, -470, x, -200, 'sm') + arrow(x, -470, x + 280, fs) + label(x + 400, -470 + fs * 0.4, k, { fs: fs * 1.15, cls: 'sk' }) +
-        line(x, D + 200, x, D + 460, 'sm') + arrow(x, D + 460, x + 280, fs) + label(x + 400, D + 460 + fs * 0.4, k, { fs: fs * 1.15, cls: 'sk' });
+        line(x, D + 200 + bS, x, D + 460 + bS, 'sm') + arrow(x, D + 460 + bS, x + 280, fs) + label(x + 400, D + 460 + bS + fs * 0.4, k, { fs: fs * 1.15, cls: 'sk' });
       s += '<g class="sec' + (on ? '' : ' off') + '">' + g + '</g>';
       if (o.ia) {
-        var bx = x - 60, by = D + 600, sz = 120;
+        var bx = x - 60, by = D + 600 + bS, sz = 120;
         s += '<g class="sx" data-s="' + k + '" tabindex="0" role="checkbox" aria-checked="' + on + '" aria-label="Show section ' + k + '-' + k + '">' +
           '<rect class="hit" x="' + (bx - 40) + '" y="' + (by - 40) + '" width="' + (sz + 420) + '" height="' + (sz + 80) + '"/>' +
           '<rect class="box" x="' + bx + '" y="' + by + '" width="' + sz + '" height="' + sz + '" rx="16"/>' +
@@ -677,7 +702,7 @@
     [L, R].forEach(function (e) {
       var x = extraTop(v, e.k); XT[e.k] = x; if (!x.n) return;
       var lay = layersAt(v, e.k), y = yX0 + (lay.second ? 72 : 40), xc = e.k === 'L' ? X1(x.len) : S - X1(x.len);
-      x.xc = xc;
+      x.xc = xc; x.y = y;
       s += poly([[xc, y]].concat(endPath(e, y, 1, x.dia, 80 + 30 * TR.lvl)), 'br k-xtop');
       if (lay.second) spacers(v, 0, x.len, lay.need).at.forEach(function (mm) {
         s += '<circle class="bd k-spc" cx="' + n(e.k === 'L' ? X1(mm) : S - X1(mm)) + '" cy="' + n(yX0 + 36) + '" r="15"/>';
@@ -685,7 +710,7 @@
     });
     // bottom extras over mid-span: above the bottom bars (higher again in a second layer, on spacer bars), curtailed at their
     // cut-off from each support face, to the span's scale
-    var XB = extraBot(v), blay = botLayersAt(v, v.span / 2), ybx = ybX0 - (blay.second ? 72 : 40);
+    var blay = botLayersAt(v, v.span / 2), ybx = ybX0 - (blay.second ? 72 : 40);
     if (XB.n) {
       var xa0 = X1(XB.cut.L), xb0 = S - X1(XB.cut.R);
       s += line(xa0, ybx, xb0, ybx, 'br k-xbot');
@@ -698,7 +723,7 @@
     function tag(x, y, runs) {
       var total = runs.reduce(function (a, r) { return a + partsLen(r[0]); }, 0), x0 = x - total * cw / 2, out = '';
       runs.forEach(function (r) { var w = partsLen(r[0]) * cw; out += spec(v, x0 + w / 2, y, r[0], assign(bo, { cls: 'tx gt k-' + r[1] + ' halo' })); x0 += w; });
-      busy.push([x - total * cw / 2 - 40, x + total * cw / 2 + 40, y < 0 ? 't' : 'b']);   // which side of the beam the tag is on
+      busy.push([x - total * cw / 2 - 40, x + total * cw / 2 + 40, y < 0 ? 't' : 'b', 'tag']);   // which side of the beam the tag is on
       return out;
     }
     function runsW(runs) { return runs.reduce(function (a, r) { return a + partsLen(r[0]); }, 0) * cw; }
@@ -724,20 +749,20 @@
     if (LB) s += tagRow(D + 130, midB, function (k) { return [[[{ k: k + 'bN' }, '-T', { k: k + 'bDia' }, ' BOTTOM'], 'bot']]; }, function (k) { return k === 'L' ? 800 : S - 800; });
     if (fys.length && LB) s += spec(v, 2750, (yt + yb) / 2 + 40, [{ k: 'faceN' }, '-T', { k: 'faceDia' }, ' EACH FACE'], assign(bo, { cls: 'tx gt k-face halo' }));
 
-    // laps: a small dimension over each lap, "LAP 800". Top: under the top bars; its lap point is dimensioned above the beam
-    // when it is not the extra bars' cut-off. Bottom: inside the beam over the bottom bars, saying where the lap sits.
-    var lpo = assign(o, { fs: fs * 0.62 }), yLapDim = -985;
-    // bottom: the extras' cut-off just above the extras; laps higher, over the lowest face bar, so the two never meet
-    var faceLow = fys.length ? fys[fys.length - 1] : yt + 300, yBC = ybx - 40, yBL = Math.min(faceLow - 70, yBC - 150);
+    // laps: a small dimension for each lap, "LAP 800", on its own row outside the beam. Top: above the beam, under the
+    // extra-bar lengths; its lap point is dimensioned higher up when it is not the extra bars' cut-off. Bottom: under the
+    // bottom tags, saying where the lap sits; the bottom extras' cut-offs on the row above it.
+    var lpo = assign(o, { fs: fs * 0.62 });
     function lapDim(sd, k, c, y, below) {
       var a = Math.max(0, k === 'L' ? c.at - c.lap : v.span - c.at), b = Math.min(v.span, k === 'L' ? c.at : v.span - c.at + c.lap), xa = X1(a), xb = X1(b);
       var txt = 'LAP ' + fmt(Math.round(b - a)) + (sd === 'b' ? (c.mode === 'face' ? ' FROM FACE' : ' TO ' + (c.basis || fmt(c.at))) : '');
+      if (sd === 'b') { var lcx = inSpan((xa + xb) / 2, txt, lpo.fs), lhw = txt.length * lpo.fs * MONO_EM / 2; busy.push([Math.min(xa, lcx - lhw) - 40, Math.max(xb, lcx + lhw) + 40, 'b']); }   // the bottom cover keeps clear
       return line(xa, y - 40, xa, y + 30, 'ex') + line(xb, y - 40, xb, y + 30, 'ex') + line(xa, y, xb, y, 'dm') + ticks(xa, y, xb, y, lpo.fs * 0.32, 'tk') +
-        label((xa + xb) / 2, below ? y + lpo.fs * 1.15 : y - lpo.fs * 0.45, txt, assign(lpo, { cls: 'tx gt k-' + (sd === 't' ? 'top' : 'bot') + ' halo' }));
+        label(inSpan((xa + xb) / 2, txt, lpo.fs), below ? y + lpo.fs * 1.15 : y - lpo.fs * 0.45, txt, assign(lpo, { cls: 'tx gt k-' + (sd === 't' ? 'top' : 'bot') + ' halo' }));
     }
     ['L', 'R'].forEach(function (k) {
       var c = TR.C[k]; if (c.ch === 'none') return;
-      if (LB) s += lapDim('t', k, c, yX0 + 150, true);
+      if (LB) s += lapDim('t', k, c, yLapRow, false);
       if (!(c.mode === 'x' && XT[k].n)) {
         var xp = k === 'L' ? X1(c.at) : S - X1(c.at), p0 = k === 'L' ? 0 : xp, p1 = k === 'L' ? xp : S;
         s += line(xp, -560, xp, yLapDim - ov, 'ex');
@@ -752,27 +777,31 @@
     if (XB.n && LB) ['L', 'R'].forEach(function (k) {
       var cut = XB.cut[k], x0 = k === 'L' ? 0 : S - X1(cut), x1 = k === 'L' ? X1(cut) : S; if (cut <= 0) return;
       s += line(x0, yBC, x1, yBC, 'dm') + ticks(x0, yBC, x1, yBC, lpo.fs * 0.32, 'tk');
-      var typedB = XB.mode[k] === 'typed', tx0 = (x0 + x1) / 2, ty0 = yBC - lpo.fs * 0.45;
+      var typedB = XB.mode[k] === 'typed', ctx = typedB ? fmt(cut) + ' CUT-OFF' : fmt(cut) + ' = ' + XB.basis[k] + ' CUT-OFF', tx0 = inSpan((x0 + x1) / 2, ctx, lpo.fs), ty0 = yBC - lpo.fs * 0.45;
+      var chw = ctx.length * lpo.fs * MONO_EM / 2;
+      busy.push([Math.min(x0, x1, tx0 - chw) - 40, Math.max(x0, x1, tx0 + chw) + 40, 'b']);   // the bottom cover keeps clear of the dimension and its label
       s += typedB ? spec(v, tx0, ty0, [{ k: k + 'bxLen' }, ' CUT-OFF'], assign(lpo, { cls: 'tx gt k-xbot halo' }))
-        : label(tx0, ty0, fmt(cut) + ' = ' + XB.basis[k] + ' CUT-OFF', assign(lpo, { cls: 'tx gt k-xbot halo' }));
+        : label(tx0, ty0, ctx, assign(lpo, { cls: 'tx gt k-xbot halo' }));
     });
 
     // beam top and bottom covers: one vertical dimension each, at the x furthest from every tag and section mark
     // each cover dimension avoids the section marks and the tags on its own side of the beam (its value is about 80 wide)
     function freeX(side) {
-      var avoid = [bx, S / 2, cx], best = 3450, score = -1;
+      var best = 3450, score = -1;   // a cover value sits beyond the tag row, so only its leader has to pass between tags
+      // each section mark takes its line, arrow and letter: from just before the line to past the letter
+      var marks = [bx, S / 2, cx].map(function (m) { return [m - 80, m + 400 + fs * 0.9, side]; });
       for (var xq = 250; xq <= S - 250; xq += 25) {
-        var d = Math.min.apply(null, avoid.map(function (a) { return Math.abs(a - xq); }).concat(busy.filter(function (r) { return r[2] === side; })
-          .map(function (r) { return xq < r[0] ? r[0] - xq : xq > r[1] ? xq - r[1] : -1; })));
+        var d = Math.min.apply(null, marks.map(function (r) { return xq < r[0] ? r[0] - xq : xq > r[1] ? xq - r[1] : -1; }).concat(busy.filter(function (r) { return r[2] === side; })
+          .map(function (r) { var lo = r[3] === 'tag' ? 25 : 0, a0 = r[0] + lo, b0 = r[1] - lo; return xq < a0 ? a0 - xq : xq > b0 ? xq - b0 : -1; })));
         if (d > score + 1e-6 || (Math.abs(d - score) < 1e-6 && Math.abs(xq - 3450) < Math.abs(best - 3450))) { score = d; best = xq; }
       }
       return clearX(best);
     }
-    s += vdimOut(0, c, freeX('t'), fmt(v.ctop), assign(co, { key: 'ctop' }), 'above') + vdimOut(D - c, D, freeX('b'), fmt(v.cbot), assign(co, { key: 'cbot' }), 'below');
+    s += vdimOut(0, c, freeX('t'), fmt(v.ctop), assign(co, { key: 'ctop', run: LB ? 2.3 : 1.0 }), 'above') + vdimOut(D - c, D, freeX('b'), fmt(v.cbot), assign(co, { key: 'cbot', run: LB ? (150 + 76 * TS) / co.fs : 1.0 }), 'below');
 
     // link zones dimensioned under the beam: typed lengths in red with their valid range in grey beneath, worked-out lengths
     // in grey; the link size and spacing under each zone
-    var yz = 1850, lo = assign(o, { fs: fs * 0.85 }), ye = D + 760, rg = linkRange(v), hw = 13 * lo.fs * MONO_EM / 2 + 20;
+    var yz = 1850 + bS, lo = assign(o, { fs: fs * 0.85 }), ye = D + 760 + bS, rg = linkRange(v), hw = 13 * lo.fs * MONO_EM / 2 + 20;
     var lens = { lEnd: EZ.len, lLeft: v.lLeft, mid: Math.max(0, v.span - 2 * EZ.len), right: Math.max(0, v.span - v.lLeft) };
     var typed = function (k) { return k === 'lLeft' || (k === 'lEnd' && linkMode(v) === 'three'); };
     zones.forEach(function (z, i) { s += line(z.a, ye, z.a, yz + ov, 'ex') + (i === zones.length - 1 ? line(z.b, ye, z.b, yz + ov, 'ex') : ''); });
@@ -799,57 +828,101 @@
     // where the first and last links stand, editable: under the left end of the link zones, clear of the title
     if (LB) s += spec(v, 1000, yz + 390, ['1ST LINK ', { k: 'lStart' }, ' FROM FACE'], assign(lo, { fs: lo.fs * 0.72 }));
 
-    // anchorage at each support: the length the top and bottom bars take into it, measured from the support face.
-    // Straight: "LD 800" over the bar; bent or to the cover: the straight run with a note (the bend develops the rest).
-    var ao = assign(o, { fs: fs * 0.62 }), ldo = assign(o, { fs: fs * 0.72 });
-    if (LB) ends.forEach(function (e) {
-      [['top', topZone(v, e.k).d, -250, 1], ['bot', barZone(v, 'b', e.k).d, D + 170, -1]].forEach(function (q) {
+    // anchorage at each support: the length the top and bottom bars take into it, measured from the support face, as a
+    // dimension over (top) or under (bottom) the bar: "LD 800" when straight, the straight run when bent or to the cover.
+    // Each bent leg has its own vertical dimension: inside a column or wall, stepping in from the bars; outside a support
+    // beam's outer face, where there is room. The full sum ("LD 800: 860 + 240 LEG") goes in the support's caption.
+    var ao = assign(o, { fs: fs * 0.62 }), ldo = assign(o, { fs: fs * 0.72 }), gapL = 1.9 * ldo.fs, CAP = {}, nOut = { L: 0, R: 0 };
+    function anchText(e, a, bl, dia) {
+      var plus = e.t === 'col' && v[e.k + 'colx'] === 'ld10';
+      if (a.mode === 'ld') return 'LD ' + a.ld + ' = ' + (plus ? '(' + v.ldF + '+10)' : v.ldF) + ' × T' + dia;
+      if (a.mode === 'cover') return 'STRAIGHT ' + a.avail + ' TO COVER (LD ' + a.ld + ')';
+      return 'LD ' + a.ld + ': ' + bl.run + ' + ' + bl.leg + ' LEG' + (bl.minRules ? ' (MIN ' + bl.minBasis + ')' : '');
+    }
+    ends.forEach(function (e) {
+      var legs = [], lines = [], uF0 = e.w - c - 35;
+      [['top', topZone(v, e.k).d, -250, 1], ['bot', barZone(v, 'b', e.k).d, Math.max(D, e.t === 'beam' ? e.Ds : D) + 170, -1]].forEach(function (q) {
         var a = anchorage(v, e.k, q[1]), yb2 = q[3] > 0 ? yt : yb;
         if (q[3] < 0 && e.t === 'beam' && !e.under && yb2 > e.Ds - c) return;   // blocked by a shallower support: no anchorage into it
-        var uF = e.w - c - 35 - (q[3] < 0 ? 40 : 0), u1 = a.mode === 'ld' ? (e.t === 'col' ? 600 : 330) : uF;
+        var uF = uF0 - (q[3] < 0 ? 40 : 0), u1 = a.mode === 'ld' ? (e.t === 'col' ? 600 : 330) : uF, bl = bendLeg(v, e.k, q[1]);
+        lines.push({ who: q[0] === 'top' ? 'TOP' : 'BOT', text: anchText(e, a, bl, q[1]) });
+        if (bl.leg) legs.push({ y0: q[3] > 0 ? yt : (a.mode === 'bend' ? yb - 300 : c + 35), y1: q[3] > 0 ? (a.mode === 'bend' ? yt + 300 : e.Ds - c - 35) : yb, u: uF, val: bl.leg, grp: q[0] });
+        if (!LB) return;
         var x0 = e.X(0), x1 = e.X(u1), lo2 = Math.min(x0, x1), hi2 = Math.max(x0, x1), y = q[2];
-        s += line(x1, q[3] > 0 ? -40 : D + 40, x1, y + (q[3] > 0 ? -ov : ov), 'ex');
+        s += line(x1, q[3] > 0 ? -40 : Math.max(D, e.t === 'beam' ? e.Ds : D) + 40, x1, y + (q[3] > 0 ? -ov : ov), 'ex');
         s += line(lo2, y, hi2, y, 'dm') + ticks(lo2, y, hi2, y, ldo.fs * 0.32, 'tk');
-        var val = a.mode === 'ld' ? 'LD ' + a.ld : String(a.avail);
-        s += label((lo2 + hi2) / 2, y - ldo.fs * 0.4, val, assign(ldo, { cls: 'tx gt k-' + q[0] }));
-        // the rule under the value ("50 x T16"; "(50+10) x T16" at a column with Ld + 10 x bar size); top: above the value, bottom: under the line
-        var plus = e.t === 'col' && v[e.k + 'colx'] === 'ld10', bl = bendLeg(v, e.k, q[1]);
-        var nt = a.mode === 'ld' ? (plus ? '(' + v.ldF + '+10)' : v.ldF) + ' \u00D7 T' + q[1] : a.mode === 'cover' ? 'TO COVER' : 'LD ' + a.ld + ' = ' + bl.run + ' + ' + bl.leg + ' LEG';
-        // the bent leg: a vertical dimension beside the drawn leg, on its inner side (the bottom bar's further in, so the two never sit together)
-        if (bl.leg) {
-          var legTop = q[3] > 0 ? yt : (a.mode === 'bend' ? yb - 300 : c + 35), legBot = q[3] > 0 ? (a.mode === 'bend' ? yt + 300 : e.Ds - c - 35) : yb;
-          var xl3 = e.X(uF - (q[3] > 0 ? 150 : 240)), side = e.k === 'L' ? 1 : -1;   // further in than any bend, extra bars' included
-          s += line(xl3, legTop, xl3, legBot, 'dm') + ticks(xl3, legTop, xl3, legBot, ldo.fs * 0.32, 'tk');
-          // the value reads on the side away from the bar: right of the line at the left end, left of it at the right end
-          s += label(xl3 + (side > 0 ? ldo.fs * 1.05 : -ldo.fs * 0.4), (legTop + legBot) / 2, fmt(bl.leg), assign(ldo, { cls: 'tx gt k-' + q[0] + ' halo', rot: -90 }));
-        }
-        s += label((lo2 + hi2) / 2, q[3] > 0 ? y - ldo.fs * 1.55 : y + ao.fs * 1.25, nt, assign(ao, { cls: 'nm' }));
+        s += label((lo2 + hi2) / 2, y - ldo.fs * 0.4, a.mode === 'ld' ? 'LD ' + a.ld : String(a.avail), assign(ldo, { cls: 'tx gt k-' + q[0] }));
       });
+      // extra top bars anchor by the same rule at their own size: their own note and their own leg
+      var xt = XT[e.k];
+      if (xt && xt.n) {
+        var ax = anchorage(v, e.k, xt.dia), blx = bendLeg(v, e.k, xt.dia);
+        lines.push({ who: 'EXTRA', text: anchText(e, ax, blx, xt.dia) });
+        if (blx.leg) legs.push({ y0: xt.y, y1: ax.mode === 'bend' ? xt.y + 300 : e.Ds - c - 35, u: uF0 - 80 - 30 * TR.lvl, val: blx.leg, grp: 'xtop' });
+      }
+      CAP[e.k] = lines;
+      if (!LB) return;
+      var inside = e.t === 'col';
+      legs.forEach(function (lg, i) {
+        var u = inside ? uF0 - 150 - i * gapL : e.w + 150 + i * gapL, xl = e.X(u), sg = u > lg.u ? 1 : -1;
+        // short extension lines from the leg's two ends to its dimension
+        s += line(e.X(lg.u + sg * 20), lg.y0, e.X(u + sg * 40), lg.y0, 'ex') + line(e.X(lg.u + sg * 20), lg.y1, e.X(u + sg * 40), lg.y1, 'ex');
+        s += line(xl, lg.y0, xl, lg.y1, 'dm') + ticks(xl, lg.y0, xl, lg.y1, ldo.fs * 0.32, 'tk');
+        // the value sits on the side away from the bars: towards the beam inside a column, outwards beyond a support beam
+        var right = (inside ? -1 : 1) * e.d > 0;
+        s += label(xl + (right ? ldo.fs * 1.05 : -ldo.fs * 0.4), (lg.y0 + lg.y1) / 2, fmt(lg.val), assign(ldo, { cls: 'tx gt k-' + lg.grp + ' halo', rot: -90 }));
+      });
+      if (!inside) nOut[e.k] = legs.length;
     });
 
-    // names and title
+    // a support beam's depth beside it, outside (beyond any leg dimensions). The main beam's depth is not dimensioned
+    // here: the cross-sections carry it.
     ends.forEach(function (e) {
+      e.uOut = 500;
+      if (e.t !== 'beam') return;
+      e.uOut = Math.max(500, nOut[e.k] ? 150 + nOut[e.k] * gapL + 200 : 0);
+      var x = e.X(e.w + e.uOut);
+      s += line(e.xo + e.d * g, 0, x + e.d * ov, 0, 'ex') + line(e.xo + e.d * g, e.Ds, x + e.d * ov, e.Ds, 'ex') + vdim(0, e.Ds, x, fmt(v[e.k + 'beamD']), assign(o, { key: e.k + 'beamD' }));
+    });
+
+    // names and captions, aligned away from the beam so a long note never runs back over the span: the support's name,
+    // the anchorage choice (a menu on the page), then one Ld note each for the top, bottom and extra bars
+    var capW = { L: 0, R: 0 }, CW = 0.56;   // average width of the condensed caption face, in em
+    ends.forEach(function (e) {
+      var right = e.k === 'R', ax2 = right ? S + 80 : -80, an2 = right ? 'start' : 'end';
       var yN = e.t === 'col' ? cB + 270 : Math.max(D, e.Ds) + 430;   // a support beam's name clears the bottom anchorage dimension above it
-      s += label(e.X(e.w / 2), yN, e.t === 'col' ? 'COLUMN / WALL' : 'SUPPORT BEAM', { fs: fs * 0.9, cls: 'nm' });
-      // anchorage choice under the name (on the page: click to change Auto / Straight / Bent, and Ld or Ld + 10 x bar size at a column)
-      var at = anchorage(v, e.k, topZone(v, e.k).d), ab = anchorage(v, e.k, barZone(v, 'b', e.k).d), lx = e.t === 'col' && v[e.k + 'colx'] === 'ld10' ? 'LD+10\u00D8' : 'LD';
-      var txt = at.mode === ab.mode ? ANCH_NAME[at.mode].replace('LD', lx) : 'TOP ' + ANCH_NAME[at.mode].replace('LD', lx) + ' \u00B7 BOT ' + ANCH_NAME[ab.mode].replace('LD', lx);
-      txt += at.override || ab.override ? '' : ' (AUTO)';
-      var cx2 = e.X(e.w / 2), cy2 = yN + 150;
+      var name = e.t === 'col' ? 'COLUMN / WALL' : 'SUPPORT BEAM';
+      s += label(ax2, yN, name, { fs: fs * 0.9, cls: 'nm', anchor: an2 });
+      capW[e.k] = name.length * fs * 0.9 * CW;
       if (!LB) return;
-      if (!o.ia) s += label(cx2, cy2, txt, { fs: fs * 0.62, cls: 'nm' });
+      // anchorage choice under the name (on the page: click to change Auto / Straight / Bent, and Ld or Ld + 10 x bar size at a column)
+      var at = anchorage(v, e.k, topZone(v, e.k).d), ab = anchorage(v, e.k, barZone(v, 'b', e.k).d), lx = e.t === 'col' && v[e.k + 'colx'] === 'ld10' ? 'LD+10Ø' : 'LD';
+      var txt = at.mode === ab.mode ? ANCH_NAME[at.mode].replace('LD', lx) : 'TOP ' + ANCH_NAME[at.mode].replace('LD', lx) + ' · BOT ' + ANCH_NAME[ab.mode].replace('LD', lx);
+      txt += at.override || ab.override ? '' : ' (AUTO)';
+      var cy2 = yN + fs * 1.1, fc = fs * 0.62;
+      if (!o.ia) s += label(ax2, cy2, txt, { fs: fc, cls: 'nm', anchor: an2 });
       else {
-        var w2 = (txt.length + 2) * fs * 0.62 * 0.5;
-        s += '<g class="ch" data-ch="' + e.k + '" tabindex="0" role="button" aria-label="Change the ' + (e.k === 'L' ? 'left' : 'right') + ' end anchorage, now ' + esc(txt.toLowerCase()) + '">' +
-          '<rect class="hit" x="' + n(cx2 - w2 / 2 - 30) + '" y="' + n(cy2 - fs * 0.75) + '" width="' + n(w2 + 60) + '" height="' + n(fs * 1.05) + '" rx="12"/>' +
-          label(cx2, cy2, txt + ' \u25BE', { fs: fs * 0.62, cls: 'nm chx' }) + '</g>';
+        var w2 = (txt.length + 2) * fc * CW;
+        s += '<g class="ch" data-ch="' + e.k + '" tabindex="0" role="button" aria-label="Change the ' + (right ? 'right' : 'left') + ' end anchorage, now ' + esc(txt.toLowerCase()) + '">' +
+          '<rect class="hit" x="' + n((right ? ax2 : ax2 - w2) - 30) + '" y="' + n(cy2 - fc * 1.2) + '" width="' + n(w2 + 60) + '" height="' + n(fc * 1.7) + '" rx="12"/>' +
+          label(ax2, cy2, txt + ' ▾', { fs: fc, cls: 'nm chx', anchor: an2 }) + '</g>';
       }
+      capW[e.k] = Math.max(capW[e.k], (txt.length + 2) * fc * CW);
+      // the Ld notes: one line each, identical notes share a line ("TOP & BOT")
+      var merged = [];
+      (CAP[e.k] || []).forEach(function (q) { var same = merged.filter(function (m) { return m.text === q.text; })[0]; if (same) same.who += ' & ' + q.who; else merged.push({ who: q.who, text: q.text }); });
+      merged.forEach(function (q, i) {
+        var t2 = q.who + '  ' + q.text;
+        s += label(ax2, cy2 + fc * (1.75 + 1.4 * i), t2, { fs: fc, cls: 'nm', anchor: an2 });
+        capW[e.k] = Math.max(capW[e.k], t2.length * fc * CW);
+      });
     });
     // the title moves down when a link note dropped a line or the text is larger, and the drawing grows to match
-    var tSh = (anyDrop ? lo.fs * 1.3 : 0) + Math.max(0, TS - 1) * 260;
+    var tSh = (anyDrop ? lo.fs * 1.3 : 0) + Math.max(0, TS - 1) * 260 + bS;
     s += label(S / 2, 2420 + tSh, 'L-SECTION', { fs: fs * 1.4, cls: 'tt' }) + line(S / 2 - 430, 2465 + tSh, S / 2 + 430, 2465 + tSh, 'ob') + label(S / 2, 2610 + tSh, beamClass(v).toUpperCase() + ' BEAM  ·  NTS', { fs: fs * 0.85, cls: 'nm' });
-    var x0 = L.xo - (L.t === 'col' ? 550 : 750), x1 = R.xo + (R.t === 'col' ? 550 : 750);
-    return wrapSVG(n(x0) + ' -1850 ' + n(x1 - x0) + ' ' + n(4560 + tSh), s, opt, 'Beam L-section, ' + beamClass(v) + ' beam');
+    // the sheet: room for each end's outside dimensions and caption, and for every row of dimensions above
+    var x0 = Math.min(L.xo - (L.t === 'col' ? 550 : L.uOut + 250), -80 - capW.L - 60), x1 = Math.max(R.xo + (R.t === 'col' ? 550 : R.uOut + 250), S + 80 + capW.R + 60);
+    return wrapSVG(n(x0) + ' ' + n(yTop) + ' ' + n(x1 - x0) + ' ' + n(2710 + tSh - yTop), s, opt, 'Beam L-section, ' + beamClass(v) + ' beam');
   }
 
   /** A cross-section (A-A by default): the beam cut through, with its cover line and its covers dimensioned. */
@@ -961,7 +1034,7 @@
       '.lkb{fill:none;stroke:#2F6DB5;stroke-width:1px;stroke-linejoin:round;vector-effect:non-scaling-stroke}.bd{fill:#1B2530}.bt{fill:#1B2530}',
       '.br{fill:none;stroke:#1B2530;stroke-width:2px;stroke-linejoin:round;vector-effect:non-scaling-stroke}.fb{fill:none;stroke:#1B2530;stroke-width:1px;vector-effect:non-scaling-stroke}',
       '.spb{fill:#D9730D}',
-      '.halo{paint-order:stroke;stroke:#FBFCFD;stroke-width:6px;stroke-linejoin:round}',
+      '.halo{paint-order:stroke;stroke:#FBFCFD;stroke-width:.3em;stroke-linejoin:round}',
       '.sm{fill:none;stroke:#1B2530;stroke-width:2.2px;vector-effect:non-scaling-stroke}.ah{fill:#1B2530}',
       '.jn{fill:none;stroke:#8A949D;stroke-width:1.2px;stroke-dasharray:10 6;vector-effect:non-scaling-stroke}',
       '.tx{font-family:"IBM Plex Mono",Consolas,"Courier New",monospace;fill:#1B2530}.ov{fill:#5B6772}.cv{fill:#2E8B57}',
@@ -971,6 +1044,6 @@
   }
   var EXPORT_CSS = exportCSS({});
 
-  root.BeamSections = { VERSION: VERSION, GROUPS: GROUPS, okColor: okColor, exportCSS: exportCSS, linkGroup: linkGroup, spacers: spacers, DEFAULTS: DEFAULTS, NAMES: NAMES, COVER: COVER, COUNT: COUNT, anchorage: anchorage, bendLeg: bendLeg, zk: zk, barZone: barZone, barChange: barChange, barRuns: barRuns, barsAt: barsAt, botLayersAt: botLayersAt, extraBot: extraBot, BXMODES: BXMODES, arrange: arrange, topZone: topZone, lapAt: lapAt, topChange: topChange, topRuns: topRuns, mainsAt: mainsAt, layersAt: layersAt, extraTop: extraTop, topLayers: topLayers, extrasAt: extrasAt, cutX: cutX, XMODES: XMODES, endZone: endZone, layoutMode: layoutMode, isEnds: isEnds, linkMode: linkMode, ENDS_MODES: ENDS_MODES, linkRange: linkRange, linkLayout: linkLayout, LINK_START: LINK_START, supportCase: supportCase, beamClass: beamClass, lSection: lSection, xSection: xSection, EXPORT_CSS: EXPORT_CSS };
+  root.BeamSections = { VERSION: VERSION, GROUPS: GROUPS, okColor: okColor, exportCSS: exportCSS, linkGroup: linkGroup, spacers: spacers, DEFAULTS: DEFAULTS, NAMES: NAMES, COVER: COVER, COUNT: COUNT, anchorage: anchorage, bendLeg: bendLeg, legMin: legMin, LEG_MIN: LEG_MIN, BS_P: BS_P, zk: zk, barZone: barZone, barChange: barChange, barRuns: barRuns, barsAt: barsAt, botLayersAt: botLayersAt, extraBot: extraBot, BXMODES: BXMODES, arrange: arrange, topZone: topZone, lapAt: lapAt, topChange: topChange, topRuns: topRuns, mainsAt: mainsAt, layersAt: layersAt, extraTop: extraTop, topLayers: topLayers, extrasAt: extrasAt, cutX: cutX, XMODES: XMODES, endZone: endZone, layoutMode: layoutMode, isEnds: isEnds, linkMode: linkMode, ENDS_MODES: ENDS_MODES, linkRange: linkRange, linkLayout: linkLayout, LINK_START: LINK_START, supportCase: supportCase, beamClass: beamClass, lSection: lSection, xSection: xSection, EXPORT_CSS: EXPORT_CSS };
   if (typeof module !== 'undefined' && module.exports) module.exports = root.BeamSections;
 })(typeof window !== 'undefined' ? window : globalThis);

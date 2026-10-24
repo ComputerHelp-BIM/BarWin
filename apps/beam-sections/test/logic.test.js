@@ -116,3 +116,37 @@ test('freeze probe: every link mode over a range of spans draws quickly and with
   }
   assert.deepEqual(slow, []);
 });
+
+test('bent leg minimum (A7): IS 456 8 x bar, BS 8666 Table 2 P, 12 x, 10 x', () => {
+  assert.equal(B.legMin(vals({ legMin: 'is' }), 16).min, 128);
+  assert.equal(B.legMin(vals({ legMin: 'bs' }), 16).min, 130);   // BS 8666 Table 2
+  assert.equal(B.legMin(vals({ legMin: 'bs' }), 20).min, 190);
+  assert.equal(B.legMin(vals({ legMin: 'bs' }), 25).min, 240);
+  assert.equal(B.legMin(vals({ legMin: '12d' }), 16).min, 192);
+  assert.equal(B.legMin(vals({ legMin: '10d' }), 16).min, 160);
+  assert.equal(B.legMin(vals(), 16).min, 192, 'default stays 12 x bar size');
+});
+
+test('bent leg: Ld less the straight run, lengthened to the minimum when shorter', () => {
+  // 900 column, cover 40: run 860; Ld 50 x 16 = 800 < run, so a forced bend has only the minimum leg
+  const v = vals({ Lanch: 'bend', legMin: '12d' });
+  const bl = B.bendLeg(v, 'L', 16);
+  assert.equal(bl.run, 860);
+  assert.equal(bl.leg, 192);
+  assert.equal(bl.minRules, true);
+  // a 300 column: run 260, Ld 800, leg 540 (the minimum does not govern)
+  const bl2 = B.bendLeg(vals({ LcolW: 300, Lanch: 'bend' }), 'L', 16);
+  assert.equal(bl2.leg, 540);
+  assert.equal(bl2.minRules, false);
+});
+
+test('L-section (A1-A4): laps and cut-offs sit outside the beam, extras get their own leg and note', () => {
+  const v = vals({ LtSame: false, LtN: 3, LtDia: 20, LxN: 2, LxDia: 25, bxN: 3, LbSame: false, LbN: 2, LbDia: 20 });
+  const svg = B.lSection(v);
+  // every "LAP" or "CUT-OFF" label is above the beam top (y < 0) or below its soffit (y > 900)
+  const re = /<text[^>]*y="(-?[\d.]+)"[^>]*>([^<]*(?:LAP \d|CUT-OFF)[^<]*)<\/text>/g;
+  let m, n = 0;
+  while ((m = re.exec(svg))) { n++; const y = +m[1]; assert.ok(y < 0 || y > 900, `"${m[2]}" at y=${y} is inside the beam`); }
+  assert.ok(n >= 3, 'laps and cut-offs are labelled');
+  assert.match(svg, /EXTRA  LD 1250/, 'the extra bars have their own Ld note in the support caption');
+});

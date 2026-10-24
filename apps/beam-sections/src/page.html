@@ -14,8 +14,9 @@
   --link: #2F6DB5;      /* links */
   --muted: #5B6772;     /* mill: dimension lines, names */
   --rule: #CFD6DD;
-  --edit: #B23A21;      /* oxide: anything the user can change */
-  --edit-soft: #F6E3DD;
+  --edit: #B45309;      /* amber: anything the user can change (no bar group uses it) */
+  --edit-soft: #FDF1DC;
+  --err: #B23A21;       /* oxide: a value that cannot be used */
   --warn: #8A5A00;      /* alerts: advice, never a block */
   /* bar colour groups, vivid: top red / magenta, bottom blue / cyan, links green, face violet, spacer orange (the user can pick others) */
   --b-top: #E0201B; --b-xtop: #D0149A; --b-face: #7A35E8; --b-bot: #1D4ED8; --b-xbot: #0891B2; --b-lkEnd: #15803D; --b-lkMid: #65A30D; --b-spc: #F07800;
@@ -25,9 +26,9 @@
   --mono: "IBM Plex Mono", Consolas, "Courier New", monospace;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --bg: #10161C; --paper: #172029; --ink: #DDE4EA; --muted: #93A0AB; --rule: #2B3743; --edit: #F08A5D; --edit-soft: #3A251D; --outline: #5E6B77; --cover: #4FB37E; --link: #6AA8E8; --warn: #E8B44F; --warn-soft: #2E2615; --b-top: #FF5A52; --b-xtop: #FF5CCB; --b-face: #B392FF; --b-bot: #6A97FF; --b-xbot: #2ED6F2; --b-lkEnd: #2FD27A; --b-lkMid: #B6E84A; --b-spc: #FFA640; color-scheme: dark } }
+  --bg: #10161C; --paper: #172029; --ink: #DDE4EA; --muted: #93A0AB; --rule: #2B3743; --edit: #FBBF24; --edit-soft: #3A2E10; --err: #F08A5D; --outline: #5E6B77; --cover: #4FB37E; --link: #6AA8E8; --warn: #E8B44F; --warn-soft: #2E2615; --b-top: #FF5A52; --b-xtop: #FF5CCB; --b-face: #B392FF; --b-bot: #6A97FF; --b-xbot: #2ED6F2; --b-lkEnd: #2FD27A; --b-lkMid: #B6E84A; --b-spc: #FFA640; color-scheme: dark } }
 :root[data-theme="dark"] {
-  --bg: #10161C; --paper: #172029; --ink: #DDE4EA; --muted: #93A0AB; --rule: #2B3743; --edit: #F08A5D; --edit-soft: #3A251D; --outline: #5E6B77; --cover: #4FB37E; --link: #6AA8E8; --warn: #E8B44F; --warn-soft: #2E2615; --b-top: #FF5A52; --b-xtop: #FF5CCB; --b-face: #B392FF; --b-bot: #6A97FF; --b-xbot: #2ED6F2; --b-lkEnd: #2FD27A; --b-lkMid: #B6E84A; --b-spc: #FFA640; color-scheme: dark }
+  --bg: #10161C; --paper: #172029; --ink: #DDE4EA; --muted: #93A0AB; --rule: #2B3743; --edit: #FBBF24; --edit-soft: #3A2E10; --err: #F08A5D; --outline: #5E6B77; --cover: #4FB37E; --link: #6AA8E8; --warn: #E8B44F; --warn-soft: #2E2615; --b-top: #FF5A52; --b-xtop: #FF5CCB; --b-face: #B392FF; --b-bot: #6A97FF; --b-xbot: #2ED6F2; --b-lkEnd: #2FD27A; --b-lkMid: #B6E84A; --b-spc: #FFA640; color-scheme: dark }
 
 body { background: var(--bg); color: var(--ink); font: 400 15px/1.55 var(--body); }
 .wrap { max-width: 1240px; margin: 0 auto; padding-block: 28px 40px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 20px; }
@@ -83,12 +84,12 @@ button.mini { padding: 4px 10px; font-size: 13px; }
 .dw .bt { fill: var(--ink); }
 .dw .br { fill: none; stroke: var(--g, var(--ink)); stroke-width: 2px; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
 .dw .fb { fill: none; stroke: var(--g, var(--ink)); stroke-width: 1px; vector-effect: non-scaling-stroke; }
-.dw .halo { paint-order: stroke; stroke: var(--paper); stroke-width: 6px; stroke-linejoin: round; }
+.dw .halo { paint-order: stroke; stroke: var(--paper); stroke-width: .3em; stroke-linejoin: round; }   /* sized to the text, so it masks lines behind at any zoom */
 .anch select { height: 38px; padding: 0 8px; font: 500 14px var(--body); color: var(--ink); background: var(--bg); border: 1px solid var(--rule); border-radius: 4px; }
 .dw .rng { fill: var(--muted); opacity: .75; letter-spacing: .04em; }
 .field small.rng { color: var(--muted); font-variant-numeric: tabular-nums; }
 .seg.wide { grid-column: 1 / -1; }
-.checks { margin: 0; padding-left: 18px; display: grid; gap: 4px; color: var(--edit); }
+.checks { margin: 0; padding-left: 18px; display: grid; gap: 4px; color: var(--err); }
 .chk { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; color: var(--ink); min-height: 38px; }
 .dw .ch { cursor: pointer; outline: none; }
 .dw .ch .hit { fill: transparent; }
@@ -139,7 +140,7 @@ button.mini { padding: 4px 10px; font-size: 13px; }
 .dw .ul { stroke: var(--edit); stroke-width: 1px; stroke-dasharray: 3 3; vector-effect: non-scaling-stroke; }
 
 .dim-ed { position: absolute; height: 34px; padding: 0 6px; font: 500 16px var(--mono); text-align: center; color: var(--ink); background: var(--paper); border: 2px solid var(--edit); border-radius: 4px; box-shadow: 0 2px 10px rgba(0,0,0,.18); z-index: 2; }
-.dim-ed[aria-invalid="true"] { border-style: dashed; }
+.dim-ed[aria-invalid="true"] { border-style: dashed; border-color: var(--err); }
 .dim-ed.cvr { border-color: var(--cover); }
 
 /* values panel */
@@ -152,7 +153,7 @@ button.mini { padding: 4px 10px; font-size: 13px; }
 .field .in input { flex: 1 1 0; width: 0; min-width: 0; height: 36px; border: 0; background: transparent; padding: 0 8px; font: 500 16px var(--mono); color: var(--edit); font-variant-numeric: tabular-nums; }
 .field .in input:focus { outline: none; }
 .field .in:focus-within { border-color: var(--edit); box-shadow: 0 0 0 2px var(--edit-soft); }
-.field input[aria-invalid="true"] { text-decoration: underline wavy var(--edit); }
+.field input[aria-invalid="true"] { text-decoration: underline wavy var(--err); }
 .field .u { padding: 0 8px; color: var(--muted); font: 400 13px var(--mono); }
 .field .out { height: 38px; display: flex; align-items: center; padding: 0 9px; font: 500 16px var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
 .field small { color: var(--muted); font-size: 12.5px; }
@@ -161,9 +162,28 @@ button { font: 600 14px var(--body); color: var(--ink); background: var(--bg); b
 button:hover { border-color: var(--muted); }
 button:focus-visible, .field input:focus-visible { outline: 2px solid var(--edit); outline-offset: 2px; }
 #msg { margin: 0; min-height: 1.5em; color: var(--muted); }
-#msg.err { color: var(--edit); }
+#msg.err { color: var(--err); }
 #svgOut { width: 100%; min-height: 120px; font: 12px var(--mono); color: var(--ink); background: var(--bg); border: 1px solid var(--rule); border-radius: 4px; padding: 8px; }
 footer { color: var(--muted); font-size: 13px; }
+/* settings panel: tabs (one tab at a time) or collapsible groups; the user switches between them */
+.panel-h { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; }
+.tabbar { display: flex; flex-wrap: wrap; gap: 4px; border-bottom: 1px solid var(--rule); }
+.tabbar[hidden] { display: none; }
+.tabbar button { border: 1px solid transparent; border-bottom: 0; border-radius: 4px 4px 0 0; background: none; color: var(--muted); padding: 8px 14px; min-height: 40px; font: 600 15px var(--cond); letter-spacing: .06em; text-transform: uppercase; margin-bottom: -1px; }
+.tabbar button[aria-selected="true"] { color: var(--ink); background: var(--paper); border-color: var(--rule); border-bottom: 1px solid var(--paper); }
+.tabbar button .cnt { margin-left: 6px; color: var(--err); }
+.pg > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 8px; min-height: 36px; border-radius: 4px; }
+.pg > summary::-webkit-details-marker { display: none; }
+.pg > summary::before { content: "\25B8"; color: var(--muted); font-size: 13px; width: 1em; }
+.pg[open] > summary::before { content: "\25BE"; }
+.pg > summary:focus-visible { outline: 2px solid var(--edit); outline-offset: 2px; }
+.pg:not([open]) { gap: 0; }
+#vals.mode-tabs .pg { display: none; }
+#vals.mode-tabs .pg.on { display: grid; }
+#vals.mode-tabs .pg > summary { cursor: default; pointer-events: none; }
+#vals.mode-tabs .pg > summary::before { content: none; }
+.grp-acts { display: flex; gap: 8px; }
+.grp-acts[hidden] { display: none; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 
@@ -171,7 +191,7 @@ footer { color: var(--muted); font-size: 13px; }
   <header>
     <p class="eyebrow">BBS Studio · beam detailing</p>
     <h1>Beam sections</h1>
-    <p class="lede">L-section and section A-A of one beam span. Choose what each end rests on, then click any <b>red number</b>, including bar counts, sizes and link spacing, to type a real size or a <b class="g">green number</b> to set a cover. Tick the box under a section mark to show that section. The drawing keeps its shape; only the numbers change, except that a support beam is drawn deeper or shallower to match the depths.</p>
+    <p class="lede">L-section and section A-A of one beam span. Choose what each end rests on, then click any <b>amber number</b>, including bar counts, sizes and link spacing, to type a real size or a <b class="g">green number</b> to set a cover. Tick the box under a section mark to show that section. The drawing keeps its shape; only the numbers change, except that a support beam is drawn deeper or shallower to match the depths.</p>
   </header>
 
   <div class="viewbar" role="group" aria-label="Drawing view">
@@ -189,9 +209,17 @@ footer { color: var(--muted); font-size: 13px; }
   </div>
 
   <section class="panel" aria-labelledby="valsH">
-    <h2 id="valsH">Dimensions</h2>
+    <div class="panel-h">
+      <h2 id="valsH">Dimensions</h2>
+      <fieldset class="seg" id="panelMode"><legend>Show settings as</legend>
+        <input type="radio" id="pm-tabs" name="panel" value="tabs"><label for="pm-tabs">Tabs</label>
+        <input type="radio" id="pm-groups" name="panel" value="groups"><label for="pm-groups">Groups</label>
+      </fieldset>
+    </div>
+    <div class="tabbar" id="tabbar" role="tablist" aria-label="Settings"></div>
+    <div class="grp-acts" id="grpActs"><button type="button" class="mini" data-act="openAll">Open all</button><button type="button" class="mini" data-act="closeAll">Close all</button></div>
     <form id="vals" class="group" novalidate>
-      <div class="group"><h3>Supports</h3>
+      <details class="group pg" data-tab="geo" open><summary><h3>Supports</h3></summary>
         <div class="ends">
           <fieldset class="seg"><legend>Left end rests on</legend>
             <input type="radio" id="tL-col" name="typeL" value="col"><label for="tL-col">Column / wall</label>
@@ -203,17 +231,17 @@ footer { color: var(--muted); font-size: 13px; }
           </fieldset>
           <p class="kind" id="kind" aria-live="polite"></p>
         </div>
-      </div>
-      <div class="group"><h3>Sizes</h3><div class="fields" id="sizes"></div></div>
-      <div class="group"><h3>Clear cover</h3><div class="fields" id="covers"></div></div>
-      <div class="group"><h3>Main bars</h3><div class="fields" id="bars"></div></div>
-      <div class="group"><h3>Top bars along the span</h3><div class="fields anch" id="tzones"></div></div>
-      <div class="group"><h3>Bottom bars along the span</h3><div class="fields anch" id="bzones"></div></div>
-      <div class="group"><h3>Bottom extra bars over mid-span</h3><div class="fields anch" id="bxtra"></div></div>
-      <div class="group"><h3>Extra top bars over the supports</h3><div class="fields anch" id="xtop"></div></div>
-      <div class="group"><h3>Anchorage</h3><div class="fields anch" id="anch"></div></div>
-      <div class="group"><h3>Links</h3><div class="fields" id="links"></div></div>
-      <div class="group"><h3>Checks</h3><ul class="checks" id="checks"></ul></div>
+      </details>
+      <details class="group pg" data-tab="geo" open><summary><h3>Sizes</h3></summary><div class="fields" id="sizes"></div></details>
+      <details class="group pg" data-tab="geo" open><summary><h3>Clear cover</h3></summary><div class="fields" id="covers"></div></details>
+      <details class="group pg" data-tab="bars" open><summary><h3>Main bars</h3></summary><div class="fields" id="bars"></div></details>
+      <details class="group pg" data-tab="top" open><summary><h3>Top bars along the span</h3></summary><div class="fields anch" id="tzones"></div></details>
+      <details class="group pg" data-tab="bot" open><summary><h3>Bottom bars along the span</h3></summary><div class="fields anch" id="bzones"></div></details>
+      <details class="group pg" data-tab="bot" open><summary><h3>Bottom extra bars over mid-span</h3></summary><div class="fields anch" id="bxtra"></div></details>
+      <details class="group pg" data-tab="top" open><summary><h3>Extra top bars over the supports</h3></summary><div class="fields anch" id="xtop"></div></details>
+      <details class="group pg" data-tab="anch" open><summary><h3>Anchorage</h3></summary><div class="fields anch" id="anch"></div></details>
+      <details class="group pg" data-tab="links" open><summary><h3>Links</h3></summary><div class="fields" id="links"></div></details>
+      <details class="group pg" data-tab="checks" open><summary><h3>Checks</h3></summary><ul class="checks" id="checks"></ul></details>
     </form>
     <div class="acts">
       <button type="button" data-act="reset">Reset to the example</button>
@@ -233,6 +261,8 @@ footer { color: var(--muted); font-size: 13px; }
   'use strict';
   var BS = window.BeamSections, KEY = 'bbs-beam-sections-v2', OLD_KEY = 'bbs-beam-sections-v1';
   var $ = function (s) { return document.querySelector(s); };
+  /** Settings tabs: [id, label]; each group in the form names its tab in data-tab. */
+  var TABS = [['geo', 'Geometry'], ['bars', 'Main bars'], ['top', 'Top bars'], ['bot', 'Bottom bars'], ['anch', 'Anchorage'], ['links', 'Links'], ['checks', 'Checks']];
   var vals = load();
   $('#ver').textContent = BS.VERSION;
 
@@ -258,6 +288,9 @@ footer { color: var(--muted); font-size: 13px; }
         else if (k === 'colors') { o.colors = {}; if (s.colors && typeof s.colors === 'object') BS.GROUPS.forEach(function (G) { if (BS.okColor(s.colors[G.k])) o.colors[G.k] = s.colors[G.k]; }); }
         else if (k === 'LxMode' || k === 'RxMode') { if (BS.XMODES.hasOwnProperty(s[k])) o[k] = s[k]; }
         else if (k === 'Lcolx' || k === 'Rcolx') { if (s[k] === 'ld' || s[k] === 'ld10') o[k] = s[k]; }
+        else if (k === 'legMin') { if (BS.LEG_MIN.hasOwnProperty(s[k])) o[k] = s[k]; }
+        else if (k === 'panel') { if (s[k] === 'tabs' || s[k] === 'groups') o[k] = s[k]; }
+        else if (k === 'tab') { if (TABS.some(function (t) { return t[0] === s[k]; })) o[k] = s[k]; }
         else if (BS.COUNT[k]) { if (parseVal(k, String(s[k])) !== null) o[k] = s[k]; }
         else if (typeof o[k] === 'boolean') { if (typeof s[k] === 'boolean') o[k] = s[k]; }
         else if (s[k] > 0 && s[k] <= 100000) o[k] = Math.round(s[k]);
@@ -462,6 +495,11 @@ footer { color: var(--muted); font-size: 13px; }
         [['auto', 'Auto'], ['1', 'Layer 1, with main bars'], ['2', 'Layer 2, on spacer bars']].map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === vals[k + 'xLayer'] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></div>';
     }).join('') + fieldHTML(['spcS', 'Spacer bars, no more than', 'rng']);
     // bars at each end, top and bottom: the same as mid, or their own count and size, lapping inside the end area where they change
+    // a plain choice that only sets its value (data-opt)
+    function selectHTML2(id, key, label, opts, cur, note) {
+      return '<div class="field"><label for="' + id + '">' + label + '</label><select id="' + id + '" data-opt="' + key + '">' +
+        opts.map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === cur ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select>' + (note ? '<small id="' + note + '"></small>' : '') + '</div>';
+    }
     function selectHTML(id, key, label, opts, cur, note) {
       return '<div class="field"><label for="' + id + '">' + label + '</label><select id="' + id + '" data-x="' + key + '">' +
         opts.map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === cur ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select>' + (note ? '<small id="' + note + '"></small>' : '') + '</div>';
@@ -497,7 +535,8 @@ footer { color: var(--muted); font-size: 13px; }
         '<select id="f-' + k + 'anch" data-c="' + k + 'anch">' + OPT[t].map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === cur ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select>' +
         (t === 'col' ? '<div class="under"><label><input type="radio" name="' + k + 'colx" value="ld"' + (vals[k + 'colx'] !== 'ld10' ? ' checked' : '') + '> Ld</label><label><input type="radio" name="' + k + 'colx" value="ld10"' + (vals[k + 'colx'] === 'ld10' ? ' checked' : '') + '> Ld + 10 x bar size</label></div>' : '') +
         '<small id="an' + k + '"></small></div>';
-    }).join('');
+    }).join('') +
+      selectHTML2('f-legMin', 'legMin', 'Shortest bent leg', [['is', 'IS 456: 8 \u00D7 bar size'], ['bs', 'BS 8666: end projection P'], ['12d', '12 \u00D7 bar size'], ['10d', '10 \u00D7 bar size']], vals.legMin, 'legMinHow');
     ['L', 'R'].forEach(function (k) { $('#t' + k + '-' + vals['type' + k]).checked = true; var r = document.querySelector('input[name="' + k + 'under"][value="' + vals[k + 'under'] + '"]'); if (r) r.checked = true; });
   }
 
@@ -541,6 +580,7 @@ footer { color: var(--muted); font-size: 13px; }
       var at = BS.anchorage(vals, k, vals.topDia), ab = BS.anchorage(vals, k, vals.botDia), el = $('#an' + k); if (!el) return;
       el.textContent = 'Ld ' + at.ld + (ab.ld !== at.ld ? ' / ' + ab.ld : '') + ', support gives ' + at.avail + '. Auto: ' + AN[at.auto] + (ab.auto !== at.auto ? ' top, ' + AN[ab.auto] + ' bottom' : '') + '.';
     });
+    if ($('#legMinHow')) { var lm1 = BS.legMin(vals, vals.topDia); $('#legMinHow').textContent = BS.LEG_MIN[lm1.mode] + '; T' + vals.topDia + ': ' + lm1.min + ' mm'; }
     // checks a detailer would make: bar spacing, legs against bars, straight anchorage that does not fit
     var C = [], Bw = vals.B - 2 * vals.cside - 2 * vals.ldia;
     var ZC = [['top', vals.topN, vals.topDia], ['bottom', vals.botN, vals.botDia]];
@@ -570,10 +610,37 @@ footer { color: var(--muted); font-size: 13px; }
     $('#lkTotal').textContent = LKL.total + ' nos';
     $('#lkHow').textContent = LKL.zones.filter(function (z) { return z.n > 0; }).map(function (z) { return z.n + ' @ ' + Math.round(z.pitch); }).join(' + ') + ' actual c/c; first and last ' + vals.lStart + ' from the support faces';
     $('#checks').innerHTML = C.length ? C.map(function (t) { return t.warn ? '<li class="warn">' + t.warn + '</li>' : '<li>' + t + '</li>'; }).join('') : '<li class="ok">No problems found.</li>';
+    if (vals.panel !== 'groups') syncPanel();
     var K = KIND[BS.beamClass(vals)];
     $('#kind').innerHTML = '<b>' + K[0] + '</b> &middot; ' + K[1];
     $('#lcap').textContent = cap(ENDS[vals.typeL]) + ' left, ' + ENDS[vals.typeR] + ' right';
   }
+  /* ---- settings as tabs or collapsible groups ---- */
+  function syncPanel() {
+    var tabs = vals.panel !== 'groups', form = $('#vals'), groups = [].slice.call(form.querySelectorAll('.pg'));
+    form.classList.toggle('mode-tabs', tabs);
+    $('#pm-' + (tabs ? 'tabs' : 'groups')).checked = true;
+    $('#tabbar').hidden = !tabs; $('#grpActs').hidden = tabs;
+    if (tabs) {
+      groups.forEach(function (g) { g.open = true; g.classList.toggle('on', g.dataset.tab === vals.tab); });
+      var nWarn = document.querySelectorAll('#checks li:not(.ok)').length;
+      $('#tabbar').innerHTML = TABS.map(function (t) {
+        var on = t[0] === vals.tab;
+        return '<button type="button" role="tab" id="tab-' + t[0] + '" data-tab="' + t[0] + '" aria-selected="' + on + '" tabindex="' + (on ? 0 : -1) + '">' + t[1] + (t[0] === 'checks' && nWarn ? '<span class="cnt">' + nWarn + '</span>' : '') + '</button>';
+      }).join('');
+    } else groups.forEach(function (g) { g.classList.remove('on'); });
+  }
+  function showTab(id, focus) { vals.tab = id; save(); syncPanel(); if (focus) { var b = $('#tab-' + id); if (b) b.focus(); } }
+  $('#panelMode').addEventListener('change', function (e) {
+    vals.panel = e.target.value === 'groups' ? 'groups' : 'tabs'; save(); syncPanel();
+    msg(vals.panel === 'tabs' ? 'Settings shown as tabs, one at a time.' : 'Settings shown as groups; click a heading to open or close it.');
+  });
+  $('#tabbar').addEventListener('click', function (e) { var b = e.target.closest('button[data-tab]'); if (b) showTab(b.dataset.tab); });
+  $('#tabbar').addEventListener('keydown', function (e) {
+    var i = TABS.map(function (t) { return t[0]; }).indexOf(vals.tab), n = TABS.length;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); showTab(TABS[(i + (e.key === 'ArrowRight' ? 1 : n - 1)) % n][0], true); }
+    else if (e.key === 'Home' || e.key === 'End') { e.preventDefault(); showTab(TABS[e.key === 'Home' ? 0 : n - 1][0], true); }
+  });
   /** Rebuilds the form (its fields depend on the supports) without losing the field the user was on. */
   function refresh() { var id = document.activeElement && document.activeElement.id; buildForm(); render(); if (id && document.getElementById(id)) document.getElementById(id).focus({ preventScroll: true }); }
 
@@ -670,6 +737,7 @@ footer { color: var(--muted); font-size: 13px; }
       else msg(sd + ' extra top bars: ' + (x.basis ? x.basis + ' = ' + x.len + ' mm' : 'type the length') + ' from the support face.' + (f4 ? ' ' + f4 : ''));
       return;
     }
+    if (i.dataset && i.dataset.opt) { vals[i.dataset.opt] = i.value; save(); render(); msg('Shortest bent leg: ' + i.options[i.selectedIndex].text + '. Legs shorter than this are lengthened to it.'); return; }
     if (i.dataset && i.dataset.c) { vals[i.dataset.c] = i.value; save(); render(); msg((i.dataset.c[0] === 'L' ? 'Left' : 'Right') + ' end anchorage: ' + i.options[i.selectedIndex].text.toLowerCase() + '.'); return; }
     if (i.name === 'Lcolx' || i.name === 'Rcolx') { vals[i.name] = i.value; save(); render(); msg((i.name[0] === 'L' ? 'Left' : 'Right') + ' column or wall: anchorage ' + (i.value === 'ld10' ? 'Ld + 10 x bar size.' : 'Ld.')); return; }
     if (i.name === 'lmode') { vals.lmode = i.value; var fit2 = fitLinks(); save(); refresh(); msg('Links: ' + i.nextElementSibling.textContent.toLowerCase() + '.' + (fit2 ? ' ' + fit2 : '')); return; }
@@ -693,6 +761,7 @@ footer { color: var(--muted); font-size: 13px; }
     var a = b.dataset.act;
     if (a === 'copyL') copy(BS.lSection(vals, { style: BS.exportCSS(vals.colors) }), 'L-section');
     else if (a === 'copyX') copy(BS.xSection(vals, { style: BS.exportCSS(vals.colors), letter: b.dataset.s }), 'Section ' + b.dataset.s + '-' + b.dataset.s);
+    else if (a === 'openAll' || a === 'closeAll') { [].forEach.call(document.querySelectorAll('#vals .pg'), function (g) { g.open = a === 'openAll'; }); }
     else if (a === 'resetColors') { vals.colors = {}; save(); applyColors(); buildLegend(); msg('Bar colours back to the defaults for this theme.'); }
     else if (a === 'toSingle') {
       var AL = linkAlerts(); if (!AL.length) return;
@@ -704,6 +773,6 @@ footer { color: var(--muted); font-size: 13px; }
 
   fitLinks(); save();   // a value saved by an older version that no longer fits the span is pulled back into range
   applyColors(); buildLegend(); syncView();
-  refresh();
+  refresh(); syncPanel();
 })();
 </script>

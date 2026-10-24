@@ -47,7 +47,17 @@ The rules behind [SS Beam Geometry](../apps/ss-beam-geometry) (geometry, frozen 
 - DXF: everything 1:1 in model space; a paper-space layout of the chosen sheet holds viewports at each view's scale.
 - Text and dimensions a fixed size on paper (about 2.5 mm). A view that does not fit: alert to pick a smaller scale, or offer a break line in the span. Alert, never block.
 
-# Reinforcement (Beam Sections 0.15.1)
+# Reinforcement (Beam Sections 0.16.0)
+
+## Drawing layout (0.16.0)
+- Inside the beam only bars and links are drawn. Every dimension and note sits on a row outside it.
+- Above the beam, from the beam up: top tags, section marks, top laps ("LAP 800", when an end laps), extra-bar lengths, lap points, the chain, the overall length.
+- Below the beam: bottom tags, then the bottom extras' cut-offs and the bottom laps on their own rows; section marks, link zones and the title move down to make room.
+- A label wider than its dimension stays on the span side, never over a support face. A long note over the extras runs out over the support instead.
+- Each support has a caption block aligned away from the beam: its name, the anchorage choice (a menu), then one Ld note each for the top, bottom and extra bars; identical notes share a line ("TOP & BOT").
+- The top cover value sits above the tag row on a longer leader, the bottom one at the cut-off row's height, so only the leader has to pass between tags. Both keep clear of section marks and of the bottom dimension labels.
+- Editable numbers are amber with a dashed underline (no bar group uses amber); covers stay green; red is kept for values that cannot be used.
+- Settings panel: Tabs (Geometry, Main bars, Top bars, Bottom bars, Anchorage, Links, Checks) or collapsible Groups, switched at the top of the panel and remembered. The Checks tab shows the number of warnings.
 
 ## View controls (0.15.0)
 - "Labels" checkbox above the drawings: off hides bar tags, notes, section bar lists and the Ld, leg, lap and cut-off dimensions in one click; geometry dimensions, section marks and titles stay. Applies to the L-section, the cross-sections and copied SVGs.
@@ -62,8 +72,15 @@ The rules behind [SS Beam Geometry](../apps/ss-beam-geometry) (geometry, frozen 
 
 ## Main bars and anchorage
 - Anchorage straight or bent by support width, automatic with a per-end override; Ld = ldF (50) x bar size from the face. Column: Ld or Ld + 10 x bar size. Beam end: bent to cover, straight Ld, or straight to cover.
-- L-section: each support shows its own top bar's anchorage above the beam and its own bottom bar's below. Straight: "LD 800" with "50 x T16". Bent / to cover: the straight run with "LD 800 = 860 + 192 LEG" or "TO COVER".
-- Bent leg (0.15.1): a vertical dimension beside each drawn leg with its length, value on the side away from the bar. Leg rule (assumption, to confirm, BACKLOG A7): at a column / wall, leg = Ld - straight run (support width - cover), never less than 12 x bar size; bent to cover at a support beam, leg = min(beam depth, support depth) - top cover - bottom cover. Bend deductions not yet included (they belong to cutting lengths in the BBS).
+- L-section: each support shows its own top bar's anchorage above the beam and its own bottom bar's below ("LD 800" when straight, the straight run when bent); under a deeper support beam the bottom one goes below the support. The full sum is in the support's caption: "LD 800 = 50 x T16", "LD 800: 275 + 835 LEG", "STRAIGHT 275 TO COVER (LD 800)".
+- Bent leg: every bent leg has its own vertical dimension, extra top bars included (0.16.0). Inside a column or wall the dimensions step in from the bars; at a support beam they sit outside its outer face (with extension lines), and the support's depth dimension moves out beyond them.
+- Leg rule: at a column / wall, leg = Ld - straight run (support width - cover), never less than the chosen minimum (0.16.0, user's choice of four):
+  - IS 456: 8 x bar size (a 90 degree bend develops 8 x bar size, cl. 26.2.2.1 b);
+  - BS 8666: the minimum end projection P of Table 2 (8: 115, 10: 120, 12: 125, 16: 130, 20: 190, 25: 240, 32: 305, 40: 380, 50: 475; other sizes radius + bar + 5 x bar, rounded up to 5);
+  - 12 x bar size (the default, confirmed by the user);
+  - 10 x bar size.
+  When the minimum sets the leg, the note says so: "LD 1000: 860 + 240 LEG (MIN 12Ø)".
+- Bent to cover at a support beam: leg = min(beam depth, support depth) - top cover - bottom cover. Bend deductions are not yet included (they belong to cutting lengths in the BBS, BACKLOG B5).
 - The note under each support name is a menu on the drawing (Auto / Straight / Bent, Ld or Ld + 10 x bar size at a column).
 
 ## Bars along the span, top and bottom

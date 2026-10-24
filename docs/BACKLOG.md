@@ -6,15 +6,17 @@ Suggested order: A (cleaning and visual), then the rest of D, then C (outputs), 
 
 ## A. Cleaning and visual (Beam Sections)
 
-| # | Item | Detail |
-|---|---|---|
-| A1 | Right support crowding | Bottom Ld note ("LD 800 = 275 + 835 LEG") sits close to "SUPPORT BEAM"; top Ld note near the right top tag at large text. |
-| A2 | Notes inside the beam | Bottom extra cut-off and lap dimensions ("750 = 0.15L CUT-OFF", "LAP 800") cross the links; the halo helps but it reads busy. |
-| A3 | Large text collisions | At 130% text, "COLUMN / WALL" touches the link-zone dimension line; cover values squeeze between tags. |
-| A4 | Extra bars' own legs | Extra top bars (e.g. T25) bend into the supports, but only the main bars' legs and Ld are dimensioned. |
-| A5 | Red on red | Main top bars are red, close to the red of editable numbers; consider another edit colour (amber / orange) so it never clashes with a bar group. |
-| A6 | Long settings panel | 13 groups; move to tabs (Geometry, Top bars, Bottom bars, Links, View) or collapsible groups. |
-| A7 | Bent leg rule to confirm | Column bend leg = Ld - straight run, never under 12 x bar size (assumption); support beam bent to cover = min(beam, support depth) - covers. **Waiting on you:** confirm 12 x or another minimum. |
+All done in Beam Sections 0.16.0 (2026-10-24).
+
+| # | Item | Status | What was done |
+|---|---|---|---|
+| A1 | Right support crowding | Done | Ld notes moved into a caption block per support, aligned away from the beam; leg dimensions outside a support beam. |
+| A2 | Notes inside the beam | Done | Laps and cut-offs on their own rows outside the beam; only bars and links inside. |
+| A3 | Large text collisions | Done | Captions aligned away from the span; cover values lifted beyond the tag rows; labels kept inside the span; text-sized halo. |
+| A4 | Extra bars' own legs | Done | Extra top bars get their own leg dimension and their own Ld note. |
+| A5 | Red on red | Done | Editable numbers amber with a dashed underline; red only for unusable values. |
+| A6 | Long settings panel | Done | Tabs or collapsible Groups, switchable and remembered. The user will decide which to keep, and has an idea of his own to bring. |
+| A7 | Bent leg minimum | Done | Four rules: IS 456 (8 x bar), BS 8666 (P, Table 2), 12 x (default), 10 x. |
 
 ## B. Engineering not covered yet
 

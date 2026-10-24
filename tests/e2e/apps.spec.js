@@ -62,6 +62,29 @@ test.describe('Beam Sections', () => {
     expect(await texts()).toBe(before);
   });
 
+  test('settings show as tabs or collapsible groups, and the choice is kept', async ({ page }) => {
+    await open(page, PAGE);
+    const visible = () => page.locator('#vals .pg:visible').count();
+    expect(await visible()).toBe(3);                       // Geometry: supports, sizes, cover
+    await page.click('#tab-anch');
+    await expect(page.locator('#f-legMin')).toBeVisible();
+    await page.click('label[for="pm-groups"]');
+    expect(await visible()).toBe(11);                      // every group, each one collapsible
+    await page.reload();
+    await expect(page.locator('#pm-groups')).toBeChecked();
+    await expect(page.locator('#tabbar')).toBeHidden();
+  });
+
+  test('shortest bent leg follows the chosen rule', async ({ page }) => {
+    await page.goto(url(PAGE));
+    await page.evaluate(() => localStorage.setItem('bbs-beam-sections-v2', JSON.stringify({ Lanch: 'bend', tab: 'anch' })));
+    await page.reload();
+    await page.selectOption('#f-legMin', 'is');
+    await expect(page.locator('#sheetL')).toContainText('860 + 128 LEG (MIN 8\u00D8 IS 456)');
+    await page.selectOption('#f-legMin', '10d');
+    await expect(page.locator('#sheetL')).toContainText('860 + 160 LEG (MIN 10\u00D8)');
+  });
+
   test('Auto layer never raises a layer alert', async ({ page }) => {
     await page.goto(url(PAGE));
     await page.evaluate(() => localStorage.setItem('bbs-beam-sections-v2', JSON.stringify({ topN: 4, bxN: 3 })));

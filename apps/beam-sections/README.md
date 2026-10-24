@@ -1,6 +1,6 @@
 # Beam Sections
 
-**Version 0.15.1 · Active**
+**Version 0.16.0 · Active**
 
 Simply supported beam: an L-section plus cross-sections A-A (mid-span), B-B (left end) and C-C (right end), with the reinforcement drawn to the rules in [docs/beam-rules.md](../../docs/beam-rules.md).
 
@@ -31,6 +31,11 @@ npm run test:e2e     # browser smoke tests
 ```
 
 Open `dist/beam-sections.html` to try a change. Values are kept in the browser under the key `bbs-beam-sections-v2`; a change that alters the shape of saved values needs a new key or a migration in `load()`.
+
+## Changelog
+
+- **0.16.0** (2026-10-24): cleaning and visual pass (BACKLOG A1 to A7). Nothing but bars and links inside the beam: laps and cut-offs on rows outside it. A caption per support with the name, the anchorage choice and the Ld notes. Every bent leg dimensioned, extra bars included; outside a support beam where there is room. Shortest bent leg: IS 456, BS 8666, 12 x (default) or 10 x bar size. Editable numbers amber. Settings as tabs or collapsible groups. Saved values from 0.15 load unchanged.
+- **0.15.1**: bent leg dimensions. Earlier versions: see `docs/beam-rules.md`.
 
 ## Release
 
