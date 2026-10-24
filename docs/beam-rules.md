@@ -1,6 +1,6 @@
 # Beam apps: agreed rules
 
-The rules behind [SS Beam Geometry](../apps/ss-beam-geometry) (geometry, frozen at 0.4.0) and [Beam Sections](../apps/beam-sections) (reinforcement, 0.15.1). Each rule here is one the user set or approved; the tests in `apps/beam-sections/test` pin the key ones.
+The rules behind [SS Beam Geometry](../apps/ss-beam-geometry) (geometry, frozen at 0.4.0) and [Beam Sections](../apps/beam-sections) (reinforcement, 0.18.0). Each rule here is one the user set or approved; the tests in `apps/beam-sections/test` pin the key ones.
 
 # Geometry (SS Beam Geometry 0.4.0, frozen 2026-10-16)
 
@@ -41,7 +41,7 @@ The rules behind [SS Beam Geometry](../apps/ss-beam-geometry) (geometry, frozen 
 - Target CAD: AutoCAD 2021 and 2025+ mostly; ZWCAD 2026 rarely; cad2bim viewer sometimes. Test the DXF in these.
 - The sheet carries a full title block (project, beam mark, drawn by, date, scale and the rest).
 
-## Drawing scales (decided 2026-10-16; built with the DXF milestone, BACKLOG C1)
+## Drawing scales (decided 2026-10-16; built in Beam Sections 0.18.0, BACKLOG C1)
 - NTS stays the on-screen default; scaled modes draw true geometry from the real numbers.
 - Outputs: PDF, SVG and especially DXF. Separate scales for the L-section and the cross-sections (1:100 to 1:10). Paper sizes A4 to A0.
 - DXF: everything 1:1 in model space; a paper-space layout of the chosen sheet holds viewports at each view's scale.
@@ -100,3 +100,22 @@ The rules behind [SS Beam Geometry](../apps/ss-beam-geometry) (geometry, frozen 
 ## Bar colour groups (vivid defaults, 0.15.0)
 - Main top red, extra top magenta, main bottom blue, extra bottom cyan, face violet, links end zone green, links mid zone lime green, spacer / pin bar orange; brighter variants in dark mode.
 - Lines, dots, links and tag / list text take their group colour; editable numbers stay the edit colour, underlined. Legend under the L-section with colour pickers and reset; copied SVGs bake in the colours.
+
+# Drawing sheet (Beam Sections 0.18.0)
+
+## What it is
+- The beam drawn true to scale from the real numbers, on a sheet with a title block: the L-section at one scale, the shown sections at another (1:10, 1:15, 1:20, 1:25, 1:30, 1:40, 1:50, 1:75, 1:100), A4 to A0, landscape or portrait. The on-screen drawings stay the not-to-scale template.
+- Downloads: DXF, PDF and SVG of the same sheet. Settings and title block are kept in the browser under their own key, so the firm and project carry over from beam to beam.
+
+## Matching the office standard beam DXF
+- Layers (colour): FRAMING (7) concrete and dimensions, BEAM R (1) all beam bars, STIRRUPS (3) links, SPACER BAR (3), COVERS (2) cover lines, TEXT (1) tags and notes, COLUMN (6) view titles and section marks. Added: TITLE (7) frame and title block, VIEWPORT (8, not plotted).
+- Text: romans.shx (style ROMANS), titles romanc.shx (style RC); 2.5 mm notes, 4.25 mm view titles. Dimensions: closed blank arrows, text above the line, dimension line colour 4, extension lines 2, text 3, whole millimetres.
+- Departures from the standard, on purpose: model space is 1:1 in mm (the standard is drawn 10 times size with a 0.1 measurement factor); views sit in a paper-space layout; cover lines are dashed; layer lineweights are set so a monochrome plot reads (bars 0.5, outlines 0.25, cover 0.13); sections are not hatched (the agreed rule for every view).
+
+## Layout rules
+- Auto scales: the L-section as large as fits whole, then the sections as large as fits, never smaller than the L-section; the sections go under the L-section or beside it, whichever lets the drawing be larger.
+- A long beam that will not fit whole at any scale (or at the chosen scale) gets a break line in the span, clear of the section marks: one break, or one each side of A-A when one is not enough. Turning breaks off gives an alert instead. A sheet too small for any scale is still drawn, with an alert to pick a larger sheet: alert, never block.
+- Inside the beam: bars and links only, as on screen. Tags, laps, cut-offs, extra lengths, link zones, Ld and leg dimensions and support captions sit on rows outside it, sized on paper. Covers are dimensioned in the sections and listed in the notes.
+- Where a real offset would vanish on paper (laps side by side, extras beside the main bars, a bottom bar's bend inside the top bar's), it is drawn 1 mm on paper (2 mm for a second layer). Dimensions always state the true value.
+- Bends are drawn at the BS 8666 minimum radius (2 x bar to 16, 3.5 x above); no bend deduction is made (BACKLOG B5). Link hooks: 135 degrees, 6 x link size and at least 65 mm (IS 13920).
+- Notes written for every sheet: dimensions in mm, the covers, lap and Ld multiples, the bent-leg minimum, the links; the user's own notes follow.

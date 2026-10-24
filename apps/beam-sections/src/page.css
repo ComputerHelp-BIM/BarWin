@@ -179,3 +179,17 @@ footer { color: var(--muted); font-size: 13px; }
 .grp-acts { display: flex; gap: 8px; }
 .grp-acts[hidden] { display: none; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* drawing sheet (true scale) */
+.sh-lede { margin: 0; max-width: 72ch; font-size: 14px; color: var(--muted); }
+.fields .sub { grid-column: 1 / -1; margin: 6px 0 0; font: 600 13px/1.2 var(--cond); letter-spacing: .08em; text-transform: uppercase; color: var(--ink); }
+.field.wide { grid-column: span 2; }
+@media (max-width: 420px) { .field.wide { grid-column: 1 / -1; } }
+.field .in.tx input { font: 500 15px var(--body); color: var(--ink); text-transform: none; }
+.field textarea { min-height: 70px; padding: 8px; font: 400 14px/1.4 var(--body); color: var(--ink); background: var(--bg); border: 1px solid var(--rule); border-radius: 4px; resize: vertical; }
+.field textarea:focus { outline: none; border-color: var(--edit); box-shadow: 0 0 0 2px var(--edit-soft); }
+.sh-out { display: grid; gap: 10px; margin-top: 4px; }
+.sh-sum { margin: 0; font: 500 14px var(--body); color: var(--ink); }
+.sh-prev { background: #FFFFFF; border: 1px solid var(--rule); border-radius: 4px; overflow: hidden; }
+.sh-prev svg { display: block; width: 100%; height: auto; }
+.sh-acts { display: flex; flex-wrap: wrap; gap: 8px; }

@@ -6,6 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const { pathToFileURL } = require('url');
 const { loadApps } = require('../../scripts/build-site.js');
+const { checkDXF } = require('../../packages/cad/test/dxf-check.js');
 
 const SITE = path.resolve(__dirname, '..', '..', 'site');
 const url = (rel) => pathToFileURL(path.join(SITE, rel)).href;
@@ -79,7 +80,7 @@ test.describe('Beam Sections', () => {
     await page.click('#tab-anch');
     await expect(page.locator('#f-legMin')).toBeVisible();
     await page.click('label[for="pm-groups"]');
-    expect(await visible()).toBe(11);                      // every group, each one collapsible
+    expect(await visible()).toBe(12);                      // every group, each one collapsible
     await page.reload();
     await expect(page.locator('#pm-groups')).toBeChecked();
     await expect(page.locator('#tabbar')).toBeHidden();
@@ -93,6 +94,31 @@ test.describe('Beam Sections', () => {
     await expect(page.locator('#sheetL')).toContainText('860 + 128 LEG (MIN 8\u00D8 IS 456)');
     await page.selectOption('#f-legMin', '10d');
     await expect(page.locator('#sheetL')).toContainText('860 + 160 LEG (MIN 10\u00D8)');
+  });
+
+  test('the drawing sheet: true-scale preview, then a DXF, a PDF and an SVG to download', async ({ page }) => {
+    const errors = await open(page, PAGE);
+    await page.click('#tab-sheet');
+    await expect(page.locator('#shPrev svg')).toHaveCount(1);
+    await expect(page.locator('#shSum')).toContainText('A2 landscape: L-section 1:');
+    await page.fill('#sh-firm', 'Example firm');
+    await page.selectOption('#sh-paper', 'A3');
+    await expect(page.locator('#shSum')).toContainText('A3 landscape: L-section 1:40, sections 1:15 beside it');
+    const got = {};
+    for (const k of ['dxf', 'pdf', 'svg']) {
+      const [d] = await Promise.all([page.waitForEvent('download'), page.click(`button[data-sheet="${k}"]`)]);
+      expect(d.suggestedFilename()).toBe('B1_sheet.' + k);
+      got[k] = fs.readFileSync(await d.path(), 'utf8');
+    }
+    const r = checkDXF(got.dxf);                           // the template survived the minifier, the writer ran in the browser
+    expect(r.count.VIEWPORT).toBe(5);                      // the main viewport, the L-section and three sections
+    expect(got.dxf).toContain('EXAMPLE FIRM');
+    expect(got.pdf.startsWith('%PDF-1.4')).toBe(true);
+    expect(got.svg).toContain('viewBox="0 0 420 297"');
+    await page.reload();                                   // the sheet settings are kept
+    await expect(page.locator('#sh-paper')).toHaveValue('A3');
+    await expect(page.locator('#sh-firm')).toHaveValue('Example firm');
+    expect(errors).toEqual([]);
   });
 
   test('Auto layer never raises a layer alert', async ({ page }) => {

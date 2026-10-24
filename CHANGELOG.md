@@ -3,6 +3,14 @@
 Changes to the repository itself: layout, tooling, tests, docs. Each app's own changes are in its README or its About box.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [semver](https://semver.org).
 
+## [0.5.0] - 2026-10-24
+
+### Added
+- `packages/cad` 1.0.0: one sheet model written three ways. DXF in AutoCAD 2010 format (model space 1:1, a paper-space layout with a locked viewport per view, real DIMENSION entities in a dimension style per scale), vector PDF and SVG of the paper sheet; ISO 5457 frame and a title block with notes and revisions. The DXF is written into `template.dxf`, which `tools/make_template.py` builds with ezdxf from `layers.json` (layers and text from the office standard beam DXF).
+- Beam Sections 0.18.0: the true-scale drawing sheet (BACKLOG C1).
+- `npm run check:dxf`: sample sheets read back by ezdxf in recover and audit mode; runs in CI.
+- Tests: 10 for the CAD writers and template, 10 for the sheet geometry and layout, a browser test that downloads all three files and checks the DXF; 46 logic and 13 browser tests in all.
+
 ## [0.4.0] - 2026-10-24
 
 ### Added

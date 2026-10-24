@@ -1,0 +1,18 @@
+{
+  "_about": "Layers of every BarWin DXF sheet. Names and colours follow the office standard beam detail DXF (kept outside the repo); TITLE and VIEWPORT are added for the sheet. aci = AutoCAD colour index, lw = lineweight in mm, lt = linetype. Source of truth for tools/make_template.py; cad.js keeps a copy that a test holds equal.",
+  "layers": {
+    "FRAMING":    { "aci": 7, "lw": 0.25, "lt": "CONTINUOUS", "role": "concrete outlines, junctions, break lines, dimensions" },
+    "BEAM R":     { "aci": 1, "lw": 0.50, "lt": "CONTINUOUS", "role": "beam bars: main, extra, face" },
+    "STIRRUPS":   { "aci": 3, "lw": 0.25, "lt": "CONTINUOUS", "role": "links (stirrups)" },
+    "SPACER BAR": { "aci": 3, "lw": 0.35, "lt": "CONTINUOUS", "role": "spacer and pin bars" },
+    "COVERS":     { "aci": 2, "lw": 0.13, "lt": "DASHED2",    "role": "cover lines" },
+    "TEXT":       { "aci": 1, "lw": 0.18, "lt": "CONTINUOUS", "role": "bar tags, notes, leaders" },
+    "COLUMN":     { "aci": 6, "lw": 0.50, "lt": "CONTINUOUS", "role": "view titles and section marks" },
+    "TITLE":      { "aci": 7, "lw": 0.35, "lt": "CONTINUOUS", "role": "sheet border and title block" },
+    "VIEWPORT":   { "aci": 8, "lw": 0.13, "lt": "CONTINUOUS", "role": "viewport frames (not plotted)", "plot": false }
+  },
+  "scales": [10, 15, 20, 25, 30, 40, 50, 75, 100],
+  "paper": { "A0": [1189, 841], "A1": [841, 594], "A2": [594, 420], "A3": [420, 297], "A4": [297, 210] },
+  "text": { "font": "romans.shx", "titleFont": "romanc.shx", "note": 2.5, "subtitle": 3.25, "title": 4.25 },
+  "dim": { "txt": 2.5, "asz": 2.5, "exo": 0.25, "exe": 0.25, "gap": 1.25, "clrd": 4, "clre": 2, "clrt": 3 }
+}

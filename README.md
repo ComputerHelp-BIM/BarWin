@@ -10,7 +10,7 @@ Every app is also a single HTML page that opens straight from disk in any modern
 
 | App | Folder | Version | Status | What it is |
 |---|---|---|---|---|
-| Beam Sections | [`apps/beam-sections`](apps/beam-sections) | 0.17.0 | Active | Simply supported beam: L-section and sections A-A / B-B / C-C with links, top and bottom bars by zone, laps, extras, layers, anchorage. |
+| Beam Sections | [`apps/beam-sections`](apps/beam-sections) | 0.18.0 | Active | Simply supported beam: L-section and sections A-A / B-B / C-C with links, top and bottom bars by zone, laps, extras, layers, anchorage; true-scale DXF / PDF / SVG sheets with a title block. |
 | SS Beam Geometry | [`apps/ss-beam-geometry`](apps/ss-beam-geometry) | 0.4.0 | Frozen | The approved geometry-only template (concrete and covers, no steel) that Beam Sections grew from. |
 | BBS Studio | [`apps/bbs-studio`](apps/bbs-studio) | 0.15.0 | Active | Reads the steel quantity workbook; walls, columns, beams (step 1). Schedule, shop drawings, 3D, IFC, BOQ, cost, PDFs, DXF. |
 | BBS Studio, footings | [`apps/bbs-studio-footings`](apps/bbs-studio-footings) | 0.4.0 | Frozen | The earlier footing-only BBS Studio, kept at its own version. |
@@ -29,6 +29,7 @@ npm run build:site  # the website -> site/ (homepage + every app, minified)
 npm test            # logic tests (node:test, no browser)
 npm run test:e2e    # builds the site, then opens every page in Chromium and checks it
 npm run check       # both
+npm run check:dxf   # sample DXF sheets read back with ezdxf (pip install ezdxf==1.4.4)
 ```
 
 To use an app: `npm run build`, then open `apps/<app>/dist/<app>.html` (Beam Sections, SS Beam Geometry, BBS Studio), or `apps/<app>/index.html` for the single-file apps (footings, shape codes).
@@ -37,13 +38,14 @@ To use an app: `npm run build`, then open `apps/<app>/dist/<app>.html` (Beam Sec
 
 ```
 apps/                   each app has app.json (its homepage card) and icon.svg
-  beam-sections/        src/ (beams.js drawing module, index.html shell, page.css, ui/ script sections), test/, dist/ (built, not committed)
+  beam-sections/        src/ (beams.js drawing module, sheet.js true-scale sheet, index.html shell, page.css, ui/ script sections), test/, dist/ (built, not committed)
   ss-beam-geometry/     src/, dist/ (frozen)
   bbs-studio/           src/ (index.html shell, styles.css, markup.html, core/ engine, ui/), test/, dist/
   bbs-studio-footings/  index.html (frozen)
   shape-codes/          index.html
 packages/
   brand/                tokens.css, tokens.json, partials/ (the BarWin strip every active tool shows), assets/*.svg, canvas/
+  cad/                  cad.js (one sheet model to DXF, PDF, SVG), template.dxf, layers.json, tools/make_template.py, test/
 site-src/               homepage and 404 templates
 docs/
   DEPLOY.md             CI/CD, Vercel setup, adding an app
@@ -52,6 +54,7 @@ docs/
   reference/            the shape-figure spec (project files are kept outside the public repo)
 scripts/build.js        assembles each app with a build section from its src/ pieces into dist/
 scripts/build-site.js   builds the website into site/
+scripts/dxf-samples.js  sample sheets as DXF; scripts/check_dxf.py reads them back with ezdxf (npm run check:dxf)
 tests/e2e/              Playwright tests, run on the built site
 vercel.json             site settings: build, headers, noindex
 .github/workflows/      CI: logic and browser tests on every push and pull request

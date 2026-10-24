@@ -1,6 +1,6 @@
 # BarWin backlog
 
-What is left, recorded 2026-10-23. Covers Beam Sections 0.15.1 and the wider BarWin apps. Status is open unless marked.
+What is left, recorded 2026-10-23, kept up to date since. Covers Beam Sections and the wider BarWin apps. Status is open unless marked.
 
 Suggested order: A (cleaning and visual), then the rest of D, then C (outputs), then B (engineering).
 
@@ -32,7 +32,7 @@ All done in Beam Sections 0.16.0 (2026-10-24).
 
 | # | Item | Detail |
 |---|---|---|
-| C1 | True-scale drawing sheets | DXF (model space 1:1, paper-space layout with viewports), PDF and SVG; separate scales for the L-section and the sections (1:100 to 1:10); A4 to A0; full title block; break line or a "pick a smaller scale" alert when a view does not fit; text about 2.5 mm on paper. Test in AutoCAD 2021 / 2025+, ZWCAD 2026 and the cad2bim viewer. Reference: the standard beam DXF, kept outside the repo (see [reference](reference/README.md)). |
+| C1 | True-scale drawing sheets | **Done in Beam Sections 0.18.0** (2026-10-24), to be opened in AutoCAD 2021 / 2025+, ZWCAD 2026 and the cad2bim viewer by the user. DXF (AutoCAD 2010 format; model space 1:1 in mm, layout SHEET with a locked viewport per view, real dimensions in a style per scale), PDF and SVG of the same sheet; L-section and sections at their own scales 1:10 to 1:100, A4 to A0, either orientation; sections under or beside the L-section; title block with notes and revisions; break lines when a long beam will not fit whole, an alert when nothing fits. Layers, colours, text styles and dimension settings from the office standard beam DXF (kept outside the repo). Shared engine: `packages/cad`; BBS Studio's sheets can move onto it later. |
 | C2 | Bar schedule | Bar marks, BS 8666 / IS shape codes, cutting lengths with bend deductions, weights, linked to BBS Studio (one data model with the drawing). |
 
 ## D. Housekeeping

@@ -1,5 +1,5 @@
 /*
- * Beam sections drawing module, v0.17.0
+ * Beam sections drawing module, v0.18.0
  * One source for the interactive page and for the standalone .svg files.
  *
  * The drawing is a fixed, not-to-scale template: geometry never follows the numbers the user types,
@@ -23,7 +23,7 @@
  */
 (function (root) {
   'use strict';
-  var VERSION = '0.17.0';
+  var VERSION = '0.18.0';
   // each end keeps its column and its beam sizes, so switching an end back and forth loses nothing
   var DEFAULTS = { typeL: 'col', typeR: 'beam', LcolW: 900, LbeamW: 300, LbeamD: 900, RcolW: 900, RbeamW: 300, RbeamD: 900,
     span: 5000, D: 900, B: 300, ctop: 25, cbot: 40, cside: 25, ccol: 40,
@@ -1044,6 +1044,7 @@
   }
   var EXPORT_CSS = exportCSS({});
 
-  root.BeamSections = { VERSION: VERSION, GROUPS: GROUPS, okColor: okColor, exportCSS: exportCSS, linkGroup: linkGroup, spacers: spacers, DEFAULTS: DEFAULTS, NAMES: NAMES, COVER: COVER, COUNT: COUNT, anchorage: anchorage, bendLeg: bendLeg, legMin: legMin, LEG_MIN: LEG_MIN, BS_P: BS_P, zk: zk, barZone: barZone, barChange: barChange, barRuns: barRuns, barsAt: barsAt, botLayersAt: botLayersAt, extraBot: extraBot, BXMODES: BXMODES, arrange: arrange, topZone: topZone, lapAt: lapAt, topChange: topChange, topRuns: topRuns, mainsAt: mainsAt, layersAt: layersAt, extraTop: extraTop, topLayers: topLayers, extrasAt: extrasAt, cutX: cutX, XMODES: XMODES, endZone: endZone, layoutMode: layoutMode, isEnds: isEnds, linkMode: linkMode, ENDS_MODES: ENDS_MODES, linkRange: linkRange, linkLayout: linkLayout, LINK_START: LINK_START, supportCase: supportCase, beamClass: beamClass, lSection: lSection, xSection: xSection, EXPORT_CSS: EXPORT_CSS };
+  root.BeamSections = { VERSION: VERSION, GROUPS: GROUPS, okColor: okColor, exportCSS: exportCSS, linkGroup: linkGroup, spacers: spacers, DEFAULTS: DEFAULTS, NAMES: NAMES, COVER: COVER, COUNT: COUNT, anchorage: anchorage, bendLeg: bendLeg, legMin: legMin, LEG_MIN: LEG_MIN, BS_P: BS_P, zk: zk, barZone: barZone, barChange: barChange, barRuns: barRuns, barsAt: barsAt, botLayersAt: botLayersAt, extraBot: extraBot, BXMODES: BXMODES, arrange: arrange, topZone: topZone, lapAt: lapAt, topChange: topChange, topRuns: topRuns, mainsAt: mainsAt, layersAt: layersAt, extraTop: extraTop, topLayers: topLayers, extrasAt: extrasAt, cutX: cutX, XMODES: XMODES, endZone: endZone, layoutMode: layoutMode, isEnds: isEnds, linkMode: linkMode, ENDS_MODES: ENDS_MODES, linkRange: linkRange, linkLayout: linkLayout, LINK_START: LINK_START, supportCase: supportCase, beamClass: beamClass, lSection: lSection, xSection: xSection, EXPORT_CSS: EXPORT_CSS,
+    withZones: withZones, sectionSpacingKey: sectionSpacingKey, innerLegs: innerLegs, spread: spread, ANCH_NAME: ANCH_NAME };
   if (typeof module !== 'undefined' && module.exports) module.exports = root.BeamSections;
 })(typeof window !== 'undefined' ? window : globalThis);

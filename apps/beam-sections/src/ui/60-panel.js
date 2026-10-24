@@ -13,9 +13,9 @@
       }).join('');
     } else groups.forEach(function (g) { g.classList.remove('on'); });
   }
-  function showTab(id, focus) { vals.tab = id; save(); syncPanel(); if (focus) { var b = $('#tab-' + id); if (b) b.focus(); } }
+  function showTab(id, focus) { vals.tab = id; save(); syncPanel(); renderSheet(true); if (focus) { var b = $('#tab-' + id); if (b) b.focus(); } }
   $('#panelMode').addEventListener('change', function (e) {
-    vals.panel = e.target.value === 'groups' ? 'groups' : 'tabs'; save(); syncPanel();
+    vals.panel = e.target.value === 'groups' ? 'groups' : 'tabs'; save(); syncPanel(); renderSheet(true);
     msg(vals.panel === 'tabs' ? 'Settings shown as tabs, one at a time.' : 'Settings shown as groups; click a heading to open or close it.');
   });
   $('#tabbar').addEventListener('click', function (e) { var b = e.target.closest('button[data-tab]'); if (b) showTab(b.dataset.tab); });

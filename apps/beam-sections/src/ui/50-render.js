@@ -72,4 +72,5 @@
     var K = KIND[BS.beamClass(vals)];
     $('#kind').innerHTML = '<b>' + K[0] + '</b> &middot; ' + K[1];
     $('#lcap').textContent = cap(ENDS[vals.typeL]) + ' left, ' + ENDS[vals.typeR] + ' right';
+    renderSheet();
   }

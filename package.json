@@ -1,6 +1,6 @@
 {
   "name": "barwin",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "private": true,
   "description": "BarWin by Computer Help: reinforcement detailing apps (Beam Sections, BBS Studio, BS 8666 shape codes) and the BarWin brand.",
   "license": "UNLICENSED",
@@ -11,9 +11,11 @@
   "scripts": {
     "build": "node scripts/build.js",
     "build:site": "npm run build && node scripts/build-site.js",
-    "test": "node --test \"apps/*/test/*.test.js\" \"scripts/test/*.test.js\"",
+    "test": "node --test \"apps/*/test/*.test.js\" \"packages/*/test/*.test.js\" \"scripts/test/*.test.js\"",
     "test:e2e": "npm run build:site && playwright test",
-    "check": "npm test && npm run test:e2e"
+    "check": "npm test && npm run test:e2e",
+    "check:dxf": "node scripts/dxf-samples.js .dxf-samples && python3 scripts/check_dxf.py .dxf-samples/*.dxf",
+    "template:dxf": "python3 packages/cad/tools/make_template.py"
   },
   "devDependencies": {
     "@playwright/test": "1.56.1",

@@ -34,6 +34,13 @@ jobs:
       - run: npm ci
       - name: Logic tests
         run: npm test
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: DXF sheets read cleanly in a DXF reader (ezdxf audit)
+        run: |
+          python -m pip install --quiet ezdxf==1.4.4
+          npm run check:dxf
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
       - name: Build the site and test it in the browser
