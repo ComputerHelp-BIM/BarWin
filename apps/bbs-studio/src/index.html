@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BBS Studio - steel schedules from your workbook</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+@@include ../../../packages/brand/tokens.css@@
+@@include ../../../packages/brand/partials/app-bar.css@@
+@@include styles.css@@
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+@@include markup.html@@
+<script type="text/plain" id="dxf-template" data-msp="17">
+@@include dxf-template.dxf@@
+</script>
+<script>
+@@include core/*.js@@
+</script>
+<script>
+@@include ui/*.js@@
+</script>
+</body>
+</html>
+

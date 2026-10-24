@@ -1,6 +1,6 @@
 # Beam Sections
 
-**Version 0.16.0 · Active**
+**Version 0.17.0 · Active**
 
 Simply supported beam: an L-section plus cross-sections A-A (mid-span), B-B (left end) and C-C (right end), with the reinforcement drawn to the rules in [docs/beam-rules.md](../../docs/beam-rules.md).
 
@@ -18,7 +18,9 @@ The drawing is a fixed not-to-scale template: the numbers are real, the geometry
 | File | Role |
 |---|---|
 | `src/beams.js` | The drawing module: rules, layout and SVG. UMD, so the page and Node use the same code. Holds `VERSION`. |
-| `src/page.html` | The page: form, alerts, on-drawing editors, legend. `/*__BEAMS__*/` is replaced by `beams.js` at build. |
+| `src/index.html` | The shell: the page with `@@include@@` lines for the brand tokens and strip, `page.css`, `beams.js` and the script sections. |
+| `src/page.css` | Page styles, on the brand tokens. |
+| `src/ui/NN-*.js` | The page script by topic: setup, values, alerts, colours and view, form, render, panel (tabs / groups), on-drawing editors, form events, copy and start. One scope; keep top-level names unique. |
 | `test/logic.test.js` | Rule tests and the freeze probe. |
 | `dist/` | Built page and SVGs. Not committed; `npm run build` makes it. |
 
@@ -34,6 +36,7 @@ Open `dist/beam-sections.html` to try a change. Values are kept in the browser u
 
 ## Changelog
 
+- **0.17.0** (2026-10-24): BarWin look. The BarWin strip at the top links back to all the tools; the page uses the brand colours and Barlow type. Drawings, saved values and outputs unchanged.
 - **0.16.0** (2026-10-24): cleaning and visual pass (BACKLOG A1 to A7). Nothing but bars and links inside the beam: laps and cut-offs on rows outside it. A caption per support with the name, the anchorage choice and the Ld notes. Every bent leg dimensioned, extra bars included; outside a support beam where there is room. Shortest bent leg: IS 456, BS 8666, 12 x (default) or 10 x bar size. Editable numbers amber. Settings as tabs or collapsible groups. Saved values from 0.15 load unchanged.
 - **0.15.1**: bent leg dimensions. Earlier versions: see `docs/beam-rules.md`.
 

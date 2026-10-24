@@ -39,6 +39,16 @@ test.describe('Homepage', () => {
   });
 });
 
+test('the BarWin strip on each active tool leads back to the homepage', async ({ page }) => {
+  for (const rel of ['beam-sections/index.html', 'bbs-studio/index.html']) {
+    await open(page, rel);
+    await expect(page.locator('.bw-bar')).toBeVisible();
+    // From disk "../" opens a folder listing, so check where the link points rather than following it.
+    const href = await page.locator('.bw-home').evaluate((a) => a.href);
+    expect(href, `${rel} -> homepage`).toBe(pathToFileURL(SITE).href + '/');
+  }
+});
+
 test.describe('Beam Sections', () => {
   const PAGE = 'beam-sections/index.html';
 

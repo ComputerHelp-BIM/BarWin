@@ -1,5 +1,5 @@
 /*
- * Beam sections drawing module, v0.15.1
+ * Beam sections drawing module, v0.17.0
  * One source for the interactive page and for the standalone .svg files.
  *
  * The drawing is a fixed, not-to-scale template: geometry never follows the numbers the user types,
@@ -23,7 +23,7 @@
  */
 (function (root) {
   'use strict';
-  var VERSION = '0.16.0';
+  var VERSION = '0.17.0';
   // each end keeps its column and its beam sizes, so switching an end back and forth loses nothing
   var DEFAULTS = { typeL: 'col', typeR: 'beam', LcolW: 900, LbeamW: 300, LbeamD: 900, RcolW: 900, RbeamW: 300, RbeamD: 900,
     span: 5000, D: 900, B: 300, ctop: 25, cbot: 40, cside: 25, ccol: 40,

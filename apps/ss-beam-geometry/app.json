@@ -3,7 +3,20 @@
   "status": "frozen",
   "order": 50,
   "summary": "The approved geometry-only beam template, before reinforcement: supports, junctions and covers.",
-  "features": ["Four support cases", "Cover lines", "Sections A, B, C"],
+  "features": [
+    "Four support cases",
+    "Cover lines",
+    "Sections A, B, C"
+  ],
   "entry": "dist/ss-beam-geometry.html",
-  "version": { "file": "src/beams.js", "pattern": "VERSION = '(\\d+\\.\\d+\\.\\d+)'" }
+  "version": {
+    "file": "src/beams.js",
+    "pattern": "VERSION = '(\\d+\\.\\d+\\.\\d+)'"
+  },
+  "build": {
+    "outputs": {
+      "dist/ss-beam-geometry.html": "src/index.html"
+    },
+    "svgs": "src/beams.js"
+  }
 }

@@ -53,7 +53,13 @@ Vercel → project `barwin` → Deployments → pick the last good one → Promo
    ```
    `status`: `active` or `reference` go under Tools, `frozen` under Archive. The version is read from the source, so the card never shows a stale number.
 3. Optionally add `apps/<slug>/icon.svg` (64 × 64 grid, `currentColor` lines, `class="dot"` for the accent dot).
-4. If the app needs a build step, add it to `npm run build` and point `entry` at the built file.
+4. If the app is kept as pieces, add a build section to `app.json` and point `entry` at the built file:
+   ```json
+   "entry": "dist/my-tool.html",
+   "build": { "outputs": { "dist/my-tool.html": "src/index.html" } }
+   ```
+   `src/index.html` is the shell; each line `@@include <path>@@` is replaced by that file's text (paths relative to the including file, `*` takes every match in name order). `npm run build` picks the app up on its own. See the header of `scripts/build.js`.
+   To show the BarWin strip, include `packages/brand/tokens.css` and `partials/app-bar.css` in the page's styles and `partials/app-bar.html` at the top of the body.
 5. `npm run check`, commit, push. The card and the page appear on the next deploy.
 
 ## Local preview

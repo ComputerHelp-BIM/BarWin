@@ -3,6 +3,22 @@
 Changes to the repository itself: layout, tooling, tests, docs. Each app's own changes are in its README or its About box.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [semver](https://semver.org).
 
+## [0.4.0] - 2026-10-24
+
+### Added
+- `scripts/build.js`: one assembler for every app with a `build` section in its `app.json`. A shell page holds `@@include <path>@@` lines, each replaced by that file's text byte for byte; includes nest, and `*` takes every match in name order.
+- `packages/brand/partials/`: the BarWin strip (mark, name, "All tools" link home) shared by the active tools.
+- Tests (26 logic, 12 browser): BBS Studio engine (BS 8666 lengths, rounding, a made-up column workbook imported and checked against its own total); every include resolves; the strip is on the active tools and not on the frozen ones; the strip links home.
+
+### Changed
+- Beam Sections page split into a shell, `page.css` and ten script sections (BACKLOG D3).
+- BBS Studio split from one 6,600-line file into `src/` (shell, styles, markup, DXF template, 20 engine and 17 interface sections) with a built `dist/` (BACKLOG D5). Both splits rebuilt byte-identical before any other change.
+- Beam Sections 0.17.0 and BBS Studio 0.15.0 on the brand: tokens, Barlow type, the BarWin strip (BACKLOG D6). SS Beam Geometry and footings stay frozen; the shape codes page is unchanged.
+- SS Beam Geometry's shell renamed `src/index.html`, using the same assembler; it still builds byte-identical to the frozen page.
+
+### Removed
+- `scripts/build-beams.js`, replaced by `scripts/build.js`.
+
 ## [0.3.1] - 2026-10-23
 
 ### Removed

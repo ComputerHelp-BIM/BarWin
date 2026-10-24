@@ -1,6 +1,6 @@
 {
   "name": "barwin",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "private": true,
   "description": "BarWin by Computer Help: reinforcement detailing apps (Beam Sections, BBS Studio, BS 8666 shape codes) and the BarWin brand.",
   "license": "UNLICENSED",
@@ -9,7 +9,7 @@
     "node": ">=22"
   },
   "scripts": {
-    "build": "node scripts/build-beams.js apps/beam-sections apps/ss-beam-geometry",
+    "build": "node scripts/build.js",
     "build:site": "npm run build && node scripts/build-site.js",
     "test": "node --test \"apps/*/test/*.test.js\" \"scripts/test/*.test.js\"",
     "test:e2e": "npm run build:site && playwright test",

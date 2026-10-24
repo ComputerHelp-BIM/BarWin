@@ -1,0 +1,85 @@
+<title>Beam Sections</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+@@include ../../../packages/brand/tokens.css@@
+@@include ../../../packages/brand/partials/app-bar.css@@
+@@include page.css@@
+</style>
+
+@@include ../../../packages/brand/partials/app-bar.html@@
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Beam detailing</p>
+    <h1>Beam sections</h1>
+    <p class="lede">L-section and section A-A of one beam span. Choose what each end rests on, then click any <b>amber number</b>, including bar counts, sizes and link spacing, to type a real size or a <b class="g">green number</b> to set a cover. Tick the box under a section mark to show that section. The drawing keeps its shape; only the numbers change, except that a support beam is drawn deeper or shallower to match the depths.</p>
+  </header>
+
+  <div class="viewbar" role="group" aria-label="Drawing view">
+    <label class="chk"><input type="checkbox" id="vLabels"> Labels</label>
+    <label class="vsize" for="vText">Text size <input type="range" id="vText" min="70" max="130" step="10"><output id="vTextOut"></output></label>
+  </div>
+  <div class="views">
+    <figure class="view l">
+      <figcaption><h2>L-section</h2><small id="lcap"></small><button type="button" class="mini" data-act="copyL">Copy SVG</button></figcaption>
+      <div class="alert" id="lkAlert" role="status" aria-live="polite" hidden></div>
+      <div class="scroll"><div class="sheet"><div class="svgbox" id="sheetL"></div></div></div>
+      <div class="legend" id="legend" role="group" aria-label="Bar colours"></div>
+    </figure>
+    <div class="secs" id="secs"></div>
+  </div>
+
+  <section class="panel" aria-labelledby="valsH">
+    <div class="panel-h">
+      <h2 id="valsH">Dimensions</h2>
+      <fieldset class="seg" id="panelMode"><legend>Show settings as</legend>
+        <input type="radio" id="pm-tabs" name="panel" value="tabs"><label for="pm-tabs">Tabs</label>
+        <input type="radio" id="pm-groups" name="panel" value="groups"><label for="pm-groups">Groups</label>
+      </fieldset>
+    </div>
+    <div class="tabbar" id="tabbar" role="tablist" aria-label="Settings"></div>
+    <div class="grp-acts" id="grpActs"><button type="button" class="mini" data-act="openAll">Open all</button><button type="button" class="mini" data-act="closeAll">Close all</button></div>
+    <form id="vals" class="group" novalidate>
+      <details class="group pg" data-tab="geo" open><summary><h3>Supports</h3></summary>
+        <div class="ends">
+          <fieldset class="seg"><legend>Left end rests on</legend>
+            <input type="radio" id="tL-col" name="typeL" value="col"><label for="tL-col">Column / wall</label>
+            <input type="radio" id="tL-beam" name="typeL" value="beam"><label for="tL-beam">Beam</label>
+          </fieldset>
+          <fieldset class="seg"><legend>Right end rests on</legend>
+            <input type="radio" id="tR-col" name="typeR" value="col"><label for="tR-col">Column / wall</label>
+            <input type="radio" id="tR-beam" name="typeR" value="beam"><label for="tR-beam">Beam</label>
+          </fieldset>
+          <p class="kind" id="kind" aria-live="polite"></p>
+        </div>
+      </details>
+      <details class="group pg" data-tab="geo" open><summary><h3>Sizes</h3></summary><div class="fields" id="sizes"></div></details>
+      <details class="group pg" data-tab="geo" open><summary><h3>Clear cover</h3></summary><div class="fields" id="covers"></div></details>
+      <details class="group pg" data-tab="bars" open><summary><h3>Main bars</h3></summary><div class="fields" id="bars"></div></details>
+      <details class="group pg" data-tab="top" open><summary><h3>Top bars along the span</h3></summary><div class="fields anch" id="tzones"></div></details>
+      <details class="group pg" data-tab="bot" open><summary><h3>Bottom bars along the span</h3></summary><div class="fields anch" id="bzones"></div></details>
+      <details class="group pg" data-tab="bot" open><summary><h3>Bottom extra bars over mid-span</h3></summary><div class="fields anch" id="bxtra"></div></details>
+      <details class="group pg" data-tab="top" open><summary><h3>Extra top bars over the supports</h3></summary><div class="fields anch" id="xtop"></div></details>
+      <details class="group pg" data-tab="anch" open><summary><h3>Anchorage</h3></summary><div class="fields anch" id="anch"></div></details>
+      <details class="group pg" data-tab="links" open><summary><h3>Links</h3></summary><div class="fields" id="links"></div></details>
+      <details class="group pg" data-tab="checks" open><summary><h3>Checks</h3></summary><ul class="checks" id="checks"></ul></details>
+    </form>
+    <div class="acts">
+      <button type="button" data-act="reset">Reset to the example</button>
+    </div>
+    <p id="msg" role="status" aria-live="polite"></p>
+    <textarea id="svgOut" aria-label="SVG code" readonly hidden></textarea>
+  </section>
+
+  <footer>Beam sections v<span id="ver"></span> · Not to scale. Sizes accept mm, cm or m (450, 45 cm, 0.45 m); values are kept in this browser.</footer>
+</div>
+
+<script>
+@@include beams.js@@
+
+</script>
+<script>
+@@include ui/*.js@@
+</script>

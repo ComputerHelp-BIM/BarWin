@@ -3,7 +3,21 @@
   "status": "active",
   "order": 20,
   "summary": "Drop the steel quantity workbook: bar bending schedule, shop drawings, 3D, IFC, BOQ and cost.",
-  "features": ["Walls and columns", "Beams (step 1)", "IS 2502 / BS 8666", "PDF, DXF, IFC"],
-  "entry": "index.html",
-  "version": { "file": "index.html", "pattern": "VERSION = '(\\d+\\.\\d+\\.\\d+)'" }
+  "features": [
+    "Walls and columns",
+    "Beams (step 1)",
+    "IS 2502 / BS 8666",
+    "PDF, DXF, IFC"
+  ],
+  "entry": "dist/bbs-studio.html",
+  "version": {
+    "file": "src/core/00-module.js",
+    "pattern": "VERSION = '(\\d+\\.\\d+\\.\\d+)'"
+  },
+  "build": {
+    "outputs": {
+      "dist/bbs-studio.html": "src/index.html",
+      "dist/bbs-core.js": "src/core.js"
+    }
+  }
 }

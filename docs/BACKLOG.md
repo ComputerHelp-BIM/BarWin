@@ -41,9 +41,9 @@ All done in Beam Sections 0.16.0 (2026-10-24).
 |---|---|---|---|
 | D1 | Old backups | Done (repo 0.1.0) | 37 `beams_v*.js` / `page_v*.html` backups dropped; history is in git. |
 | D2 | Tests | Done (repo 0.1.0) | Logic tests with the freeze probe (`apps/beam-sections/test`) and Playwright smoke tests (`tests/e2e`), run in CI. |
-| D3 | Page size | Open | `page.html` has grown large (form, alerts, editors); split into modules (form, alerts, on-drawing editors, view) with the build inlining them. |
+| D3 | Page size | Done (repo 0.4.0) | Beam Sections' page is now a shell, `page.css` and ten numbered script sections in `src/ui/`, assembled by `scripts/build.js` byte for byte. |
 | D4 | Repo | Done (repo 0.1.0) | Every BarWin app in this repo as its own app. |
-| D5 | BBS Studio source | Open | The modular source was lost; `apps/bbs-studio/index.html` (6,600 lines) is now the source. Split it into modules like Beam Sections before large changes. |
-| D6 | Apps on the brand | Open | No app uses `packages/brand` yet; each has its own colours and fonts. Move them onto `tokens.css`, keeping the drawing colour groups. |
-| D7 | BBS Studio tests | Partly done (repo 0.2.0) | End-to-end smoke tests with a DXF download check are in. Still to add: workbook import totals against the workbook's own, schedule lengths against the CADS RC sample. |
+| D5 | BBS Studio source | Done (repo 0.4.0) | Split into `src/`: shell, styles, markup, DXF template, 20 engine sections (`core/`) and 17 UI sections (`ui/`). The rebuilt page and `bbs-core.js` were byte-identical to the single file before any change. |
+| D6 | Apps on the brand | Done (Beam Sections 0.17.0, BBS Studio 0.15.0) | Both active tools use `tokens.css`, Barlow type and the BarWin strip linking home; drawing colour groups unchanged. Frozen apps and the shape codes page stay as published. |
+| D7 | BBS Studio tests | Done (repo 0.4.0) | End-to-end smoke tests with a DXF download check; engine tests (`apps/bbs-studio/test`) for BS 8666 shape lengths, rounding, and a made-up column workbook imported and checked against its own total. |
 | D8 | Custom domain | Open | e.g. barwin.buildingsoftware.in in place of barwin-ch.vercel.app; needs a DNS record at the domain's registrar. |

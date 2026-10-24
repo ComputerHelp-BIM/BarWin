@@ -10,9 +10,9 @@ Every app is also a single HTML page that opens straight from disk in any modern
 
 | App | Folder | Version | Status | What it is |
 |---|---|---|---|---|
-| Beam Sections | [`apps/beam-sections`](apps/beam-sections) | 0.16.0 | Active | Simply supported beam: L-section and sections A-A / B-B / C-C with links, top and bottom bars by zone, laps, extras, layers, anchorage. |
+| Beam Sections | [`apps/beam-sections`](apps/beam-sections) | 0.17.0 | Active | Simply supported beam: L-section and sections A-A / B-B / C-C with links, top and bottom bars by zone, laps, extras, layers, anchorage. |
 | SS Beam Geometry | [`apps/ss-beam-geometry`](apps/ss-beam-geometry) | 0.4.0 | Frozen | The approved geometry-only template (concrete and covers, no steel) that Beam Sections grew from. |
-| BBS Studio | [`apps/bbs-studio`](apps/bbs-studio) | 0.14.2 | Active | Reads the steel quantity workbook; walls, columns, beams (step 1). Schedule, shop drawings, 3D, IFC, BOQ, cost, PDFs, DXF. |
+| BBS Studio | [`apps/bbs-studio`](apps/bbs-studio) | 0.15.0 | Active | Reads the steel quantity workbook; walls, columns, beams (step 1). Schedule, shop drawings, 3D, IFC, BOQ, cost, PDFs, DXF. |
 | BBS Studio, footings | [`apps/bbs-studio-footings`](apps/bbs-studio-footings) | 0.4.0 | Frozen | The earlier footing-only BBS Studio, kept at its own version. |
 | BS 8666 shape codes | [`apps/shape-codes`](apps/shape-codes) | engine 1.3.0 | Reference | All 35 BS 8666:2020 codes plus 51A, in four presentations. The approved figure style. |
 | BarWin brand | [`packages/brand`](packages/brand) | 1.0.0 | Active | Logo, app icon, colour and type tokens, and the brand canvas source. |
@@ -31,26 +31,26 @@ npm run test:e2e    # builds the site, then opens every page in Chromium and che
 npm run check       # both
 ```
 
-To use an app: open `apps/<app>/index.html`, or for the two beam apps, `apps/<app>/dist/<app>.html` after `npm run build`.
+To use an app: `npm run build`, then open `apps/<app>/dist/<app>.html` (Beam Sections, SS Beam Geometry, BBS Studio), or `apps/<app>/index.html` for the single-file apps (footings, shape codes).
 
 ## Layout
 
 ```
 apps/                   each app has app.json (its homepage card) and icon.svg
-  beam-sections/        src/ (beams.js drawing module, page.html shell), test/, dist/ (built, not committed)
+  beam-sections/        src/ (beams.js drawing module, index.html shell, page.css, ui/ script sections), test/, dist/ (built, not committed)
   ss-beam-geometry/     src/, dist/ (frozen)
-  bbs-studio/           index.html
+  bbs-studio/           src/ (index.html shell, styles.css, markup.html, core/ engine, ui/), test/, dist/
   bbs-studio-footings/  index.html (frozen)
   shape-codes/          index.html
 packages/
-  brand/                tokens.css, tokens.json, assets/*.svg, canvas/ (brand board source)
+  brand/                tokens.css, tokens.json, partials/ (the BarWin strip every active tool shows), assets/*.svg, canvas/
 site-src/               homepage and 404 templates
 docs/
   DEPLOY.md             CI/CD, Vercel setup, adding an app
   BACKLOG.md            what is left: visual, engineering, outputs, housekeeping
   beam-rules.md         every agreed rule for the beam apps
   reference/            the shape-figure spec (project files are kept outside the public repo)
-scripts/build-beams.js  builds a beam app into its dist/
+scripts/build.js        assembles each app with a build section from its src/ pieces into dist/
 scripts/build-site.js   builds the website into site/
 tests/e2e/              Playwright tests, run on the built site
 vercel.json             site settings: build, headers, noindex
@@ -64,7 +64,8 @@ Each app keeps its own [semantic version](https://semver.org) (major.minor.patch
 | App | Version lives in |
 |---|---|
 | Beam Sections, SS Beam Geometry | `VERSION` in `src/beams.js` |
-| BBS Studio, footings | `VERSION` in `index.html`, changelog in its About box |
+| BBS Studio | `VERSION` in `src/core/00-module.js`, changelog in its About box (`src/markup.html`) |
+| BBS Studio footings | `VERSION` in `index.html`, changelog in its About box |
 | Shape codes | the engine comment at the top of the script |
 | Brand | `version` in `tokens.json` and the header of `tokens.css` |
 

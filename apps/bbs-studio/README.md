@@ -1,6 +1,6 @@
 # BBS Studio
 
-**Version 0.14.2 · Active**
+**Version 0.15.0 · Active**
 
 Steel schedules from the steel quantity workbook. Drop the column and wall workbook (or the beam workbook) and the app reads the typed inputs, checks its totals against the workbook's own, and builds:
 
@@ -13,10 +13,29 @@ Covers shear walls, core walls and columns; beams at step 1 (schedule, BOQ, cost
 
 ## Files
 
-`index.html` is the whole app: one file, opens from disk. It loads four libraries from public CDNs (SheetJS 0.18.5, JSZip 3.10.1, three.js r128 with OrbitControls), so the first open needs internet.
+| Path | Role |
+|---|---|
+| `src/index.html` | The shell: head, fonts, CDN libraries and the include lines. |
+| `src/styles.css`, `src/markup.html` | Styles and the page body (header, About box with the changelog). |
+| `src/dxf-template.dxf` | The DXF header template, kept as a data block (the site build leaves it untouched). |
+| `src/core/NN-*.js` | The engine, by topic: standards, bend geometry, shape codes, model, wall / column / beam workbooks, cutting plan, BOQ, drawings, SVG, DXF, IFC, PDF. `00-module.js` holds `VERSION`. |
+| `src/ui/NN-*.js` | The interface: storage, import, tabs, 3D, exports, start-up. |
+| `src/core.js` | Assembles the engine alone into `dist/bbs-core.js` (Node and tests). |
+| `test/core.test.js` | Engine tests on made-up data. |
+| `dist/` | Built page and core. Not committed; `npm run build` makes them. |
 
-## Notes
+The sections share one script scope (they are parts of one script, not modules), so keep top-level names unique. The page loads SheetJS 0.18.5, JSZip 3.10.1 and three.js r128 (with OrbitControls) from public CDNs, so the first open needs internet.
 
-- The earlier modular source of this app was not kept; this single file is now the source. Splitting it into modules (as Beam Sections is) is a good next step before larger changes.
-- Release: bump `VERSION` in the script, add a line to the About changelog, commit, tag `bbs-studio@vX.Y.Z`.
-- Sample outputs from a real project are in [docs/reference/pdf-samples](../../docs/reference/pdf-samples).
+## Develop
+
+```bash
+npm run build      # from the repo root: writes dist/bbs-studio.html and dist/bbs-core.js
+npm test           # engine tests
+npm run test:e2e   # browser tests, including a DXF download
+```
+
+## Release
+
+Bump `VERSION` in `src/core/00-module.js` (and the version in the comment at the top of `src/ui/00-setup.js`), add a line to the About changelog in `src/markup.html`, `npm run check`, commit, tag `bbs-studio@vX.Y.Z`.
+
+Project files used to check the outputs are kept outside this public repository; tests use made-up data only.

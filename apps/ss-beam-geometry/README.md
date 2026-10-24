@@ -6,6 +6,6 @@ The approved geometry-only template for simply supported beams, before reinforce
 
 Kept as it was approved, so the geometry rules have a fixed reference. Do not develop here; changes go into [Beam Sections](../beam-sections). The rules are in [docs/beam-rules.md](../../docs/beam-rules.md).
 
-- `src/beams.js` drawing module, `src/page.html` page shell.
+- `src/beams.js` drawing module, `src/index.html` page shell (`@@include beams.js@@` where the module goes); `npm run build` assembles `dist/ss-beam-geometry.html`.
 - `npm run build` (repo root) writes `dist/ss-beam-geometry.html` and the SVGs.
 - Saved values use the browser key `bbs-ss-beam-geometry-v040`, separate from Beam Sections.

@@ -1,0 +1,11 @@
+/* BarWin bar: the brand strip at the top of every tool, linking back to the homepage (needs tokens.css). */
+.bw-bar { display: flex; align-items: center; gap: 12px; padding: calc(8px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) 8px max(16px, env(safe-area-inset-left, 0px)); background: var(--bw-steel); color: var(--bw-white); }
+.bw-bar a { color: inherit; text-decoration: none; border-radius: 4px; }
+.bw-bar a:focus-visible { outline: 2px solid var(--bw-marker); outline-offset: 3px; }
+.bw-home { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; }
+.bw-home svg { width: 30px; height: 30px; flex: none; }
+.bw-word { font: 700 26px/1 var(--bw-font-display); letter-spacing: -0.01em; }
+.bw-word span { color: var(--bw-oxide-light); }
+.bw-tools { margin-left: auto; display: inline-flex; align-items: center; min-height: 44px; padding: 0 4px; font: 500 15px var(--bw-font-body); color: var(--bw-on-steel-muted); }
+.bw-tools::after { content: " \2192"; margin-left: 4px; }
+.bw-tools:hover { color: var(--bw-white); }
