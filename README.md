@@ -47,6 +47,7 @@ packages/
   brand/                tokens.css, tokens.json, partials/ (the BarWin strip every active tool shows), assets/*.svg, canvas/
   cad/                  cad.js (one sheet model to DXF, PDF, SVG), template.dxf, layers.json, tools/make_template.py, test/
 site-src/               homepage and 404 templates
+CLAUDE.md               the owner's standing rules and the workflow, for Claude Code sessions
 docs/
   DEPLOY.md             CI/CD, Vercel setup, adding an app
   BACKLOG.md            what is left: visual, engineering, outputs, housekeeping

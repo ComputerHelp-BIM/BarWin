@@ -3,6 +3,11 @@
 Changes to the repository itself: layout, tooling, tests, docs. Each app's own changes are in its README or its About box.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [semver](https://semver.org).
 
+## [0.5.1] - 2026-11-12
+
+### Added
+- `CLAUDE.md`: the owner's standing rules (commit author, semver, no client files, work on `main`), layout, commands and the checks to run before pushing, so a Claude Code session can carry on from the repository alone.
+
 ## [0.5.0] - 2026-10-24
 
 ### Added
